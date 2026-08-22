@@ -9,6 +9,7 @@ por pregunta.
 import json
 import os
 import sys
+import threading
 
 from claude_agent_sdk import create_sdk_mcp_server, tool
 
@@ -207,15 +208,25 @@ def build_bench_tools(ledger, nomina_by_period, ausencias_by_period):
 
 
 _bench_tools_singleton = None
+_bench_tools_lock = threading.Lock()
 
 
 def get_bench_tools():
     """Devuelve (server, tool_names), cargando los datos y armando las herramientas una sola
     vez por proceso. Pensado para el chat: la primera sesión paga la carga, las siguientes
     reutilizan el mismo server (los datos son de solo lectura, seguro entre requests async).
+
+    Con lock: si dos hilos llaman esto a la vez (ej. la precarga de arranque y la primera
+    sesión conectándose en simultáneo), el segundo espera al primero en vez de repetir la
+    carga completa en paralelo — eso fue justo lo que dejó el chat colgado la primera vez.
     """
     global _bench_tools_singleton
-    if _bench_tools_singleton is None:
-        ledger, nomina_by_period, ausencias_by_period = load_bench_context()
-        _bench_tools_singleton = build_bench_tools(ledger, nomina_by_period, ausencias_by_period)
+    if _bench_tools_singleton is not None:
+        return _bench_tools_singleton
+    with _bench_tools_lock:
+        if _bench_tools_singleton is None:
+            ledger, nomina_by_period, ausencias_by_period = load_bench_context()
+            _bench_tools_singleton = build_bench_tools(
+                ledger, nomina_by_period, ausencias_by_period
+            )
     return _bench_tools_singleton

@@ -6,6 +6,7 @@ ejecuta código, solo llama herramientas ya calculadas sobre los datos reales.
 """
 
 import os
+import threading
 import uuid
 
 import chainlit as cl
@@ -27,12 +28,13 @@ MAX_TURNS = 15
 MAX_BUDGET_USD = 1.50
 EFFORT = "medium"
 
-# Precarga el ledger + nómina/ausencias ANTES de que el servidor acepte conexiones. Sin esto,
-# la primera sesión paga el costo de carga (decenas de segundos) dentro de on_chat_start, y si
-# el navegador reintenta la conexión antes de que termine, cada reintento vuelve a disparar la
-# carga completa en paralelo (el singleton no tiene lock) — eso deja el chat colgado sin poder
-# mandar mensajes.
-get_bench_tools()
+# Arranca la precarga del ledger + nómina/ausencias en un hilo de fondo, sin bloquear el
+# import de este módulo — Chainlit no abre el puerto HTTP hasta que termina de importar
+# app.py, así que una precarga síncrona acá demora el arranque del servidor entero (en
+# Render, eso significa que el health-check de puerto puede no encontrar nada a tiempo).
+# get_bench_tools() tiene lock (agent/sdk_tools.py): si la primera sesión se conecta antes
+# de que este hilo termine, espera a que termine en vez de repetir la carga completa.
+threading.Thread(target=get_bench_tools, daemon=True, name="bench-tools-preload").start()
 
 
 def build_options(system_prompt, mcp_server, tool_names):
