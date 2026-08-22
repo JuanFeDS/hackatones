@@ -102,6 +102,13 @@ async def handle_message(message: cl.Message):
     client: ClaudeSDKClient = cl.user_session.get("client")
     trace_path = cl.user_session.get("trace_path")
 
+    if client is None:
+        await cl.Message(
+            content="La sesión no llegó a conectarse con el agente. Refrescá la página para "
+            "reintentar."
+        ).send()
+        return
+
     await client.query(message.content)
 
     all_messages = []

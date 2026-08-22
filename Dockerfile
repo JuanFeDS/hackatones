@@ -19,6 +19,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+# El CLI de Claude Code rechaza --dangerously-skip-permissions (permission_mode=
+# "bypassPermissions") cuando corre como root, por seguridad — y el contenedor corre
+# como root por defecto. Sin un usuario no-root acá, connect() falla con exit code 1.
+RUN useradd --create-home --shell /bin/bash appuser \
+    && chown -R appuser:appuser /app
+USER appuser
+
 ENV PYTHONUNBUFFERED=1
 
 # Render (y servicios similares) inyectan $PORT en runtime; Chainlit necesita 0.0.0.0
