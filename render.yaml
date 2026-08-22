@@ -8,3 +8,5 @@ services:
         sync: false
       - key: QUICK_ANALYST_MODEL
         value: claude-sonnet-5
+      - key: CLAUDE_CODE_STREAM_CLOSE_TIMEOUT
+        value: "180000"
