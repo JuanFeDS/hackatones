@@ -4,7 +4,6 @@ __pycache__/
 *.pyc
 .env
 .git/
-data/.cache/
 traces/
 answers/
 submissions/
