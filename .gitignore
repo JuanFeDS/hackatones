@@ -1,0 +1,14 @@
+.env
+__pycache__/
+*.pyc
+data/.file_ids.json
+data/.cache/
+claude_outputs/
+submissions/
+traces/
+answers/
+.venv/
+venv/
+charlas/
+.files/
+chainlit.log

@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: quick-logistica-analista
+    runtime: docker
+    plan: free
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: QUICK_ANALYST_MODEL
+        value: claude-sonnet-5

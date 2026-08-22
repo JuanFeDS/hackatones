@@ -1,0 +1,12 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+.env
+.git/
+data/.cache/
+traces/
+answers/
+submissions/
+charlas/
+docs/
