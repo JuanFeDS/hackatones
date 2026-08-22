@@ -16,6 +16,7 @@ from claude_agent_sdk import (
     ClaudeSDKClient,
     ResultMessage,
     TextBlock,
+    ToolUseBlock,
 )
 
 from agent.data_loader import list_dataset_relative_paths
@@ -27,6 +28,17 @@ from config import DATA_DIR, MODEL_ID, TRACES_DIR
 MAX_TURNS = 15
 MAX_BUDGET_USD = 1.50
 EFFORT = "medium"
+
+TOOL_STATUS_MESSAGES = {
+    "margin_table": "Calculando el margen...",
+    "all_lines_margin_table": "Calculando el margen de las 7 líneas...",
+    "facturacion_real": "Calculando la facturación real...",
+    "retroactive_split": "Separando gasto corriente de retroactivo...",
+    "account_delta_breakdown": "Viendo qué cuentas explican la variación...",
+    "project_novelties": "Cruzando novedades del proyecto (cuentas, nómina, ausencias)...",
+}
+DEFAULT_STATUS_MESSAGE = "Consultando los datos..."
+THINKING_MESSAGE = "Pensando cómo responder tu pregunta..."
 
 # Arranca la precarga del ledger + nómina/ausencias en un hilo de fondo, sin bloquear el
 # import de este módulo — Chainlit no abre el puerto HTTP hasta que termina de importar
@@ -113,6 +125,9 @@ async def handle_message(message: cl.Message):
 
     await client.query(message.content)
 
+    status_msg = cl.Message(content=THINKING_MESSAGE)
+    await status_msg.send()
+
     all_messages = []
     final_text_parts = []
     result_message = None
@@ -124,6 +139,9 @@ async def handle_message(message: cl.Message):
             for block in sdk_message.content:
                 if isinstance(block, TextBlock):
                     final_text_parts.append(block.text)
+                elif isinstance(block, ToolUseBlock):
+                    status_msg.content = TOOL_STATUS_MESSAGES.get(block.name, DEFAULT_STATUS_MESSAGE)
+                    await status_msg.update()
         elif isinstance(sdk_message, ResultMessage):
             result_message = sdk_message
 
@@ -139,7 +157,8 @@ async def handle_message(message: cl.Message):
     cl.user_session.set("turn_count", turn_count)
     cl.user_session.set("total_cost_usd", total_cost_usd)
 
-    await cl.Message(content=final_text).send()
+    status_msg.content = final_text
+    await status_msg.update()
 
     cost_summary = (
         f"_turno {turn_count} · costo turno: "
