@@ -164,7 +164,7 @@ def build_bench_tools(ledger, nomina_by_period, ausencias_by_period):
             delta = julio_sums.add(-junio_sums, fill_value=0.0)
             delta = delta.reindex(delta.abs().sort_values(ascending=False).index)
             nomina_concept_deltas = [
-                {"concept": concept, "delta_jun_a_jul": float(value)}
+                {"concept": concept, "delta_jun_a_jul": round(float(value))}
                 for concept, value in delta.head(10).items()
             ]
 

@@ -109,14 +109,15 @@ def group_metrics(ledger, period, cost_center_id=None, project_id=None):
     ingreso = float((clase4["Credito"] - clase4["Debito"]).sum())
     costo = float((clase67["Debito"] - clase67["Credito"]).sum())
     gasto = float((clase5["Debito"] - clase5["Credito"]).sum())
-    margen = round((ingreso - costo) / ingreso, 4) if ingreso > 0 else None
+    # margen se calcula sobre el float completo (CONV §2.8); solo el COP reportado va sin decimales.
+    margen = round((ingreso - costo) / ingreso * 100, 2) if ingreso > 0 else None
 
     return {
         "period": str(period),
         "period_name": PERIOD_NAMES.get(str(period), str(period)),
-        "ingreso": ingreso,
-        "costo": costo,
-        "gasto": gasto,
+        "ingreso": round(ingreso),
+        "costo": round(costo),
+        "gasto": round(gasto),
         "margen": margen,
     }
 
@@ -145,7 +146,7 @@ def margin_table(ledger, cost_center_id=None, project_id=None):
     margen_jun = by_period["6"]["margen"]
     margen_jul = by_period["7"]["margen"]
     variacion_pp = (
-        round((margen_jul - margen_jun) * 100, 2)
+        round(margen_jul - margen_jun, 2)
         if margen_jul is not None and margen_jun is not None
         else None
     )
@@ -200,14 +201,14 @@ def facturacion_real(ledger, period):
     return {
         "period": str(period),
         "period_name": PERIOD_NAMES.get(str(period), str(period)),
-        "facturacion_real": facturacion,
-        "fc_credito": fc_credito,
-        "dv_debito": dv_debito,
-        "notas_netas": notas_netas,
-        "ingreso_contable_neto": ingreso_contable_neto,
-        "provision_pi": provision_pi,
-        "reversion_ri": reversion_ri,
-        "diferencia_ingreso_vs_facturacion": ingreso_contable_neto - facturacion,
+        "facturacion_real": round(facturacion),
+        "fc_credito": round(fc_credito),
+        "dv_debito": round(dv_debito),
+        "notas_netas": round(notas_netas),
+        "ingreso_contable_neto": round(ingreso_contable_neto),
+        "provision_pi": round(provision_pi),
+        "reversion_ri": round(reversion_ri),
+        "diferencia_ingreso_vs_facturacion": round(ingreso_contable_neto - facturacion),
     }
 
 
@@ -256,9 +257,9 @@ def retroactive_split(ledger, period):
         total = corriente + retroactivo
         pct_retroactivo = round(retroactivo / total * 100, 2) if total else None
         return {
-            "corriente": corriente,
-            "retroactivo": retroactivo,
-            "total": total,
+            "corriente": round(corriente),
+            "retroactivo": round(retroactivo),
+            "total": round(total),
             "pct_retroactivo": pct_retroactivo,
         }
 
@@ -384,7 +385,7 @@ def account_delta_breakdown(ledger, period_a, period_b, cost_center_id=None, pro
         delta = group_b.add(-group_a, fill_value=0.0)
         delta = delta.reindex(delta.abs().sort_values(ascending=False).index)
         return [
-            {"account_id": account_id, "account_name": account_name, "delta": float(value)}
+            {"account_id": account_id, "account_name": account_name, "delta": round(float(value))}
             for (account_id, account_name), value in delta.head(top_n).items()
         ]
 

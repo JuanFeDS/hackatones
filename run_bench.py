@@ -29,7 +29,7 @@ ALL_QUESTION_IDS = [f"q0{n}" for n in range(1, 8)]
 
 MAX_TURNS = 12
 MAX_BUDGET_USD = 0.60
-EFFORT = "medium"
+EFFORT = "low"
 
 QUESTION_HEADING_PATTERN = re.compile(r"^#\s*(q\d+)\s*[—-]\s*(.+?)\s*$", re.MULTILINE)
 ANSWER_HINT_PATTERN = re.compile(r'"answer":\s*/\*\s*(.+?)\s*\*/', re.DOTALL)
@@ -176,9 +176,17 @@ async def run_bench(question_ids):
     system_prompt = build_system_prompt(dataset_filenames)
     options = build_options(system_prompt, mcp_server, tool_names)
 
-    results = await asyncio.gather(
-        *(process_question(question_id, options) for question_id in question_ids)
+    # Las 7 preguntas comparten el mismo system_prompt + herramientas (prefijo cacheable).
+    # Si las lanzamos todas a la vez, cada una paga su propia escritura de cache (cache_creation,
+    # ~1.25x el precio de input) en vez de reusar la de las demás. Corriendo la primera sola
+    # primero, esa escritura ya está lista cuando arrancan las otras 6 en paralelo, que entonces
+    # pagan cache_read (~0.1x) por ese mismo prefijo.
+    warmup_id, remaining_ids = question_ids[0], question_ids[1:]
+    warmup_result = await process_question(warmup_id, options)
+    remaining_results = await asyncio.gather(
+        *(process_question(question_id, options) for question_id in remaining_ids)
     )
+    results = [warmup_result, *remaining_results]
 
     total_cost_usd = sum(result["cost_usd"] for result in results)
     print()
