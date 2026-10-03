@@ -2,6 +2,7 @@ services:
   - type: web
     name: quick-logistica-analista
     runtime: docker
+    rootDir: 2026-08-agents-bogota
     plan: free
     envVars:
       - key: ANTHROPIC_API_KEY
