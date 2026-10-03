@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ashmere — crónica de siete pueblos</title>
+<style>
+:root {
+  --carbon: #1C1815;
+  --brea: #262019;
+  --brea-clara: #322A23;
+  --borde: #4A3C31;
+  --borde-claro: #6B5847;
+  --hueso: #F1E6CF;
+  --hueso-tenue: #CFC1A6;
+  --ceniza: #9E9284;
+  --sangre: #A11D1D;
+  --sangre-viva: #D63A2A;
+  --oro: #B58C36;
+  --oro-tenue: #7A5F26;
+  --display: Cambria, "Book Antiqua", "Palatino Linotype", Georgia, "Times New Roman", serif;
+  --texto: Georgia, Cambria, "Times New Roman", serif;
+  --simbolos: "Segoe UI Symbol", "Apple Symbols", "Noto Sans Symbols", serif;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--carbon);
+  color: var(--hueso);
+  font-family: var(--texto);
+  font-size: 16px;
+  line-height: 1.5;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100vh;
+  position: relative;
+}
+body::before {
+  content: "";
+  position: fixed; inset: 0; z-index: 50; pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='220' height='220' filter='url(%23n)' opacity='0.55'/></svg>");
+  opacity: .08;
+  mix-blend-mode: soft-light;
+}
+body::after {
+  content: "";
+  position: fixed; inset: 0; z-index: 51; pointer-events: none;
+  background: radial-gradient(ellipse 72% 64% at 50% 45%, transparent 52%, rgba(0, 0, 0, .5) 100%);
+  animation: vela 5.5s ease-in-out infinite alternate;
+}
+@keyframes vela { from { opacity: .9; } to { opacity: 1; } }
+
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+:focus-visible { outline: 1px solid var(--sangre-viva); outline-offset: 3px; }
+
+.etq {
+  font-family: var(--display);
+  font-size: 10.5px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--ceniza);
+}
+.num { font-variant-numeric: tabular-nums; }
+.tallado { text-shadow: 0 2px 10px rgba(0, 0, 0, .75); }
+
+/* Cabecera */
+header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px 40px;
+  padding: 26px 44px 10px;
+}
+.marca { display: flex; align-items: center; gap: 16px; }
+.sello {
+  width: 42px; height: 42px; border: 1px solid var(--borde-claro); border-radius: 50%;
+  display: grid; place-items: center; font-family: var(--simbolos); font-size: 20px; color: var(--sangre-viva);
+  text-shadow: 0 0 12px rgba(214, 58, 42, .55);
+}
+.titulo { font-family: var(--display); font-size: 26px; letter-spacing: .3em; text-transform: uppercase; line-height: 1; color: var(--hueso); }
+.capitulo { text-align: center; }
+.estacion { font-family: var(--display); font-size: 34px; letter-spacing: .2em; text-transform: uppercase; line-height: 1.05; color: var(--hueso); margin-top: 4px; }
+.estacion small { display: block; font-size: 13px; letter-spacing: .3em; color: var(--oro); margin-top: 6px; }
+.recursos { display: flex; justify-content: flex-end; align-items: center; gap: 28px; }
+.influencia { text-align: right; }
+.influencia .num { display: block; font-family: var(--display); font-size: 28px; line-height: 1.1; color: var(--sangre-viva); }
+.influencia .num span { color: var(--ceniza); font-size: 15px; }
+.avanzar {
+  font-family: var(--display);
+  text-transform: uppercase; letter-spacing: .18em; font-size: 13px;
+  color: #F4EADA;
+  padding: 16px 30px;
+  background: var(--sangre);
+  transition: background .25s ease, box-shadow .3s ease, transform .1s ease;
+}
+.avanzar:hover:not(:disabled) { background: var(--sangre-viva); box-shadow: 0 0 36px rgba(214, 58, 42, .38); }
+.avanzar:active:not(:disabled) { transform: translateY(1px); }
+.avanzar:disabled { background: var(--brea-clara); color: var(--ceniza); }
+
+.aviso {
+  grid-column: 1 / -1;
+  border-left: 3px solid var(--sangre-viva);
+  padding: 10px 14px;
+  color: var(--hueso-tenue);
+  font-size: 15px;
+  background: #120E0C;
+}
+.aviso code, dialog code { font-family: Consolas, "Cascadia Mono", Menlo, monospace; font-size: 13px; color: var(--hueso); }
+
+/* Cuerpo */
+main {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(340px, .85fr);
+  gap: 32px;
+  padding: 0 44px 12px;
+  min-height: 0;
+}
+.escenario { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.mapa { flex: 1 1 0; display: flex; align-items: center; justify-content: center; padding: 0 0 10px; min-height: 0; perspective: 1600px; perspective-origin: 50% 35%; overflow: hidden; }
+.tablero {
+  width: 100%; height: 100%;
+  transform-style: preserve-3d;
+  transform-origin: 50% 50%;
+  transform: rotateX(var(--rx, 22deg)) rotateY(var(--ry, 0deg)) scale(.98);
+  transition: transform .9s cubic-bezier(.2, .7, .2, 1);
+}
+.pov .tablero { transform: rotateX(8deg) rotateY(0deg) scale(.94); }
+.mapa svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.canto { fill: #221C18; stroke: #0A0807; stroke-width: 1.2; stroke-linejoin: round; }
+
+.leyenda { display: flex; gap: 24px; flex-wrap: wrap; padding: 2px 0 8px; }
+.leyenda span { display: inline-flex; align-items: center; gap: 8px; }
+.leyenda i { display: inline-block; width: 26px; height: 0; border-top: 2px solid var(--oro); }
+.leyenda i.cerrada { border-top: 2px dotted var(--ceniza); }
+.leyenda i.guerra { border-top: 2px solid var(--sangre-viva); box-shadow: 0 0 6px rgba(214, 58, 42, .6); }
+.leyenda i.ceniza { width: 12px; height: 12px; border: 1px solid var(--borde-claro); background: linear-gradient(90deg, #2F5250, var(--brea-clara)); }
+
+/* Mapa SVG */
+.region {
+  stroke: #0A0807;
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  transition: fill 1.2s ease, opacity .6s ease, stroke .4s ease;
+  cursor: pointer;
+}
+.region:hover { filter: brightness(1.22); }
+.region.enguerra { stroke: var(--sangre-viva); stroke-width: 2.6; }
+.region.seleccionada { stroke: #E6D9BF; stroke-width: 2.2; }
+.pov .region:not(.seleccionada) { opacity: .3; }
+.pov #svg [data-id]:not(.region):not(.activa) { opacity: .28; }
+#svg [data-id]:not(.region) { transition: opacity .6s ease; }
+.grabado { pointer-events: none; }
+.terreno, .terrazas, .ciudadela, .astrolabio, .brujula { pointer-events: none; }
+.rio-sombra { fill: none; stroke: #0A0807; stroke-width: 4.6; stroke-linecap: round; opacity: .85; }
+.rio { fill: none; stroke: #5F7C8C; stroke-width: 1.8; stroke-linecap: round; }
+.torre { transform-box: fill-box; transform-origin: 50% 100%; transition: transform 1.1s cubic-bezier(.2, .7, .2, 1); transition-delay: var(--retardo, 0s); }
+.torre.oculta { transform: scaleY(0); }
+.gira { transform-box: fill-box; transform-origin: center; animation: girar 80s linear infinite; }
+@keyframes girar { to { transform: rotate(360deg); } }
+.luz { mix-blend-mode: overlay; pointer-events: none; animation: barrer 34s ease-in-out infinite alternate; }
+@keyframes barrer { from { transform: translateX(-140px); } to { transform: translateX(560px); } }
+.dof { pointer-events: none; opacity: .92; }
+.pov .dof { display: none; }
+.nombre-region {
+  font-family: var(--display);
+  font-size: 15.5px; font-weight: bold; letter-spacing: .2em; text-transform: uppercase;
+  fill: #D8B872; text-anchor: middle; pointer-events: none;
+  paint-order: stroke; stroke: #0A0807; stroke-width: 5px; stroke-linejoin: round;
+}
+.nombre-pueblo {
+  font-family: var(--display);
+  font-size: 9.5px; letter-spacing: .26em; text-transform: uppercase;
+  fill: var(--hueso-tenue); text-anchor: middle; pointer-events: none;
+  paint-order: stroke; stroke: #0A0807; stroke-width: 4px;
+}
+.ruta { fill: none; stroke-width: 2; stroke-linecap: round; transition: stroke .6s ease, opacity .6s ease; }
+.ruta.activa { stroke: var(--oro); stroke-dasharray: 4 9; animation: fluir 26s linear infinite; opacity: .9; }
+.ruta.cerrada { stroke: var(--ceniza); stroke-width: 1.4; stroke-dasharray: 1.5 7; opacity: .5; }
+.ruta.guerra { stroke: var(--sangre-viva); stroke-width: 2.6; stroke-dasharray: none; filter: drop-shadow(0 0 4px rgba(214, 58, 42, .8)); animation: arder 3.2s ease-in-out infinite; }
+.conflicto { fill: none; stroke: var(--sangre-viva); stroke-width: 1.8; stroke-dasharray: 3 6; filter: drop-shadow(0 0 4px rgba(214, 58, 42, .8)); animation: arder 3.2s ease-in-out infinite; }
+.ola { fill: none; stroke: var(--ceniza); stroke-width: .9; opacity: .3; }
+@keyframes fluir { to { stroke-dashoffset: -260; } }
+@keyframes arder { 50% { opacity: .55; } }
+
+/* Acciones */
+.acciones { padding: 10px 0 6px; }
+.acciones-cab { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.botonera { display: flex; flex-wrap: wrap; gap: 4px 34px; }
+.accion {
+  font-family: var(--display);
+  text-transform: uppercase; letter-spacing: .14em; font-size: 12px;
+  color: var(--hueso-tenue);
+  padding: 10px 0;
+  display: inline-flex; gap: 10px; align-items: baseline;
+  position: relative;
+  transition: color .2s ease, text-shadow .3s ease;
+}
+.accion::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 6px; height: 1px;
+  background: var(--oro); transform: scaleX(0); transform-origin: left; transition: transform .3s ease;
+}
+.accion:hover:not(:disabled) { color: var(--hueso); text-shadow: 0 0 14px rgba(214, 58, 42, .45); }
+.accion:hover:not(:disabled)::after { transform: scaleX(1); }
+.accion:disabled { opacity: .35; }
+.accion .num { color: var(--oro); font-size: 12px; }
+.selector {
+  margin-top: 8px; padding: 6px 0 4px 18px;
+  border-left: 1px solid var(--oro-tenue);
+  display: none;
+}
+.selector.abierto { display: block; }
+.selector p { margin: 0 0 12px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  font-family: var(--display); letter-spacing: .06em;
+  background: rgba(230, 217, 191, .06);
+  padding: 8px 14px;
+  font-size: 14px;
+  color: var(--hueso-tenue);
+  transition: background .2s ease, color .2s ease;
+}
+.chip:hover:not(:disabled) { background: rgba(168, 129, 47, .22); color: var(--hueso); }
+.chip.chip-cancelar { background: none; color: var(--ceniza); }
+.resultado { margin-top: 10px; color: var(--hueso-tenue); font-size: 15px; font-style: italic; }
+.resultado.ignorada { color: var(--sangre-viva); font-style: normal; }
+
+/* Columna editorial */
+.columna { display: flex; flex-direction: column; min-height: 0; padding-left: 32px; border-left: 1px solid rgba(230, 217, 191, .07); }
+.columna-cab { display: flex; justify-content: space-between; align-items: baseline; padding: 14px 0 6px; }
+.columna-cab h2 { font-family: var(--display); font-size: 12px; letter-spacing: .3em; text-transform: uppercase; margin: 0; font-weight: normal; color: var(--ceniza); }
+.volver { font-family: var(--display); color: var(--oro); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; }
+.volver:hover { color: var(--hueso); }
+.registro { overflow-y: auto; padding: 0 12px 26px 0; scrollbar-width: thin; scrollbar-color: var(--borde) transparent; }
+
+.cronica { padding: 22px 0 26px; position: relative; max-width: 62ch; }
+.cronica + .cronica { border-top: 1px solid rgba(230, 217, 191, .07); }
+.cronica + .cronica::before {
+  content: "✦"; position: absolute; top: -9px; left: 50%; transform: translateX(-50%);
+  background: var(--carbon); padding: 0 10px; color: var(--sangre-viva); font-size: 11px; line-height: 1; font-family: var(--simbolos);
+}
+.cronica .cab { display: flex; gap: 14px; align-items: baseline; margin-bottom: 10px; }
+.cronica .cab .registro-tipo { color: var(--oro); }
+.cronica .cab .fuente { color: var(--ceniza); margin-left: auto; opacity: .8; }
+.cronica .texto { font-size: 17.5px; line-height: 1.58; color: var(--hueso); }
+.registro > .cronica:first-child .texto { font-size: 19px; line-height: 1.6; }
+.cronica .texto p { margin: 0 0 .8em; }
+.cronica .texto p:last-child { margin-bottom: 0; }
+.cronica .texto p:first-child::first-letter {
+  float: left; font-family: var(--display); font-size: 3.1em; line-height: .82; padding: 5px 9px 0 0;
+  color: var(--sangre-viva); text-shadow: 0 0 12px rgba(214, 58, 42, .35), 0 1px 0 #000;
+}
+.cronica.nueva .texto { animation: tinta .9s ease-out both; }
+.cronica .nota { font-size: 13.5px; color: var(--ceniza); margin-top: 10px; font-style: italic; }
+.esperando { color: var(--ceniza); font-style: italic; animation: latir 2.4s ease-in-out infinite; }
+.esperando::first-letter { float: none; font-size: inherit; color: inherit; padding: 0; text-shadow: none; }
+@keyframes tinta { from { opacity: 0; filter: blur(3px); transform: translateY(4px); } to { opacity: 1; filter: blur(0); transform: none; } }
+@keyframes latir { 50% { opacity: .45; } }
+
+.vacio { padding: 44px 0; color: var(--hueso-tenue); max-width: 46ch; }
+.vacio p:first-child { font-family: var(--display); font-size: 24px; color: var(--hueso); margin: 0 0 12px; letter-spacing: .02em; }
+.vacio p { margin: 0; }
+
+/* POV */
+.pov-cab { padding: 22px 0 18px; display: flex; gap: 18px; align-items: center; }
+.pov-cab .blason {
+  width: 56px; height: 56px; flex: none; border: 1px solid var(--borde-claro); border-radius: 50%;
+  display: grid; place-items: center; font-family: var(--simbolos); font-size: 26px; color: var(--oro);
+  text-shadow: 0 0 14px rgba(168, 129, 47, .5);
+}
+.pov-cab h3 { font-family: var(--display); font-size: 26px; letter-spacing: .12em; text-transform: uppercase; margin: 0; font-weight: normal; line-height: 1.1; }
+.pov-cab .lugar { color: var(--ceniza); margin-top: 6px; font-size: 14px; }
+.ficha { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 6px 0 22px; font-size: 15px; }
+.ficha dt { color: var(--ceniza); font-family: var(--display); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; padding-top: 3px; }
+.ficha dd { margin: 0; color: var(--hueso-tenue); }
+.bloque { padding: 18px 0; border-top: 1px solid rgba(230, 217, 191, .07); }
+.bloque h4 { margin: 0 0 14px; font-family: var(--display); font-size: 11px; letter-spacing: .24em; text-transform: uppercase; font-weight: normal; color: var(--oro); }
+.fila { display: grid; grid-template-columns: 96px 1fr 40px; gap: 12px; align-items: center; margin-bottom: 10px; font-size: 15px; }
+.barra { height: 3px; background: rgba(230, 217, 191, .08); position: relative; }
+.barra i { position: absolute; inset: 0 auto 0 0; background: var(--oro); transition: width 1s ease; }
+.barra i.baja { background: var(--sangre-viva); box-shadow: 0 0 10px rgba(214, 58, 42, .55); }
+.fila .num { text-align: right; color: var(--hueso); font-family: var(--display); }
+.relacion { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; font-size: 15px; }
+.relacion .estado { display: inline-flex; align-items: center; gap: 8px; color: var(--ceniza); font-size: 13.5px; }
+.relacion .estado::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--borde-claro); }
+.relacion .estado.cordial::before, .relacion .estado.alianza::before { background: var(--oro); box-shadow: 0 0 6px rgba(168, 129, 47, .6); }
+.relacion .estado.hostil::before, .relacion .estado.guerra::before { background: var(--sangre-viva); box-shadow: 0 0 6px rgba(214, 58, 42, .7); }
+.hito { padding: 6px 0; color: var(--hueso-tenue); font-size: 15px; }
+.hito.brasa { color: var(--sangre-viva); }
+
+/* Pie */
+footer {
+  display: flex; gap: 24px; align-items: center; flex-wrap: wrap;
+  padding: 10px 44px 18px;
+  color: var(--ceniza);
+  font-size: 13.5px;
+}
+footer button { font-family: var(--display); color: var(--hueso-tenue); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; }
+footer button:hover { color: var(--hueso); }
+footer .derecha { margin-left: auto; display: inline-flex; gap: 18px; align-items: center; }
+footer .num { font-family: var(--display); font-size: 12px; letter-spacing: .1em; }
+.confirmar { display: inline-flex; gap: 14px; align-items: center; }
+.confirmar b { color: var(--sangre-viva); font-weight: normal; font-style: italic; }
+
+/* Diálogo */
+dialog {
+  background: var(--brea);
+  color: var(--hueso);
+  border: 0;
+  box-shadow: 0 40px 120px rgba(0, 0, 0, .85);
+  padding: 34px 36px;
+  max-width: 560px;
+  width: calc(100% - 40px);
+}
+dialog::backdrop { background: rgba(5, 4, 3, .82); }
+dialog h3 { margin: 0 0 8px; font-family: var(--display); font-weight: normal; font-size: 20px; letter-spacing: .12em; text-transform: uppercase; }
+dialog p { margin: 0 0 14px; color: var(--hueso-tenue); font-size: 15px; }
+dialog input {
+  width: 100%; font: inherit; font-family: Consolas, "Cascadia Mono", Menlo, monospace; font-size: 14px;
+  padding: 10px 0; background: none; color: var(--hueso);
+  border: 0; border-bottom: 1px solid var(--borde-claro); margin: 6px 0 20px;
+}
+dialog input:focus { outline: none; border-bottom-color: var(--oro); }
+dialog .advertencia { border-left: 2px solid var(--sangre-viva); padding-left: 12px; margin-bottom: 14px; }
+dialog menu { display: flex; gap: 10px; justify-content: flex-end; margin: 0; padding: 0; }
+dialog .primario { font-family: var(--display); text-transform: uppercase; letter-spacing: .14em; font-size: 12px; background: var(--sangre); color: #F4EADA; padding: 12px 20px; }
+dialog .primario:hover { background: var(--sangre-viva); }
+dialog .secundario { font-family: var(--display); text-transform: uppercase; letter-spacing: .14em; font-size: 11px; color: var(--ceniza); padding: 11px 12px; }
+dialog .secundario:hover, dialog .primario:hover { color: var(--hueso); }
+
+@media (max-width: 960px) {
+  body { height: auto; min-height: 100vh; grid-template-rows: auto 1fr auto; }
+  header { grid-template-columns: 1fr 1fr; padding: 22px 22px 6px; }
+  .capitulo { text-align: left; }
+  .recursos { grid-column: 1 / -1; justify-content: space-between; }
+  main { grid-template-columns: 1fr; padding: 0 22px 12px; gap: 18px; }
+  .columna { padding-left: 0; border-left: 0; }
+  footer { padding: 10px 22px 18px; }
+  .mapa { flex: none; }
+  .tablero { transform: rotateX(14deg) scale(.98); }
+  .mapa svg { height: auto; aspect-ratio: 10 / 7; }
+  .registro { overflow: visible; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="marca">
+    <span class="sello" aria-hidden="true">✠</span>
+    <div>
+      <span class="etq">Crónica de siete pueblos</span>
+      <div class="titulo tallado">Ashmere</div>
+    </div>
+  </div>
+  <div class="capitulo">
+    <span class="etq">Estación por venir</span>
+    <div class="estacion tallado" id="estacion"></div>
+  </div>
+  <div class="recursos">
+    <div class="influencia">
+      <span class="etq">Influencia del Cronista</span>
+      <span class="num tallado" id="influencia"></span>
+    </div>
+    <button class="avanzar" id="avanzar">Avanzar estación</button>
+  </div>
+  <div class="aviso" id="aviso-http" hidden>
+    Este archivo se abrió desde el disco (<code>file://</code>), y así el navegador no deja hablar con la API.
+    Para narrar con Fable, sírvelo por HTTP: <code>python -m http.server 8000</code> y abre
+    <code>http://localhost:8000/ashmere.html</code>. Mientras tanto, la partida sigue en crónica seca.
+  </div>
+</header>
+
+<main>
+  <section class="escenario">
+    <div class="mapa" id="mapa"></div>
+    <div class="leyenda">
+      <span class="etq"><i></i> ruta activa</span>
+      <span class="etq"><i class="cerrada"></i> ruta cerrada</span>
+      <span class="etq"><i class="guerra"></i> guerra</span>
+      <span class="etq"><i class="ceniza"></i> la tinta se apaga con la prosperidad</span>
+    </div>
+    <div class="acciones">
+      <div class="acciones-cab">
+        <span class="etq">Acciones del Cronista</span>
+        <span class="etq" id="contador-acciones"></span>
+      </div>
+      <div class="botonera" id="botonera"></div>
+      <div class="selector" id="selector"></div>
+      <div class="resultado" id="resultado"></div>
+    </div>
+  </section>
+
+  <aside class="columna">
+    <div class="columna-cab">
+      <h2 id="columna-titulo">Crónica del reino</h2>
+      <button class="volver" id="volver" hidden>Volver al reino</button>
+    </div>
+    <div class="registro" id="registro"></div>
+  </aside>
+</main>
+
+<footer>
+  <button id="abrir-clave">Clave de API</button>
+  <span class="estado-clave" id="estado-clave"></span>
+  <span class="derecha">
+    <span class="confirmar" id="confirmar-reinicio" hidden>
+      <b>¿Borrar la partida entera?</b>
+      <button id="reiniciar-si">Borrar</button>
+      <button id="reiniciar-no">Cancelar</button>
+    </span>
+    <button id="reiniciar">Reiniciar</button>
+    <span class="num" id="pie-info"></span>
+  </span>
+</footer>
+
+<dialog id="dialogo-clave">
+  <h3>Clave de API de Anthropic</h3>
+  <p>Se guarda solo en este navegador y viaja únicamente a <code>api.anthropic.com</code>.</p>
+  <div class="advertencia">
+    <p>Una clave en el navegador puede ser leída por cualquiera con acceso a esta máquina. Usa una clave dedicada a esta prueba y rótala al terminar.</p>
+  </div>
+  <p>Modelo: <code>claude-fable-5-1</code>. Sin clave, la partida continúa igual con crónica seca. Si sirves la carpeta por HTTP y hay un <code>.env</code> con <code>ANTHROPIC_API_KEY=…</code>, la clave se carga sola.</p>
+  <label class="etq" for="campo-clave">Clave</label>
+  <input id="campo-clave" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-…">
+  <menu>
+    <button class="secundario" id="clave-borrar">Quitar clave</button>
+    <button class="secundario" id="clave-cancelar">Cancelar</button>
+    <button class="primario" id="clave-guardar">Guardar clave</button>
+  </menu>
+</dialog>
+
+<script id="motor">
+// === MOTOR ===
+const ESTACIONES = ["Primavera", "Verano", "Otoño", "Invierno"];
+const CLAVE_ESTADO = "ashmere_state_v1";
+const CLAVE_API = "ashmere_api_key";
+const INFLUENCIA_INICIAL = 12;
+const INFLUENCIA_POR_TURNO = 4;
+const INFLUENCIA_MAX = 30;
+const ACCIONES_POR_TURNO = 2;
+
+const PUEBLOS = [
+  { id: "emberfolk", nombre: "Emberfolk", region: "Caldrun Vale", lugar: "sur, llanuras cálidas", rasgo: "Expansionistas, prósperos", economia: "Agricultura", grupo: "agro", tendencia: "Diplomáticos hasta que falta tierra, luego agresivos", vulnerabilidad: "Sequía", color: "#A0562A", simbolo: "☀",
+    ini: { poblacion: 140, prosperidad: 72, estabilidad: 58, militar: 55, favor: 50 }, centro: [530, 580],
+    poly: [[365,482],[450,478],[560,480],[660,440],[700,500],[730,580],[690,650],[580,680],[450,675],[360,620],[325,545]] },
+  { id: "frostkin", nombre: "Frostkin", region: "Vaerholt", lugar: "norte, montañas", rasgo: "Aislacionistas, resistentes", economia: "Minería y caza", grupo: "otro", tendencia: "Neutrales, feroces si se sienten amenazados", vulnerabilidad: "Inviernos duros", color: "#66788A", simbolo: "▲",
+    ini: { poblacion: 85, prosperidad: 44, estabilidad: 74, militar: 68, favor: 50 }, centro: [475, 140],
+    poly: [[340,70],[430,40],[540,38],[620,80],[640,150],[600,210],[510,235],[410,230],[352,190],[315,130]] },
+  { id: "river", nombre: "River Clans", region: "Ashmere Delta", lugar: "centro, el nudo de las rutas", rasgo: "Mercantiles, diplomáticos", economia: "Comercio y pesca", grupo: "comercio", tendencia: "Siempre buscan acuerdos, evitan la guerra", vulnerabilidad: "Militarmente débiles", color: "#437A76", simbolo: "≋",
+    ini: { poblacion: 120, prosperidad: 80, estabilidad: 52, militar: 24, favor: 50 }, centro: [530, 350],
+    poly: [[410,230],[510,235],[600,210],[670,280],[700,360],[660,440],[560,480],[450,478],[385,410],[365,310]] },
+  { id: "highland", nombre: "Highland Wardens", region: "Tharn Peak", lugar: "noreste, riscos", rasgo: "Orgullosos, ligados al honor", economia: "Ganadería y mercenariado", grupo: "otro", tendencia: "Cumplen juramentos incluso a su costa", vulnerabilidad: "Rígidos, no se adaptan", color: "#735273", simbolo: "⚔",
+    ini: { poblacion: 100, prosperidad: 52, estabilidad: 80, militar: 76, favor: 50 }, centro: [755, 205],
+    poly: [[640,150],[700,105],[800,110],[870,165],[880,250],[830,300],[740,315],[670,280],[625,215]] },
+  { id: "marsh", nombre: "Marsh Folk", region: "Duskmere Fen", lugar: "oeste lejano, ciénaga", rasgo: "Secretivos, autosuficientes", economia: "Recolección y alquimia", grupo: "agro", tendencia: "Desconfían de forasteros, comercian poco", vulnerabilidad: "Aislamiento: nadie acude en crisis", color: "#5C6C36", simbolo: "☾",
+    ini: { poblacion: 60, prosperidad: 40, estabilidad: 70, militar: 34, favor: 50 }, centro: [170, 535],
+    poly: [[60,430],[150,410],[240,470],[300,520],[285,600],[210,650],[110,640],[45,570]] },
+  { id: "sail", nombre: "Sail Lords", region: "Corvane Bay", lugar: "este, costa", rasgo: "Oportunistas, semi-piratas", economia: "Comercio marítimo", grupo: "comercio", tendencia: "Apoyan al que más ofrezca", vulnerabilidad: "Dependen del mar: tormentas, bloqueos", color: "#3D5480", simbolo: "⚓",
+    ini: { poblacion: 95, prosperidad: 74, estabilidad: 38, militar: 52, favor: 50 }, centro: [790, 435],
+    poly: [[705,372],[752,338],[836,322],[882,345],[895,440],[860,530],[770,545],[700,500],[665,440]] },
+  { id: "greywood", nombre: "Greywood Wardens", region: "Greywood", lugar: "centro-oeste, bosque", rasgo: "Reclusivos, espirituales", economia: "Recolección y guardia de sitios antiguos", grupo: "agro", tendencia: "Pacíficos, implacables si su bosque es invadido", vulnerabilidad: "Población pequeña, no sostienen guerra larga", color: "#3E6244", simbolo: "♣",
+    ini: { poblacion: 55, prosperidad: 46, estabilidad: 84, militar: 40, favor: 50 }, centro: [265, 345],
+    poly: [[180,250],[255,225],[335,215],[365,310],[385,410],[335,465],[240,470],[170,400],[150,320]] },
+];
+const PUEBLO = Object.fromEntries(PUEBLOS.map(p => [p.id, p]));
+const TODOS = PUEBLOS.map(p => p.id);
+const GRUPO = {
+  agro: TODOS.filter(id => PUEBLO[id].grupo === "agro"),
+  comercio: TODOS.filter(id => PUEBLO[id].grupo === "comercio"),
+};
+
+function par(a, b) { return [a, b].sort().join("|"); }
+function partes(clave) { return clave.split("|"); }
+function otro(clave, id) { return partes(clave).find(x => x !== id); }
+
+const RELACIONES_BASE = {};
+[
+  ["emberfolk", "greywood", -35], ["emberfolk", "river", 25], ["emberfolk", "frostkin", 0], ["emberfolk", "highland", -10],
+  ["emberfolk", "marsh", -5], ["emberfolk", "sail", 10], ["frostkin", "highland", -30], ["frostkin", "river", 10],
+  ["frostkin", "greywood", 5], ["frostkin", "marsh", 0], ["frostkin", "sail", -15], ["highland", "river", 20],
+  ["river", "greywood", 15], ["river", "marsh", 5], ["river", "sail", 30], ["highland", "greywood", 10],
+  ["highland", "marsh", -10], ["highland", "sail", -25], ["greywood", "marsh", 20], ["greywood", "sail", -5], ["marsh", "sail", -20],
+].forEach(([a, b, valor]) => { RELACIONES_BASE[par(a, b)] = valor; });
+const PARES = Object.keys(RELACIONES_BASE);
+
+const ARISTAS = [
+  ["frostkin", "highland"], ["frostkin", "river"], ["highland", "river"], ["river", "sail"],
+  ["river", "greywood"], ["river", "emberfolk"], ["greywood", "marsh"],
+].map(([a, b]) => par(a, b));
+const RUTAS_CERRADAS_AL_INICIO = [par("greywood", "marsh")];
+
+function sonVecinos(a, b) { return ARISTAS.includes(par(a, b)); }
+function vecinosDe(id) { return ARISTAS.filter(k => partes(k).includes(id)).map(k => otro(k, id)); }
+function nombreDe(id) { return PUEBLO[id].nombre; }
+function nombresPar(clave) { return partes(clave).map(nombreDe).join(" y "); }
+function nombreRuta(clave) { return partes(clave).map(id => PUEBLO[id].region).join(" – "); }
+
+function etiquetaRelacion(valor) {
+  if (valor <= -60) return "guerra abierta";
+  if (valor <= -25) return "hostil";
+  if (valor < 25) return "neutral";
+  if (valor < 60) return "cordial";
+  return "alianza";
+}
+function claseRelacion(valor) {
+  const etiqueta = etiquetaRelacion(valor);
+  return etiqueta === "guerra abierta" ? "guerra" : etiqueta;
+}
+
+function estadoInicial(semilla) {
+  const pueblos = {};
+  PUEBLOS.forEach(p => { pueblos[p.id] = { ...p.ini, turnosProspBaja: 0, hambruna: false, colapso: false }; });
+  const rutas = {};
+  ARISTAS.forEach(k => { rutas[k] = !RUTAS_CERRADAS_AL_INICIO.includes(k); });
+  return {
+    version: 1, semilla, rng: semilla, turno: 0, influencia: INFLUENCIA_INICIAL,
+    pueblos, relaciones: { ...RELACIONES_BASE }, rutas,
+    guerras: [], alianzas: [], hitos: [], cronicas: [], messages: [], accionesTurno: [],
+  };
+}
+
+function azar(estado) {
+  estado.rng = (estado.rng + 0x6D2B79F5) | 0;
+  let t = estado.rng;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+function elegir(estado, lista) { return lista[Math.floor(azar(estado) * lista.length)]; }
+
+const LIMITES = { poblacion: [20, 300] };
+function ajustar(estado, id, campo, delta) {
+  const [minimo, maximo] = LIMITES[campo] || [0, 100];
+  const pueblo = estado.pueblos[id];
+  pueblo[campo] = Math.max(minimo, Math.min(maximo, Math.round(pueblo[campo] + delta)));
+}
+function ajustarRelacion(estado, clave, delta) {
+  estado.relaciones[clave] = Math.max(-100, Math.min(100, estado.relaciones[clave] + delta));
+}
+function enGuerra(estado, clave) { return estado.guerras.some(g => g.par === clave); }
+function etiquetaTurno(turno) {
+  return { estacion: ESTACIONES[(turno - 1) % 4], anio: Math.floor((turno - 1) / 4) + 1 };
+}
+
+const EVENTOS = [
+  { id: "sequia", peso: 10, vulnerable: "emberfolk", estacion: "Verano",
+    objetivos: () => TODOS.map(id => ({ pueblo: id })),
+    aplicar(e, o) {
+      ajustar(e, o.pueblo, "prosperidad", -12); ajustar(e, o.pueblo, "estabilidad", -5);
+      return { pueblos: [o.pueblo], titulo: `Sequía en ${PUEBLO[o.pueblo].region}`, detalle: `Los ${nombreDe(o.pueblo)} pierden cosechas y reservas: prosperidad −12, estabilidad −5.` };
+    } },
+  { id: "invierno_brutal", peso: 10, vulnerable: "frostkin", estacion: "Invierno",
+    objetivos: () => TODOS.map(id => ({ pueblo: id })),
+    aplicar(e, o) {
+      ajustar(e, o.pueblo, "prosperidad", -10); ajustar(e, o.pueblo, "poblacion", -8);
+      return { pueblos: [o.pueblo], titulo: `Invierno brutal en ${PUEBLO[o.pueblo].region}`, detalle: `El frío se cobra vidas entre los ${nombreDe(o.pueblo)}: prosperidad −10, población −8.` };
+    } },
+  { id: "tormenta", peso: 10, vulnerable: "sail", estacion: "Invierno",
+    objetivos: () => [{ pueblo: "sail" }],
+    aplicar(e) {
+      ajustar(e, "sail", "prosperidad", -14); ajustar(e, "sail", "militar", -4);
+      return { pueblos: ["sail"], titulo: "Tormenta en Corvane Bay", detalle: "La flota de los Sail Lords pierde barcos y carga: prosperidad −14, militar −4." };
+    } },
+  { id: "peste", peso: 6, vulnerable: "marsh", estacion: null,
+    objetivos: () => TODOS.map(id => ({ pueblo: id })),
+    aplicar(e, o) {
+      ajustar(e, o.pueblo, "poblacion", -15); ajustar(e, o.pueblo, "estabilidad", -6);
+      return { pueblos: [o.pueblo], titulo: `Peste en ${PUEBLO[o.pueblo].region}`, detalle: `Una enfermedad recorre a los ${nombreDe(o.pueblo)}: población −15, estabilidad −6.` };
+    } },
+  { id: "cosecha", peso: 8, vulnerable: null, estacion: "Otoño",
+    objetivos: () => TODOS.map(id => ({ pueblo: id })),
+    aplicar(e, o) {
+      ajustar(e, o.pueblo, "prosperidad", 12); ajustar(e, o.pueblo, "estabilidad", 4);
+      return { pueblos: [o.pueblo], titulo: `Cosecha excepcional en ${PUEBLO[o.pueblo].region}`, detalle: `Graneros llenos entre los ${nombreDe(o.pueblo)}: prosperidad +12, estabilidad +4.` };
+    } },
+  { id: "veta", peso: 6, vulnerable: null, estacion: null,
+    objetivos: () => [{ pueblo: "frostkin" }, { pueblo: "highland" }],
+    aplicar(e, o) {
+      ajustar(e, o.pueblo, "prosperidad", 14);
+      return { pueblos: [o.pueblo], titulo: `Veta de mineral en ${PUEBLO[o.pueblo].region}`, detalle: `Los ${nombreDe(o.pueblo)} abren una veta nueva: prosperidad +14.` };
+    } },
+  { id: "revuelta", peso: 12, vulnerable: "sail", estacion: null,
+    objetivos: e => TODOS.filter(id => e.pueblos[id].estabilidad < 45).map(id => ({ pueblo: id })),
+    aplicar(e, o) {
+      ajustar(e, o.pueblo, "estabilidad", -12); ajustar(e, o.pueblo, "militar", -5);
+      return { pueblos: [o.pueblo], titulo: `Revuelta interna en ${PUEBLO[o.pueblo].region}`, detalle: `Facciones de los ${nombreDe(o.pueblo)} se enfrentan entre sí: estabilidad −12, militar −5.` };
+    } },
+  { id: "incursion", peso: 10, vulnerable: null, estacion: null,
+    objetivos: e => ARISTAS.filter(k => e.relaciones[k] <= -25).map(k => ({ par: k })),
+    aplicar(e, o) {
+      const [a, b] = partes(o.par);
+      const defensor = elegir(e, [a, b]);
+      const atacante = otro(o.par, defensor);
+      ajustarRelacion(e, o.par, -8);
+      ajustar(e, a, "militar", -4); ajustar(e, b, "militar", -4); ajustar(e, defensor, "estabilidad", -3);
+      return { pueblos: [a, b], titulo: `Incursión de ${nombreDe(atacante)} sobre ${PUEBLO[defensor].region}`, detalle: `Partidas armadas cruzan la frontera. Relación −8, militar −4 para ambos, estabilidad −3 para los ${nombreDe(defensor)}.` };
+    } },
+  { id: "juramento", peso: 7, vulnerable: null, estacion: null,
+    objetivos: () => [{ pueblo: "highland" }],
+    aplicar(e) {
+      const vecino = elegir(e, vecinosDe("highland"));
+      const clave = par("highland", vecino);
+      ajustarRelacion(e, clave, 10); ajustar(e, "highland", "prosperidad", -6);
+      return { pueblos: ["highland", vecino], titulo: `Juramento cumplido en Tharn Peak`, detalle: `Los Highland Wardens honran una promesa antigua hacia los ${nombreDe(vecino)} aunque les cueste: relación +10, prosperidad −6.` };
+    } },
+  { id: "ruta_saqueada", peso: 8, vulnerable: null, estacion: null,
+    objetivos: e => ARISTAS.filter(k => e.rutas[k]).map(k => ({ par: k })),
+    aplicar(e, o) {
+      e.rutas[o.par] = false;
+      ajustarRelacion(e, o.par, -12);
+      const conSail = partes(o.par).includes("sail");
+      const culpable = conSail ? "bandas sin bandera" : "corsarios de Corvane Bay";
+      const pueblos = conSail ? partes(o.par) : [...partes(o.par), "sail"];
+      return { pueblos, titulo: `Ruta saqueada: ${nombreRuta(o.par)}`, detalle: `Caravanas asaltadas por ${culpable}. La ruta queda cerrada y cada lado culpa al otro: relación −12.` };
+    } },
+  { id: "peregrinacion", peso: 6, vulnerable: null, estacion: "Primavera",
+    objetivos: () => [{ pueblo: "greywood" }],
+    aplicar(e) {
+      ajustar(e, "greywood", "estabilidad", 8);
+      vecinosDe("greywood").forEach(v => ajustarRelacion(e, par("greywood", v), 5));
+      return { pueblos: ["greywood", ...vecinosDe("greywood")], titulo: "Peregrinación a Greywood", detalle: "Forasteros acuden a los sitios antiguos del bosque. Estabilidad +8 para los Greywood Wardens, relación +5 con sus vecinos." };
+    } },
+  { id: "alquimia", peso: 5, vulnerable: null, estacion: null,
+    objetivos: () => [{ pueblo: "marsh" }],
+    aplicar(e) {
+      ajustar(e, "marsh", "prosperidad", 10); ajustar(e, "marsh", "favor", 6);
+      return { pueblos: ["marsh"], titulo: "Descubrimiento alquímico en Duskmere Fen", detalle: "Los Marsh Folk dan con un preparado que vale su peso en plata: prosperidad +10, favor al Cronista +6." };
+    } },
+  { id: "tala", peso: 7, vulnerable: null, estacion: "Verano",
+    objetivos: () => [{ par: par("emberfolk", "greywood") }],
+    aplicar(e, o) {
+      ajustarRelacion(e, o.par, -20); ajustar(e, "emberfolk", "prosperidad", 6);
+      return { pueblos: ["emberfolk", "greywood"], titulo: "Tala en el bosque sagrado", detalle: "Colonos Emberfolk abren campos en el linde de Greywood. Relación −20; prosperidad +6 para los Emberfolk." };
+    } },
+  { id: "mercenario", peso: 6, vulnerable: null, estacion: null,
+    objetivos: () => [{ pueblo: "sail" }, { pueblo: "highland" }],
+    aplicar(e, o) {
+      const tercero = elegir(e, TODOS.filter(id => id !== o.pueblo));
+      ajustar(e, o.pueblo, "militar", 8); ajustarRelacion(e, par(o.pueblo, tercero), -10);
+      return { pueblos: [o.pueblo, tercero], titulo: `Ofrecimiento mercenario de ${nombreDe(o.pueblo)}`, detalle: `Los ${nombreDe(o.pueblo)} alquilan sus armas y los ${nombreDe(tercero)} lo toman como amenaza: militar +8, relación −10.` };
+    } },
+];
+
+function aplicarEstacion(estado, estacion) {
+  if (estacion === "Primavera") {
+    GRUPO.agro.forEach(id => ajustar(estado, id, "prosperidad", 3));
+    return "Primavera: siembra y recolección. +3 prosperidad para Emberfolk, Marsh Folk y Greywood Wardens.";
+  }
+  if (estacion === "Verano") {
+    GRUPO.comercio.forEach(id => ajustar(estado, id, "prosperidad", 3));
+    return "Verano: temporada de navegación. +3 prosperidad para River Clans y Sail Lords; el riesgo de sequía en Caldrun Vale se duplica.";
+  }
+  if (estacion === "Otoño") {
+    TODOS.forEach(id => { ajustar(estado, id, "prosperidad", 2); ajustar(estado, id, "estabilidad", 2); });
+    return "Otoño: cosecha. +2 prosperidad y +2 estabilidad para todos.";
+  }
+  TODOS.forEach(id => ajustar(estado, id, "prosperidad", -4));
+  ajustar(estado, "frostkin", "prosperidad", -6);
+  return "Invierno: −4 prosperidad para todos; Vaerholt sufre −6 adicional; el riesgo de tormenta en Corvane Bay se duplica.";
+}
+
+function rutasActivasDe(estado, id) {
+  return ARISTAS.filter(k => partes(k).includes(id) && estado.rutas[k]).length;
+}
+
+function sortearEventos(estado, estacion) {
+  const tirada = azar(estado);
+  const cantidad = tirada < 0.25 ? 0 : tirada < 0.75 ? 1 : 2;
+  const resultados = [];
+  const usados = new Set();
+  for (let i = 0; i < cantidad; i++) {
+    const candidatos = [];
+    EVENTOS.forEach(evento => {
+      if (usados.has(evento.id)) return;
+      evento.objetivos(estado).forEach(objetivo => {
+        let peso = evento.peso;
+        if (evento.vulnerable && objetivo.pueblo === evento.vulnerable) peso *= 3;
+        if (evento.estacion === estacion) peso *= 2;
+        candidatos.push({ evento, objetivo, peso });
+      });
+    });
+    if (!candidatos.length) break;
+    const total = candidatos.reduce((suma, c) => suma + c.peso, 0);
+    let corte = azar(estado) * total;
+    let elegido = candidatos[candidatos.length - 1];
+    for (const candidato of candidatos) {
+      corte -= candidato.peso;
+      if (corte <= 0) { elegido = candidato; break; }
+    }
+    usados.add(elegido.evento.id);
+    resultados.push({ id: elegido.evento.id, ...elegido.evento.aplicar(estado, elegido.objetivo) });
+  }
+  return resultados;
+}
+
+function derivarRelaciones(estado) {
+  PARES.forEach(clave => {
+    const vecinos = ARISTAS.includes(clave);
+    if (!vecinos && estado.turno % 2 !== 0) return;
+    const base = RELACIONES_BASE[clave];
+    const actual = estado.relaciones[clave];
+    if (actual < base) estado.relaciones[clave] = actual + 1;
+    else if (actual > base) estado.relaciones[clave] = actual - 1;
+  });
+}
+
+function cerrarRutasHostiles(estado) {
+  ARISTAS.forEach(clave => { if (estado.relaciones[clave] <= -25) estado.rutas[clave] = false; });
+}
+
+function comprobarUmbrales(estado, marca) {
+  const hitos = [];
+  const anotar = (tipo, pueblos, texto, brasa) => {
+    const hito = { turno: estado.turno, estacion: marca.estacion, anio: marca.anio, tipo, pueblos, texto, brasa: !!brasa };
+    estado.hitos.push(hito); hitos.push(hito);
+  };
+  PARES.forEach(clave => {
+    const valor = estado.relaciones[clave];
+    const guerra = estado.guerras.find(g => g.par === clave);
+    if (valor <= -60 && !guerra) {
+      estado.guerras.push({ par: clave, desde: { ...marca } });
+      anotar("guerra", partes(clave), `Guerra declarada entre ${nombresPar(clave)}.`, true);
+    } else if (guerra && valor > -40) {
+      estado.guerras = estado.guerras.filter(g => g.par !== clave);
+      anotar("paz", partes(clave), `Paz entre ${nombresPar(clave)}: las armas se guardan, la desconfianza no.`);
+    }
+    const alianza = estado.alianzas.find(a => a.par === clave);
+    if (valor >= 60 && !alianza) {
+      estado.alianzas.push({ par: clave, desde: { ...marca } });
+      anotar("alianza", partes(clave), `Alianza formal entre ${nombresPar(clave)}.`);
+    } else if (alianza && valor < 40) {
+      estado.alianzas = estado.alianzas.filter(a => a.par !== clave);
+      anotar("ruptura", partes(clave), `La alianza entre ${nombresPar(clave)} se disuelve.`);
+    }
+  });
+  estado.guerras.forEach(g => {
+    partes(g.par).forEach(id => ajustar(estado, id, "prosperidad", -5));
+    if (estado.rutas[g.par] !== undefined) estado.rutas[g.par] = false;
+  });
+  TODOS.forEach(id => {
+    const pueblo = estado.pueblos[id];
+    if (pueblo.prosperidad < 15) pueblo.turnosProspBaja += 1; else pueblo.turnosProspBaja = 0;
+    if (pueblo.turnosProspBaja >= 2) {
+      if (!pueblo.hambruna) { pueblo.hambruna = true; anotar("hambruna", [id], `Hambruna en ${PUEBLO[id].region}.`, true); }
+      ajustar(estado, id, "poblacion", -10);
+    } else if (pueblo.hambruna && pueblo.prosperidad >= 15) {
+      pueblo.hambruna = false; anotar("fin_hambruna", [id], `Termina la hambruna en ${PUEBLO[id].region}.`);
+    }
+    if (pueblo.estabilidad < 20 && !pueblo.colapso) {
+      pueblo.colapso = true; anotar("colapso", [id], `Colapso de autoridad en ${PUEBLO[id].region}: nadie manda, nadie obedece.`, true);
+    }
+  });
+  return hitos;
+}
+
+function instantanea(estado) {
+  return {
+    pueblos: JSON.parse(JSON.stringify(estado.pueblos)),
+    relaciones: { ...estado.relaciones },
+    rutas: { ...estado.rutas },
+  };
+}
+
+const NOMBRE_CAMPO = { poblacion: "población", prosperidad: "prosperidad", estabilidad: "estabilidad", militar: "militar", favor: "favor al Cronista" };
+function diferencias(antes, estado) {
+  const pueblos = [];
+  TODOS.forEach(id => {
+    const cambios = Object.keys(NOMBRE_CAMPO)
+      .filter(campo => antes.pueblos[id][campo] !== estado.pueblos[id][campo])
+      .map(campo => `${NOMBRE_CAMPO[campo]} ${antes.pueblos[id][campo]}→${estado.pueblos[id][campo]}`);
+    if (cambios.length) pueblos.push(`${nombreDe(id)}: ${cambios.join(", ")}.`);
+  });
+  const relaciones = PARES
+    .filter(clave => antes.relaciones[clave] !== estado.relaciones[clave])
+    .map(clave => `Relación ${partes(clave).map(nombreDe).join("–")}: ${antes.relaciones[clave]}→${estado.relaciones[clave]} (${etiquetaRelacion(estado.relaciones[clave])}).`);
+  const rutas = ARISTAS
+    .filter(clave => antes.rutas[clave] !== estado.rutas[clave])
+    .map(clave => `Ruta ${nombreRuta(clave)}: ${estado.rutas[clave] ? "reabierta" : "cerrada"}.`);
+  return { pueblos, relaciones, rutas };
+}
+
+function hitosActivos(estado) {
+  const lista = [];
+  estado.guerras.forEach(g => lista.push({ brasa: true, pueblos: partes(g.par), texto: `Guerra ${nombresPar(g.par)} (desde ${g.desde.estacion}, Año ${g.desde.anio})` }));
+  estado.alianzas.forEach(a => lista.push({ brasa: false, pueblos: partes(a.par), texto: `Alianza ${nombresPar(a.par)} (desde ${a.desde.estacion}, Año ${a.desde.anio})` }));
+  TODOS.forEach(id => {
+    if (estado.pueblos[id].hambruna) lista.push({ brasa: true, pueblos: [id], texto: `Hambruna en ${PUEBLO[id].region}` });
+    if (estado.pueblos[id].colapso) lista.push({ brasa: true, pueblos: [id], texto: `Autoridad colapsada en ${PUEBLO[id].region}` });
+  });
+  return lista;
+}
+
+function resolverTurno(estado) {
+  estado.turno += 1;
+  const marca = etiquetaTurno(estado.turno);
+  const antes = instantanea(estado);
+  const acciones = estado.accionesTurno;
+  estado.accionesTurno = [];
+
+  const notaEstacion = aplicarEstacion(estado, marca.estacion);
+  TODOS.forEach(id => ajustar(estado, id, "prosperidad", rutasActivasDe(estado, id) * 2 - 1));
+  TODOS.forEach(id => {
+    const pueblo = estado.pueblos[id];
+    ajustar(estado, id, "poblacion", Math.round((pueblo.prosperidad - 50) / 12 + (pueblo.estabilidad - 50) / 20));
+  });
+  const eventos = sortearEventos(estado, marca.estacion);
+  derivarRelaciones(estado);
+  cerrarRutasHostiles(estado);
+  const hitosNuevos = comprobarUmbrales(estado, marca);
+  estado.influencia = Math.min(INFLUENCIA_MAX, estado.influencia + INFLUENCIA_POR_TURNO);
+
+  const pueblosTocados = new Set();
+  eventos.forEach(ev => ev.pueblos.forEach(id => pueblosTocados.add(id)));
+  acciones.forEach(ac => ac.pueblos.forEach(id => pueblosTocados.add(id)));
+  hitosNuevos.forEach(h => h.pueblos.forEach(id => pueblosTocados.add(id)));
+
+  const informe = {
+    turno: estado.turno, ...marca, notaEstacion, eventos, acciones, hitosNuevos,
+    hitosActivos: hitosActivos(estado), cambios: diferencias(antes, estado), pueblos: [...pueblosTocados],
+  };
+  estado.cronicas.push({ turno: estado.turno, ...marca, texto: null, fuente: null, nota: null, pueblos: informe.pueblos, resumen: eventos.map(ev => ev.titulo) });
+  estado.messages.push({ role: "user", content: construirMensajeUsuario(estado, informe) });
+  return informe;
+}
+
+function describirPueblo(estado, id) {
+  const p = estado.pueblos[id];
+  const relaciones = TODOS.filter(x => x !== id)
+    .map(x => `${nombreDe(x)} ${etiquetaRelacion(estado.relaciones[par(id, x)])}`).join(", ");
+  const rutas = ARISTAS.filter(k => partes(k).includes(id))
+    .map(k => `${PUEBLO[otro(k, id)].region} ${estado.rutas[k] ? "abierta" : "cerrada"}`).join(", ");
+  return `- ${nombreDe(id)} (${PUEBLO[id].region}): población ${p.poblacion}, prosperidad ${p.prosperidad}, estabilidad ${p.estabilidad}, militar ${p.militar}, favor al Cronista ${p.favor}. Relaciones: ${relaciones}. Rutas: ${rutas}.`;
+}
+
+function construirMensajeUsuario(estado, informe) {
+  const lineas = [];
+  lineas.push(`TURNO ${informe.turno} — ${informe.estacion}, Año ${informe.anio}.`);
+  lineas.push("", "EFECTO DE LA ESTACIÓN:", informe.notaEstacion);
+  lineas.push("", "ACCIONES DEL CRONISTA ANTES DE ESTA ESTACIÓN:");
+  if (informe.acciones.length) informe.acciones.forEach(a => lineas.push(`- ${a.texto}`)); else lineas.push("- Ninguna.");
+  lineas.push("", "ACONTECIMIENTOS:");
+  if (informe.eventos.length) informe.eventos.forEach(ev => lineas.push(`- ${ev.titulo}. ${ev.detalle}`)); else lineas.push("- Ninguno. Una estación tranquila.");
+  lineas.push("", "HITOS NUEVOS:");
+  if (informe.hitosNuevos.length) informe.hitosNuevos.forEach(h => lineas.push(`- ${h.texto}`)); else lineas.push("- Ninguno.");
+  lineas.push("", "HITOS EN CURSO:");
+  if (informe.hitosActivos.length) informe.hitosActivos.forEach(h => lineas.push(`- ${h.texto}`)); else lineas.push("- Ninguno.");
+  lineas.push("", "CAMBIOS NETOS DE LA ESTACIÓN (antes → después):");
+  const cambios = [...informe.cambios.pueblos, ...informe.cambios.relaciones, ...informe.cambios.rutas];
+  if (cambios.length) cambios.forEach(c => lineas.push(`- ${c}`)); else lineas.push("- Ninguno.");
+  lineas.push("", "ESTADO DE LOS SIETE PUEBLOS TRAS LA ESTACIÓN:");
+  TODOS.forEach(id => lineas.push(describirPueblo(estado, id)));
+  lineas.push("", "Narra esta estación.");
+  return lineas.join("\n");
+}
+
+function cronicaSeca(informe) {
+  const frases = [`${informe.estacion} del Año ${informe.anio}.`, informe.notaEstacion];
+  informe.acciones.forEach(a => frases.push(a.texto));
+  if (informe.eventos.length) informe.eventos.forEach(ev => frases.push(`${ev.titulo}. ${ev.detalle}`));
+  else frases.push("Ninguna noticia llega por los caminos: una estación tranquila.");
+  informe.hitosNuevos.forEach(h => frases.push(h.texto));
+  return frases.join(" ");
+}
+
+const ACCIONES = {
+  apoyar: { nombre: "Apoyar con recursos", costo: 4, pasos: ["pueblo"], preguntas: ["¿A qué pueblo envías recursos?"] },
+  emisario: { nombre: "Enviar emisario", costo: 3, pasos: ["pueblo", "pueblo"], preguntas: ["¿Entre qué dos pueblos median? Elige el primero.", "Elige el segundo."] },
+  impuesto: { nombre: "Imponer impuesto", costo: 2, pasos: ["pueblo"], preguntas: ["¿A qué pueblo le impones el impuesto?"] },
+  abrir_ruta: { nombre: "Abrir acuerdo comercial", costo: 5, pasos: ["ruta_cerrada"], preguntas: ["¿Qué ruta reabres?"] },
+  romper_ruta: { nombre: "Romper acuerdo comercial", costo: 3, pasos: ["ruta_activa"], preguntas: ["¿Qué ruta rompes?"] },
+};
+
+function rutasAbribles(estado) { return ARISTAS.filter(k => !estado.rutas[k] && !enGuerra(estado, k)); }
+function rutasActivas(estado) { return ARISTAS.filter(k => estado.rutas[k]); }
+
+function aplicarAccion(estado, tipo, objetivos) {
+  const accion = ACCIONES[tipo];
+  if (estado.accionesTurno.length >= ACCIONES_POR_TURNO) return { ok: false, texto: "Ya usaste las dos acciones de esta estación." };
+  if (estado.influencia < accion.costo) return { ok: false, texto: "No tienes influencia suficiente." };
+  const pueblos = tipo === "abrir_ruta" || tipo === "romper_ruta" ? partes(objetivos[0]) : objetivos;
+  estado.influencia -= accion.costo;
+
+  const colapsado = pueblos.find(id => estado.pueblos[id].colapso);
+  if (colapsado) {
+    estado.pueblos[colapsado].colapso = false;
+    const texto = `${accion.nombre}: ${PUEBLO[colapsado].region} ignora al Cronista. La autoridad de los ${nombreDe(colapsado)} ha colapsado y la acción se pierde.`;
+    estado.accionesTurno.push({ tipo, pueblos, texto, ignorada: true });
+    return { ok: true, ignorada: true, texto };
+  }
+
+  let texto = "";
+  if (tipo === "apoyar") {
+    const [id] = pueblos;
+    ajustar(estado, id, "prosperidad", 8); ajustar(estado, id, "estabilidad", 3); ajustar(estado, id, "favor", 6);
+    texto = `El Cronista apoya con recursos a los ${nombreDe(id)}: prosperidad +8, estabilidad +3, favor +6.`;
+  } else if (tipo === "emisario") {
+    const clave = par(pueblos[0], pueblos[1]);
+    ajustarRelacion(estado, clave, 10);
+    texto = `El Cronista envía un emisario entre ${nombresPar(clave)}: relación +10, ahora ${etiquetaRelacion(estado.relaciones[clave])} (${estado.relaciones[clave]}).`;
+  } else if (tipo === "impuesto") {
+    const [id] = pueblos;
+    ajustar(estado, id, "prosperidad", -6); ajustar(estado, id, "favor", -8);
+    estado.influencia = Math.min(INFLUENCIA_MAX, estado.influencia + 6);
+    texto = `El Cronista impone un impuesto a los ${nombreDe(id)}: prosperidad −6, favor −8; el Cronista recauda 6 de influencia.`;
+  } else if (tipo === "abrir_ruta") {
+    const clave = objetivos[0];
+    estado.rutas[clave] = true; ajustarRelacion(estado, clave, 12);
+    texto = `El Cronista abre un acuerdo comercial ${nombreRuta(clave)}: la ruta vuelve a funcionar, relación +12 entre ${nombresPar(clave)}.`;
+  } else if (tipo === "romper_ruta") {
+    const clave = objetivos[0];
+    estado.rutas[clave] = false; ajustarRelacion(estado, clave, -15);
+    texto = `El Cronista rompe el acuerdo comercial ${nombreRuta(clave)}: la ruta se cierra, relación −15 entre ${nombresPar(clave)}.`;
+  }
+  estado.accionesTurno.push({ tipo, pueblos, texto, ignorada: false });
+  return { ok: true, ignorada: false, texto };
+}
+
+const SISTEMA = `Eres el cronista de Ashmere, un mundo de siete pueblos unidos y enfrentados por una única ruta de comercio. Tu trabajo es convertir el registro seco de cada estación en prosa: una crónica breve, un rumor de taberna o de muelle, o una carta de embajador. Nunca decides nada; el mundo ya ocurrió cuando llega a ti. Tú solo lo cuentas.
+
+GEOGRAFÍA
+Vaerholt (norte, montañas) linda con Tharn Peak y con Ashmere Delta. Tharn Peak (noreste, riscos) linda con Vaerholt y con Ashmere Delta. Ashmere Delta (centro) es el nudo del mundo: linda con Vaerholt, Tharn Peak, Corvane Bay, Greywood y Caldrun Vale; casi todo el comercio pasa por sus canales. Corvane Bay (este, costa) solo linda con Ashmere. Greywood (oeste, bosque antiguo) linda con Ashmere y con Duskmere Fen. Duskmere Fen (oeste lejano, ciénaga) solo linda con Greywood. Caldrun Vale (sur, llanuras cálidas) solo linda con Ashmere.
+
+LOS SIETE PUEBLOS
+Emberfolk — Caldrun Vale. Expansionistas y prósperos; viven de la agricultura. Diplomáticos hasta que les falta tierra; entonces, agresivos. Vulnerables a la sequía. Voz: campesina y orgullosa; hablan en cosechas y en yugadas, y cuando se enfadan hablan de derechos.
+Frostkin — Vaerholt. Aislacionistas y resistentes; minería y caza. Neutrales, feroces si se sienten amenazados. Vulnerables a los inviernos duros. Voz: frases cortas, sin adorno; la montaña es la medida de todo, y el frío no se menciona porque se da por hecho.
+River Clans — Ashmere Delta. Mercantiles y diplomáticos; comercio y pesca. Siempre buscan acuerdos y evitan la guerra porque son militarmente débiles. Voz: cortés y calculadora; todo se expresa como flujo, de agua, de mercancía o de favores.
+Highland Wardens — Tharn Peak. Orgullosos, ligados al honor; ganadería y mercenariado. Cumplen sus juramentos aunque les cueste. Rígidos, no se adaptan. Voz: formal y arcaica; invocan juramentos y linajes y jamás admiten haber cambiado de opinión.
+Marsh Folk — Duskmere Fen. Secretivos y autosuficientes; recolección y alquimia. Desconfían de forasteros y comercian poco. Su aislamiento hace que en una crisis nadie acuda. Voz: oblicua; hablan en remedios y en señales, y lo que importa se dice a medias.
+Sail Lords — Corvane Bay. Oportunistas, semi-piratas; comercio marítimo. Apoyan al que más ofrezca. Dependen del mar: tormentas y bloqueos los arruinan. Voz: labia de puerto, jovial y mercenaria; todo tiene precio y lo dicen con una sonrisa.
+Greywood Wardens — Greywood. Reclusivos y espirituales; recolección y guardia de sitios antiguos. Pacíficos, pero implacables si su bosque es invadido. Población pequeña, no sostienen una guerra larga. Voz: lenta y litúrgica; miden el tiempo en árboles, y la ira les sale como sentencia, no como grito.
+
+TENSIONES DE FONDO
+Todos quieren la ruta de Ashmere. Los Emberfolk empujan sus campos hacia el bosque sagrado de Greywood. Frostkin y Highland Wardens comparten frontera y valores opuestos. Duskmere está solo. Los Sail Lords cambian de bando cuando conviene.
+
+REGLAS
+1. Narra únicamente lo que la entrada autoriza. No inventes muertes, batallas, tratados, bodas ni cambios de estado que no figuren en los datos del turno. Si un número no cambió, nada dramático le pasó a ese pueblo. Los números están para que los traduzcas a hechos concretos, no para citarlos.
+2. Entre 120 y 190 palabras.
+3. Elige un registro según lo ocurrido: crónica (hechos, tercera persona), rumor (voz anónima, de taberna o de muelle) o carta (un embajador o notable escribe a otro, con encabezado y despedida). Indica el registro en la primera línea, entre corchetes: [Crónica], [Rumor] o [Carta]. No repitas el mismo registro más de dos estaciones seguidas.
+4. Cuenta como quien estuvo allí: una imagen concreta por estación (un objeto, un gesto, un olor, una cifra dicha en voz alta) vale más que tres adjetivos. Deja que la voz del pueblo protagonista tiña la prosa.
+5. Continuidad: lo que narraste sigue siendo cierto hasta que los datos digan lo contrario. Recupera detalles, lugares y personas de estaciones anteriores cuando venga a cuento; eso es lo que convierte estaciones sueltas en una historia.
+6. Personajes: puedes nombrar a una persona nueva cuando la escena lo pida, como mucho una por estación. Si la nombras, existe: mantén su nombre, su cargo y su carácter en adelante.
+7. Termina con una frase que deje algo pendiente: una deuda, una amenaza, una pregunta sin responder. Sin anunciarla como tal.
+8. Las estaciones sin acontecimientos también se narran. En Ashmere el silencio también es noticia.
+9. Escribe en español. Prosa corrida: sin listas, sin encabezados, sin negritas.`;
+</script>
+
+<script>
+// === UI ===
+const $ = selector => document.querySelector(selector);
+const esc = texto => String(texto).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const SIN_HTTP = location.protocol === "file:";
+const VISTA = { ancho: 1000, alto: 700 };
+
+let estado = cargar();
+let seleccion = null;
+let regionPov = null;
+let narrando = false;
+let ultimaCronicaNueva = null;
+
+function romano(numero) {
+  const tabla = [[100, "C"], [90, "XC"], [50, "L"], [40, "XL"], [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"]];
+  let resto = numero, salida = "";
+  tabla.forEach(([valor, letra]) => { while (resto >= valor) { salida += letra; resto -= valor; } });
+  return salida || "I";
+}
+
+function cargar() {
+  try {
+    const crudo = localStorage.getItem(CLAVE_ESTADO);
+    if (crudo) {
+      const guardado = JSON.parse(crudo);
+      if (guardado && guardado.version === 1) {
+        const huerfana = guardado.cronicas.find(c => c.texto === null);
+        if (huerfana) {
+          huerfana.texto = "El registro de esta estación se perdió al recargar; solo quedan los hechos: " + (huerfana.resumen.join("; ") || "una estación tranquila") + ".";
+          huerfana.fuente = "seca"; huerfana.nota = "Crónica seca: la página se recargó antes de que llegara la respuesta.";
+          if (guardado.messages.length && guardado.messages[guardado.messages.length - 1].role === "user") {
+            guardado.messages.push({ role: "assistant", content: huerfana.texto });
+          }
+        }
+        return guardado;
+      }
+    }
+  } catch (error) { console.warn("Estado guardado ilegible; se empieza de cero.", error); }
+  return estadoInicial((Date.now() ^ Math.floor(Math.random() * 1e9)) >>> 0);
+}
+function guardar() { localStorage.setItem(CLAVE_ESTADO, JSON.stringify(estado)); }
+function claveApi() { return localStorage.getItem(CLAVE_API) || ""; }
+let claveDesdeEntorno = false;
+
+async function cargarClaveDesdeEntorno() {
+  if (claveApi() || SIN_HTTP) return;
+  try {
+    const respuesta = await fetch("./.env", { cache: "no-store" });
+    if (!respuesta.ok) return;
+    const texto = await respuesta.text();
+    const linea = texto.split(/\r?\n/).find(l => /^(ANTHROPIC_API_KEY|ANTHROPIC_TOKEN|ANTRHOPHIC_TOKEN)\s*=/.test(l));
+    if (!linea) return;
+    const valor = linea.slice(linea.indexOf("=") + 1).trim().replace(/^["']|["']$/g, "");
+    if (!valor) return;
+    localStorage.setItem(CLAVE_API, valor);
+    claveDesdeEntorno = true;
+    render();
+  } catch (error) { /* sin .env servido: se sigue en crónica seca */ }
+}
+
+/* ---- Mapa ---- */
+function hexARgb(hex) { return [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)); }
+function mezclar(hexA, hexB, t) {
+  const a = hexARgb(hexA), b = hexARgb(hexB);
+  return `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * t)).join(",")})`;
+}
+function colorProsperidad(id) {
+  const prosperidad = estado.pueblos[id].prosperidad;
+  const vida = 0.22 + 0.78 * (prosperidad / 100);
+  return mezclar("#2C251F", PUEBLO[id].color, vida);
+}
+function nivelProsperidad(prosperidad) { return prosperidad < 35 ? 1 : prosperidad < 70 ? 2 : 3; }
+function puntos(poly) { return poly.map(p => p.join(",")).join(" "); }
+
+const TERRENO = {
+  frostkin: { tipo: "montanas", puntos: [[395,105,14],[440,80,16],[500,78,18],[560,100,14],[600,150,12],[365,150,12],[560,190,11],[420,205,10]] },
+  highland: { tipo: "montanas", puntos: [[690,150,12],[740,130,15],[800,140,15],[845,190,13],[840,250,12],[680,250,12],[760,290,10],[665,212,10]] },
+  greywood: { tipo: "bosque", puntos: [[200,290,12],[240,262,12],[300,250,12],[330,300,11],[190,352,12],[352,372,11],[220,422,12],[280,442,12],[330,432,11],[178,402,11],[262,292,10],[300,412,10],[232,330,9],[318,344,9]] },
+  marsh: { tipo: "juncos", puntos: [[90,470],[140,440],[210,490],[262,552],[100,562],[240,612],[150,622],[80,612],[205,585]] },
+  emberfolk: { tipo: "campos", puntos: [[398,518],[468,506],[598,498],[658,556],[398,608],[478,648],[598,640],[676,606],[356,568]] },
+  sail: { tipo: "bahia", puntos: [[740,400],[830,378],[760,512],[842,522]], barco: [852,486] },
+};
+const RIOS = [
+  "M 470,205 C 480,240 470,270 500,300 S 522,332 530,346",
+  "M 530,346 C 570,340 620,330 700,362",
+  "M 530,346 C 560,380 620,400 682,425",
+  "M 530,346 C 540,400 590,440 668,448",
+];
+const GROSOR_EXTRUSION = 5;
+
+function glifoMontana([x, y, s]) {
+  return `<polygon points="${x - s},${y + s * 0.6} ${x},${y - s} ${x + s},${y + s * 0.6}" fill="#544B47" stroke="#0A0807" stroke-width="1"></polygon>
+    <polygon points="${x - s * 0.34},${y - s * 0.3} ${x},${y - s} ${x + s * 0.34},${y - s * 0.3}" fill="#D9CDB2" opacity=".9"></polygon>`;
+}
+function glifoArbol([x, y, s]) {
+  return `<rect x="${x - 1.2}" y="${y - 2}" width="2.4" height="5" fill="#2A211B"></rect>
+    <polygon points="${x - s * 0.55},${y} ${x},${y - s * 1.6} ${x + s * 0.55},${y}" fill="#3A5A3E" stroke="#0A0807" stroke-width=".8"></polygon>
+    <polygon points="${x - s * 0.42},${y - s * 0.55} ${x},${y - s * 1.6} ${x + s * 0.42},${y - s * 0.55}" fill="#4F7A54"></polygon>`;
+}
+function glifoJuncos([x, y]) {
+  return `<path d="M ${x - 8},${y + 3} h 20" stroke="#3E5060" stroke-width=".9" opacity=".9"></path>
+    <path d="M ${x},${y} v -14 M ${x - 4},${y} v -10 M ${x + 4},${y} v -11 M ${x + 8},${y} v -8 M ${x - 8},${y} v -7" stroke="#6E7A52" stroke-width="1.2" stroke-linecap="round"></path>`;
+}
+function glifoCampos([x, y]) {
+  let salida = "";
+  for (let fila = 0; fila < 2; fila++) for (let col = 0; col < 3; col++) {
+    salida += `<rect x="${x + col * 12}" y="${y + fila * 8}" width="9" height="5" fill="${(fila + col) % 2 ? "#7E5E32" : "#93703C"}" stroke="#0A0807" stroke-width=".7"></rect>`;
+  }
+  return salida;
+}
+function glifoOla([x, y]) { return `<path d="M ${x},${y} q 8,-6 16,0 t 16,0" fill="none" stroke="#7C97A6" stroke-width="1" opacity=".55"></path>`; }
+function glifoBarco([x, y]) {
+  return `<path d="M ${x - 11},${y} l 4,6 h 14 l 4,-6 z" fill="#6E5A45" stroke="#0A0807" stroke-width=".9"></path>
+    <path d="M ${x},${y} v -15" stroke="#2A211B" stroke-width="1.4"></path>
+    <path d="M ${x + 1},${y - 15} l 9,7 h -9 z" fill="#B9AB90" stroke="#0A0807" stroke-width=".6"></path>`;
+}
+function terreno(p) {
+  const t = TERRENO[p.id];
+  if (!t) return "";
+  let cuerpo = "";
+  if (t.tipo === "montanas") cuerpo = t.puntos.map(glifoMontana).join("");
+  if (t.tipo === "bosque") cuerpo = t.puntos.map(glifoArbol).join("");
+  if (t.tipo === "juncos") cuerpo = t.puntos.map(glifoJuncos).join("");
+  if (t.tipo === "campos") cuerpo = t.puntos.map(glifoCampos).join("");
+  if (t.tipo === "bahia") cuerpo = t.puntos.map(glifoOla).join("") + glifoBarco(t.barco);
+  return `<g class="terreno" data-id="${p.id}">${cuerpo}</g>`;
+}
+function terrazas(p) {
+  const [cx, cy] = p.centro;
+  return `<g class="terrazas" data-id="${p.id}">
+    <ellipse cx="${cx}" cy="${cy + 8}" rx="48" ry="27" fill="#5A4736" stroke="#0A0807" stroke-width="1.2"></ellipse>
+    <ellipse cx="${cx}" cy="${cy + 4}" rx="36" ry="20" fill="#6B5642" stroke="#0A0807" stroke-width="1.1"></ellipse>
+    <ellipse cx="${cx}" cy="${cy}" rx="24" ry="13" fill="#7D664E" stroke="#0A0807" stroke-width="1"></ellipse>
+  </g>`;
+}
+function astrolabio(p) {
+  const rayos = Array.from({ length: 8 }, (_, i) => {
+    const angulo = i * Math.PI / 4;
+    return `<line x1="${(Math.cos(angulo) * 30).toFixed(1)}" y1="${(Math.sin(angulo) * 30).toFixed(1)}" x2="${(Math.cos(angulo) * 44).toFixed(1)}" y2="${(Math.sin(angulo) * 44).toFixed(1)}"></line>`;
+  }).join("");
+  return `<g class="astrolabio" data-id="${p.id}" transform="translate(${p.centro[0]},${p.centro[1] + 4})"><g class="gira">
+    <circle r="56" fill="none" stroke="#9A7C48" stroke-width="6" stroke-dasharray="5 6"></circle>
+    <circle r="46" fill="none" stroke="#7D664E" stroke-width="1.4"></circle>
+    <g stroke="#B0925C" stroke-width="2.4" stroke-linecap="round">${rayos}</g>
+  </g></g>`;
+}
+function ciudadela(p, indice) {
+  const base = -6;
+  const torre = (nivel, x, alto, ancho) => `<g class="torre oculta" data-nivel="${nivel}">
+      <rect x="${x}" y="${base - alto}" width="${ancho}" height="${alto}" fill="#B0925C" stroke="#0A0807" stroke-width=".9"></rect>
+      <polygon points="${x - 1},${base - alto} ${x + ancho / 2},${base - alto - 6} ${x + ancho + 1},${base - alto}" fill="#7D664E" stroke="#0A0807" stroke-width=".8"></polygon>
+    </g>`;
+  return `<g class="ciudadela" data-id="${p.id}" transform="translate(${p.centro[0]},${p.centro[1] - 2})" style="--retardo:${(0.7 + indice * 0.12).toFixed(2)}s">
+    <circle r="19" fill="none" stroke="#9A7C48" stroke-width="3" stroke-dasharray="2.6 2.6"></circle>
+    <rect x="-15" y="${base}" width="30" height="7" fill="#8C7458" stroke="#0A0807" stroke-width=".9"></rect>
+    ${torre(2, -13, 16, 7)}${torre(1, -4, 24, 8)}${torre(3, 6, 14, 7)}
+  </g>`;
+}
+function extrusion() {
+  let capas = "";
+  for (let n = GROSOR_EXTRUSION; n >= 1; n--) {
+    capas += PUEBLOS.map(p => `<polygon class="canto" points="${puntos(p.poly.map(([x, y]) => [x, y + n * 3]))}"></polygon>`).join("");
+  }
+  return capas;
+}
+
+function construirMapa() {
+  const rutas = ARISTAS.map(clave => {
+    const [a, b] = partes(clave).map(id => PUEBLO[id].centro);
+    return `<line class="ruta" data-ruta="${clave}" x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}"></line>`;
+  }).join("");
+  const regiones = PUEBLOS.map(p => `
+    <polygon class="region" data-id="${p.id}" points="${puntos(p.poly)}" tabindex="0" role="button" aria-label="${esc(p.region)}, ${esc(p.nombre)}"></polygon>
+    <polygon class="grabado" data-id="${p.id}" points="${puntos(p.poly)}" fill="url(#hachurado)"></polygon>`).join("");
+  const rios = RIOS.map(d => `<path class="rio-sombra" d="${d}"></path><path class="rio" d="${d}"></path>`).join("");
+  const relieve = PUEBLOS.map(terreno).join("") + astrolabio(PUEBLO.river) + PUEBLOS.map(terrazas).join("") + PUEBLOS.map(ciudadela).join("");
+  const etiquetas = PUEBLOS.map(p => `
+    <text class="nombre-region" data-id="${p.id}" x="${p.centro[0]}" y="${p.centro[1] + 46}">${esc(p.region)}</text>
+    <text class="nombre-pueblo" data-id="${p.id}" x="${p.centro[0]}" y="${p.centro[1] + 61}">${esc(p.nombre)}</text>`).join("");
+  $("#mapa").innerHTML = `<div class="tablero">
+    <svg id="svg" viewBox="0 0 ${VISTA.ancho} ${VISTA.alto}" xmlns="http://www.w3.org/2000/svg" aria-label="Mapa de Ashmere">
+      <defs>
+        <!-- sRGB en los filtros: en linearRGB los negros casi puros se cuantizan a rojo al desenfocarse -->
+        <filter id="relieve" x="-8%" y="-8%" width="116%" height="118%" color-interpolation-filters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency="0.028" numOctaves="2" seed="7" result="ruido"></feTurbulence>
+          <feDisplacementMap in="SourceGraphic" in2="ruido" scale="5" xChannelSelector="R" yChannelSelector="G" result="forma"></feDisplacementMap>
+          <feGaussianBlur in="forma" stdDeviation="3" result="suave"></feGaussianBlur>
+          <feDiffuseLighting in="suave" surfaceScale="10" diffuseConstant="1.1" lighting-color="#FFF6E6" result="difusa">
+            <feDistantLight azimuth="230" elevation="42"></feDistantLight>
+          </feDiffuseLighting>
+          <feComposite in="difusa" in2="forma" operator="in" result="difusaRecortada"></feComposite>
+          <feBlend in="forma" in2="difusaRecortada" mode="multiply" result="sombreado"></feBlend>
+          <feSpecularLighting in="suave" surfaceScale="10" specularConstant="0.7" specularExponent="22" lighting-color="#F3DFB0" result="brillo">
+            <feDistantLight azimuth="230" elevation="42"></feDistantLight>
+          </feSpecularLighting>
+          <feComposite in="brillo" in2="forma" operator="in" result="brilloRecortado"></feComposite>
+          <feComposite in="brilloRecortado" in2="sombreado" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="iluminado"></feComposite>
+          <feDropShadow in="iluminado" dx="0" dy="14" stdDeviation="12" flood-color="#000" flood-opacity="0.75"></feDropShadow>
+        </filter>
+        <filter id="grano" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="3" result="ruido"></feTurbulence>
+          <feColorMatrix in="ruido" type="saturate" values="0" result="gris"></feColorMatrix>
+          <feComponentTransfer in="gris" result="tenue"><feFuncA type="linear" slope="0.2"></feFuncA></feComponentTransfer>
+          <feComposite in="tenue" in2="SourceGraphic" operator="in" result="recorte"></feComposite>
+          <feComposite in="recorte" in2="SourceGraphic" operator="over"></feComposite>
+        </filter>
+        <filter id="desenfoque" x="-2%" y="-2%" width="104%" height="104%" color-interpolation-filters="sRGB">
+          <feGaussianBlur stdDeviation="2.6"></feGaussianBlur>
+        </filter>
+        <pattern id="hachurado" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)">
+          <line x1="0" y1="0" x2="0" y2="7" stroke="#000" stroke-opacity="0.26" stroke-width="1.3"></line>
+        </pattern>
+        <radialGradient id="candela" cx="50%" cy="50%" r="50%">
+          <stop offset="0" stop-color="#3E332A"></stop>
+          <stop offset="0.55" stop-color="#2A221C"></stop>
+          <stop offset="1" stop-color="#1C1815" stop-opacity="0"></stop>
+        </radialGradient>
+        <radialGradient id="luzsol" cx="50%" cy="50%" r="50%">
+          <stop offset="0" stop-color="#FFE9B8" stop-opacity=".6"></stop>
+          <stop offset="1" stop-color="#FFE9B8" stop-opacity="0"></stop>
+        </radialGradient>
+        <linearGradient id="profundidad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#fff"></stop><stop offset="0.14" stop-color="#fff"></stop>
+          <stop offset="0.36" stop-color="#000"></stop><stop offset="0.7" stop-color="#000"></stop>
+          <stop offset="0.9" stop-color="#fff"></stop><stop offset="1" stop-color="#fff"></stop>
+        </linearGradient>
+        <mask id="mascara-profundidad" maskUnits="userSpaceOnUse" x="-100" y="-100" width="1200" height="900">
+          <rect x="-100" y="-100" width="1200" height="900" fill="url(#profundidad)"></rect>
+        </mask>
+      </defs>
+      <ellipse class="halo" cx="480" cy="350" rx="440" ry="290" fill="url(#candela)" filter="url(#grano)"></ellipse>
+      <path class="ola" d="M 905,150 q 12,-8 24,0 t 24,0"></path>
+      <path class="ola" d="M 925,172 q 10,-7 20,0 t 20,0"></path>
+      <path class="ola" d="M 915,300 q 12,-8 24,0 t 24,0"></path>
+      <path class="ola" d="M 930,410 q 12,-8 24,0 t 24,0"></path>
+      <path class="ola" d="M 910,432 q 10,-7 20,0 t 20,0"></path>
+      <path class="ola" d="M 880,560 q 12,-8 24,0 t 24,0"></path>
+      <g id="mundo">
+        <g id="capa-cantos">${extrusion()}</g>
+        <g id="capa-regiones" filter="url(#relieve)">${regiones}${rios}${relieve}</g>
+        <g id="capa-rutas">${rutas}</g>
+        <g id="capa-conflictos"></g>
+        <g id="capa-etiquetas">${etiquetas}</g>
+      </g>
+      <use class="dof" href="#mundo" filter="url(#desenfoque)" mask="url(#mascara-profundidad)"></use>
+      <ellipse class="luz" cx="300" cy="350" rx="340" ry="280" fill="url(#luzsol)"></ellipse>
+      <g class="brujula" transform="translate(84,92)">
+        <circle r="22" fill="none" stroke="#5E4D3C" stroke-width="1"></circle>
+        <path d="M 0,-30 L 5,0 L 0,30 L -5,0 Z" fill="#8C7448" opacity=".9"></path>
+        <path d="M -30,0 L 0,5 L 30,0 L 0,-5 Z" fill="#5E4D3C"></path>
+        <text y="-36" text-anchor="middle" font-size="11" fill="#D8B872" font-family="Cambria, Georgia, serif" letter-spacing="2">N</text>
+      </g>
+    </svg>
+  </div>`;
+  document.querySelectorAll(".region").forEach(nodo => {
+    nodo.addEventListener("click", () => abrirPov(nodo.dataset.id));
+    nodo.addEventListener("keydown", evento => {
+      if (evento.key === "Enter" || evento.key === " ") { evento.preventDefault(); abrirPov(nodo.dataset.id); }
+    });
+  });
+}
+
+function pintarMapa() {
+  document.querySelectorAll(".region").forEach(nodo => {
+    const id = nodo.dataset.id;
+    nodo.style.fill = colorProsperidad(id);
+    const guerra = estado.guerras.some(g => partes(g.par).includes(id));
+    nodo.classList.toggle("enguerra", guerra && regionPov !== id);
+    nodo.classList.toggle("seleccionada", regionPov === id);
+  });
+  document.querySelectorAll("#svg [data-id]:not(.region)").forEach(nodo => {
+    nodo.classList.toggle("activa", nodo.dataset.id === regionPov);
+  });
+  document.querySelectorAll(".ciudadela").forEach(nodo => {
+    const nivel = nivelProsperidad(estado.pueblos[nodo.dataset.id].prosperidad);
+    nodo.querySelectorAll(".torre").forEach(torre => torre.classList.toggle("oculta", Number(torre.dataset.nivel) > nivel));
+  });
+  document.querySelectorAll(".ruta").forEach(nodo => {
+    const clave = nodo.dataset.ruta;
+    nodo.classList.remove("activa", "cerrada", "guerra");
+    if (enGuerra(estado, clave)) nodo.classList.add("guerra");
+    else nodo.classList.add(estado.rutas[clave] ? "activa" : "cerrada");
+  });
+  $("#capa-conflictos").innerHTML = estado.guerras
+    .filter(g => !ARISTAS.includes(g.par))
+    .map(g => {
+      const [a, b] = partes(g.par).map(id => PUEBLO[id].centro);
+      const medio = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2 - 70];
+      return `<path class="conflicto" d="M ${a[0]},${a[1]} Q ${medio[0]},${medio[1]} ${b[0]},${b[1]}"></path>`;
+    }).join("");
+  document.body.classList.toggle("pov", regionPov !== null);
+}
+
+let animacionVista = null;
+function animarVista(destino, duracion = 620) {
+  const svg = $("#svg");
+  const origen = svg.getAttribute("viewBox").split(" ").map(Number);
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) { svg.setAttribute("viewBox", destino.join(" ")); return; }
+  if (animacionVista) cancelAnimationFrame(animacionVista);
+  const inicio = performance.now();
+  const paso = ahora => {
+    const t = Math.min(1, (ahora - inicio) / duracion);
+    const suave = 1 - Math.pow(1 - t, 3);
+    svg.setAttribute("viewBox", origen.map((v, i) => v + (destino[i] - v) * suave).join(" "));
+    if (t < 1) animacionVista = requestAnimationFrame(paso);
+  };
+  animacionVista = requestAnimationFrame(paso);
+}
+function vistaDeRegion(id) {
+  const xs = PUEBLO[id].poly.map(p => p[0]), ys = PUEBLO[id].poly.map(p => p[1]);
+  const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
+  const relacion = VISTA.ancho / VISTA.alto;
+  const ancho = Math.max((maxX - minX) + 160, ((maxY - minY) + 160) * relacion);
+  const alto = ancho / relacion;
+  const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+  return [cx - ancho / 2, cy - alto / 2, ancho, alto];
+}
+
+/* ---- POV ---- */
+function abrirPov(id) {
+  regionPov = regionPov === id ? null : id;
+  if (regionPov) animarVista(vistaDeRegion(regionPov)); else animarVista([0, 0, VISTA.ancho, VISTA.alto]);
+  render();
+}
+function cerrarPov() { if (regionPov) { regionPov = null; animarVista([0, 0, VISTA.ancho, VISTA.alto]); render(); } }
+
+function barra(campo, valor, maximo) {
+  const pct = Math.round((valor / maximo) * 100);
+  const baja = campo !== "poblacion" && valor < 25;
+  return `<div class="fila"><span class="etq">${campo === "poblacion" ? "población" : campo}</span><span class="barra"><i class="${baja ? "baja" : ""}" style="width:${pct}%"></i></span><span class="num">${valor}</span></div>`;
+}
+
+function renderPov(id) {
+  const p = PUEBLO[id], s = estado.pueblos[id];
+  $("#columna-titulo").textContent = "Punto de vista";
+  $("#volver").hidden = false;
+  const relaciones = TODOS.filter(x => x !== id).map(x => {
+    const valor = estado.relaciones[par(id, x)];
+    return `<div class="relacion"><span>${esc(nombreDe(x))}${sonVecinos(id, x) ? ' <span class="etq">vecino</span>' : ""}</span><span class="estado ${claseRelacion(valor)}">${etiquetaRelacion(valor)} <span class="num">${valor}</span></span></div>`;
+  }).join("");
+  const hitos = hitosActivos(estado).filter(h => h.pueblos.includes(id));
+  const cronicas = estado.cronicas.filter(c => c.pueblos.includes(id) && c.texto).slice(-3).reverse();
+  $("#registro").innerHTML = `
+    <div class="pov-cab">
+      <span class="blason" aria-hidden="true">${p.simbolo}</span>
+      <div>
+        <h3 class="tallado">${esc(p.region)}</h3>
+        <div class="lugar">${esc(p.nombre)} · ${esc(p.lugar)}</div>
+      </div>
+    </div>
+    <dl class="ficha">
+      <dt>Rasgo</dt><dd>${esc(p.rasgo)}</dd>
+      <dt>Economía</dt><dd>${esc(p.economia)}</dd>
+      <dt>Tendencia</dt><dd>${esc(p.tendencia)}</dd>
+      <dt>Vulnerable a</dt><dd>${esc(p.vulnerabilidad)}</dd>
+    </dl>
+    <div class="bloque">
+      <h4>Estado</h4>
+      ${barra("poblacion", s.poblacion, 300)}${barra("prosperidad", s.prosperidad, 100)}${barra("estabilidad", s.estabilidad, 100)}${barra("militar", s.militar, 100)}${barra("favor", s.favor, 100)}
+    </div>
+    <div class="bloque"><h4>Relaciones</h4>${relaciones}</div>
+    <div class="bloque"><h4>Hitos en curso</h4>${hitos.length ? hitos.map(h => `<div class="hito ${h.brasa ? "brasa" : ""}">${esc(h.texto)}</div>`).join("") : '<div class="hito">Ninguno.</div>'}</div>
+    <div class="bloque"><h4>Últimas crónicas que lo nombran</h4>${cronicas.length ? cronicas.map(renderCronica).join("") : '<div class="hito">Ninguna todavía.</div>'}</div>`;
+}
+
+/* ---- Crónicas ---- */
+function separarRegistro(texto) {
+  const coincidencia = texto.match(/^\s*\[(Crónica|Cronica|Rumor|Carta)\]\s*/i);
+  if (!coincidencia) return { registro: null, cuerpo: texto };
+  return { registro: coincidencia[1].replace("Cronica", "Crónica"), cuerpo: texto.slice(coincidencia[0].length) };
+}
+function renderCronica(c) {
+  const nueva = c.turno === ultimaCronicaNueva;
+  let cuerpo;
+  if (c.texto === null) {
+    cuerpo = '<p class="esperando">La tinta aún no ha secado.</p>';
+  } else {
+    const { cuerpo: texto } = separarRegistro(c.texto);
+    cuerpo = texto.split(/\n{2,}|\n/).filter(Boolean).map(parrafo => `<p>${esc(parrafo)}</p>`).join("");
+  }
+  const registro = c.texto === null ? "" : (separarRegistro(c.texto).registro || (c.fuente === "seca" ? "Registro" : "Crónica"));
+  const fuente = c.fuente === "seca" ? "crónica seca" : c.fuente === "fable" ? "Fable 5.1" : "";
+  return `<article class="cronica ${nueva ? "nueva" : ""}">
+    <div class="cab"><span class="etq">${esc(c.estacion)} · Año ${romano(c.anio)}</span>${registro ? `<span class="etq registro-tipo">${esc(registro)}</span>` : ""}${fuente ? `<span class="etq fuente">${esc(fuente)}</span>` : ""}</div>
+    <div class="texto">${cuerpo}</div>
+    ${c.nota ? `<div class="nota">${esc(c.nota)}</div>` : ""}
+  </article>`;
+}
+function renderRegistro() {
+  $("#columna-titulo").textContent = "Crónica del reino";
+  $("#volver").hidden = true;
+  if (!estado.cronicas.length) {
+    const avisoClave = claveApi() || SIN_HTTP ? "" : `<p class="nota">Sin clave de API las crónicas salen en modo seco: hechos y cifras, sin voz. Añade la tuya en "Clave de API" para que narre Fable 5.1.</p>`;
+    $("#registro").innerHTML = `<div class="vacio"><p>El reino espera su primera estación.</p><p>Avanza la estación para que el registro empiece. Toca una región del mapa para conocer a su pueblo antes de que ocurra nada.</p>${avisoClave}</div>`;
+    return;
+  }
+  $("#registro").innerHTML = [...estado.cronicas].reverse().map(renderCronica).join("");
+}
+
+/* ---- Acciones ---- */
+function renderAcciones() {
+  const usadas = estado.accionesTurno.length;
+  $("#contador-acciones").textContent = `${ACCIONES_POR_TURNO} por estación · ${usadas} usada${usadas === 1 ? "" : "s"}`;
+  $("#botonera").innerHTML = Object.entries(ACCIONES).map(([tipo, a]) => {
+    const sinInfluencia = estado.influencia < a.costo;
+    const agotadas = usadas >= ACCIONES_POR_TURNO;
+    const sinObjetivo = (tipo === "abrir_ruta" && !rutasAbribles(estado).length) || (tipo === "romper_ruta" && !rutasActivas(estado).length);
+    const motivo = agotadas ? "Ya usaste las dos acciones de esta estación" : sinInfluencia ? "Influencia insuficiente" : sinObjetivo ? "No hay rutas sobre las que actuar" : "";
+    return `<button class="accion" data-tipo="${tipo}" ${motivo ? `disabled title="${motivo}"` : ""}>${esc(a.nombre)} <span class="num">${a.costo}</span></button>`;
+  }).join("");
+  document.querySelectorAll(".accion").forEach(nodo => nodo.addEventListener("click", () => iniciarSeleccion(nodo.dataset.tipo)));
+  renderSelector();
+}
+function iniciarSeleccion(tipo) {
+  seleccion = { tipo, elegidos: [] };
+  $("#resultado").textContent = "";
+  renderSelector();
+}
+function renderSelector() {
+  const nodo = $("#selector");
+  if (!seleccion) { nodo.classList.remove("abierto"); nodo.innerHTML = ""; return; }
+  const accion = ACCIONES[seleccion.tipo];
+  const paso = seleccion.elegidos.length;
+  const tipoPaso = accion.pasos[paso];
+  let opciones = [];
+  if (tipoPaso === "pueblo") opciones = TODOS.filter(id => !seleccion.elegidos.includes(id)).map(id => ({ valor: id, texto: `${PUEBLO[id].simbolo} ${nombreDe(id)}` }));
+  if (tipoPaso === "ruta_cerrada") opciones = rutasAbribles(estado).map(k => ({ valor: k, texto: nombreRuta(k) }));
+  if (tipoPaso === "ruta_activa") opciones = rutasActivas(estado).map(k => ({ valor: k, texto: nombreRuta(k) }));
+  nodo.classList.add("abierto");
+  nodo.innerHTML = `<p><span class="etq">${esc(accion.nombre)} · ${accion.costo} de influencia</span><br>${esc(accion.preguntas[paso])}</p>
+    <div class="chips">${opciones.map(o => `<button class="chip" data-valor="${esc(o.valor)}">${esc(o.texto)}</button>`).join("")}<button class="chip chip-cancelar" id="cancelar-seleccion">Cancelar</button></div>`;
+  nodo.querySelectorAll(".chip[data-valor]").forEach(chip => chip.addEventListener("click", () => elegirObjetivo(chip.dataset.valor)));
+  $("#cancelar-seleccion").addEventListener("click", () => { seleccion = null; renderSelector(); });
+}
+function elegirObjetivo(valor) {
+  seleccion.elegidos.push(valor);
+  if (seleccion.elegidos.length < ACCIONES[seleccion.tipo].pasos.length) { renderSelector(); return; }
+  const resultado = aplicarAccion(estado, seleccion.tipo, seleccion.elegidos);
+  seleccion = null;
+  const salida = $("#resultado");
+  salida.textContent = resultado.texto;
+  salida.classList.toggle("ignorada", !!resultado.ignorada);
+  guardar(); render();
+}
+
+/* ---- Turno y narración ---- */
+async function avanzarEstacion() {
+  if (narrando) return;
+  seleccion = null;
+  $("#resultado").textContent = "";
+  const informe = resolverTurno(estado);
+  ultimaCronicaNueva = null;
+  guardar(); render();
+  await narrar(informe);
+}
+
+function completarCronica(turno, texto, fuente, nota) {
+  const entrada = estado.cronicas.find(c => c.turno === turno);
+  entrada.texto = texto; entrada.fuente = fuente; entrada.nota = nota || null;
+  estado.messages.push({ role: "assistant", content: texto });
+  ultimaCronicaNueva = turno;
+  guardar(); render();
+}
+
+async function narrar(informe) {
+  const clave = claveApi();
+  if (!clave || SIN_HTTP) {
+    completarCronica(informe.turno, cronicaSeca(informe), "seca", !clave && !SIN_HTTP ? "Sin clave de API: crónica seca. Añade una clave en el pie de página para narrar con Fable." : null);
+    return;
+  }
+  narrando = true; render();
+  try {
+    const respuesta = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": clave,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true",
+        "anthropic-beta": "server-side-fallback-2026-07-01",
+      },
+      body: JSON.stringify({
+        model: "claude-fable-5-1",
+        max_tokens: 1200,
+        output_config: { effort: "medium" },
+        fallbacks: "default",
+        cache_control: { type: "ephemeral" },
+        system: [{ type: "text", text: SISTEMA, cache_control: { type: "ephemeral" } }],
+        messages: estado.messages,
+      }),
+    });
+    const datos = await respuesta.json();
+    if (!respuesta.ok) throw new Error((datos.error && datos.error.message) || `HTTP ${respuesta.status}`);
+    if (datos.stop_reason === "refusal") {
+      completarCronica(informe.turno, cronicaSeca(informe), "seca", "El modelo declinó narrar esta estación; queda la crónica seca.");
+      return;
+    }
+    const texto = (datos.content || []).filter(b => b.type === "text").map(b => b.text).join("\n").trim();
+    if (!texto) throw new Error("La respuesta llegó sin texto.");
+    completarCronica(informe.turno, texto, "fable", null);
+  } catch (error) {
+    completarCronica(informe.turno, cronicaSeca(informe), "seca", `Fable no respondió (${error.message}). Queda la crónica seca; la partida sigue.`);
+  } finally {
+    narrando = false; render();
+  }
+}
+
+/* ---- Render general ---- */
+function render() {
+  const siguiente = etiquetaTurno(estado.turno + 1);
+  $("#estacion").innerHTML = `${esc(siguiente.estacion)}<small>Año ${romano(siguiente.anio)}</small>`;
+  $("#influencia").innerHTML = `${estado.influencia} <span>/ ${INFLUENCIA_MAX}</span>`;
+  const boton = $("#avanzar");
+  boton.disabled = narrando;
+  boton.textContent = narrando ? "Narrando…" : "Avanzar estación";
+  boton.setAttribute("aria-busy", narrando ? "true" : "false");
+  pintarMapa();
+  renderAcciones();
+  if (regionPov) renderPov(regionPov); else renderRegistro();
+  $("#estado-clave").textContent = SIN_HTTP ? "sin acceso a la API desde file://" : claveApi() ? (claveDesdeEntorno ? "clave cargada del .env · narra Fable 5.1" : "clave guardada · narra Fable 5.1") : "sin clave · crónica seca";
+  $("#pie-info").textContent = `turno ${estado.turno} · semilla ${estado.semilla}`;
+}
+
+/* ---- Eventos de UI ---- */
+$("#avanzar").addEventListener("click", avanzarEstacion);
+$("#volver").addEventListener("click", cerrarPov);
+document.addEventListener("keydown", evento => { if (evento.key === "Escape") { if (seleccion) { seleccion = null; renderSelector(); } else cerrarPov(); } });
+
+const dialogo = $("#dialogo-clave");
+$("#abrir-clave").addEventListener("click", () => { $("#campo-clave").value = claveApi(); dialogo.showModal(); });
+$("#clave-cancelar").addEventListener("click", () => dialogo.close());
+$("#clave-guardar").addEventListener("click", () => {
+  const valor = $("#campo-clave").value.trim();
+  if (valor) localStorage.setItem(CLAVE_API, valor); else localStorage.removeItem(CLAVE_API);
+  dialogo.close(); render();
+});
+$("#clave-borrar").addEventListener("click", () => { localStorage.removeItem(CLAVE_API); dialogo.close(); render(); });
+
+$("#reiniciar").addEventListener("click", () => { $("#confirmar-reinicio").hidden = false; $("#reiniciar").hidden = true; });
+$("#reiniciar-no").addEventListener("click", () => { $("#confirmar-reinicio").hidden = true; $("#reiniciar").hidden = false; });
+$("#reiniciar-si").addEventListener("click", () => {
+  localStorage.removeItem(CLAVE_ESTADO);
+  estado = estadoInicial((Date.now() ^ Math.floor(Math.random() * 1e9)) >>> 0);
+  regionPov = null; seleccion = null; ultimaCronicaNueva = null;
+  $("#confirmar-reinicio").hidden = true; $("#reiniciar").hidden = false;
+  $("#resultado").textContent = "";
+  animarVista([0, 0, VISTA.ancho, VISTA.alto]);
+  guardar(); render();
+});
+
+$("#aviso-http").hidden = !SIN_HTTP;
+construirMapa();
+$("#svg").getBoundingClientRect();
+render();
+cargarClaveDesdeEntorno();
+if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  $("#svg").setAttribute("viewBox", vistaDeRegion("river").join(" "));
+  setTimeout(() => { if (!regionPov) animarVista([0, 0, VISTA.ancho, VISTA.alto], 2400); }, 500);
+  const tablero = $(".tablero");
+  $("#mapa").addEventListener("mousemove", evento => {
+    const caja = tablero.getBoundingClientRect();
+    const dx = (evento.clientX - caja.left) / caja.width - 0.5;
+    const dy = (evento.clientY - caja.top) / caja.height - 0.5;
+    tablero.style.setProperty("--rx", `${(22 - dy * 8).toFixed(2)}deg`);
+    tablero.style.setProperty("--ry", `${(dx * 7).toFixed(2)}deg`);
+  });
+  $("#mapa").addEventListener("mouseleave", () => { tablero.style.removeProperty("--rx"); tablero.style.removeProperty("--ry"); });
+}
+setTimeout(() => document.querySelectorAll(".ciudadela").forEach(nodo => nodo.style.setProperty("--retardo", "0s")), 3500);
+</script>
+</body>
+</html>
