@@ -1,0 +1,49 @@
+{
+  "question_id": "q02",
+  "answer": {
+    "diagnosis": {
+      "metrics": {
+        "linea": "WAREHOUSE (2002)",
+        "margen_mayo_pct": 18.12,
+        "margen_junio_pct": 17.38,
+        "margen_julio_pct": 13.8,
+        "variacion_pp_jun_jul": -3.58,
+        "ingreso_julio_cop": 4101521269,
+        "costo_julio_cop": 3535466282,
+        "utilidad_julio_cop": 566054987,
+        "variacion_ingreso_jun_jul_cop": -733647154,
+        "variacion_costo_jun_jul_cop": -459164583,
+        "observacion": "🔴 Disminuye"
+      }
+    },
+    "recommendations": [
+      {
+        "accion": "Recuperar/retener volumen de almacenamiento y depósito",
+        "evidencia": "account_delta_breakdown jun→jul: cuenta 41450504 ALMACENAMIENTO Y DEPOSITO GRAVADO delta -655,266,778 COP, la mayor caída de ingreso individual y explica ~89% de la baja de ingreso total (-733.6M)."
+      },
+      {
+        "accion": "Auditar consistencia de provisiones QUICK HELP (no gravada vs gravada)",
+        "evidencia": "account_delta_breakdown: cuenta 41709501 delta -2,652,263,946 vs 41709502 delta +2,592,407,379, efecto neto ≈ -59.9M; parece reclasificación contable, riesgo de ingreso mal registrado."
+      },
+      {
+        "accion": "No profundizar recortes de costo de forma reactiva sin recuperar volumen",
+        "evidencia": "account_delta_breakdown costo: HORAS EXTRAS -48,176,344 y SUELDOS -47,138,356 cayeron junto con el ingreso, indicando ajuste de dotación ante menor actividad; si el volumen vuelve, la estructura debe poder escalar sin sobrecostos."
+      },
+      {
+        "accion": "Monitorear tendencia mensual, no es rebote de un solo mes",
+        "evidencia": "margin_table: margen cayó de 18.12% (mayo) a 17.38% (junio, -0.74pp) a 13.80% (julio, -3.58pp) — deterioro sostenido en dos meses consecutivos."
+      }
+    ]
+  },
+  "summary": "Warehouse es la única línea operativa comparable con caída real de margen: pasó de 17.38% en junio a 13.80% en julio (-3.58 pp), y venía cayendo también en mayo-junio, o sea es tendencia, no un mes puntual. La causa no es un descontrol de costos -de hecho el costo bajó 459M-, sino una caída de ingreso mucho mayor (-734M), concentrada casi toda (655M) en la cuenta de Almacenamiento y Depósito. La prioridad es comercial/operativa: recuperar el volumen o tarifa de almacenamiento perdido, no seguir recortando costo, porque el ajuste de nómina (horas extra y sueldos) ya está siguiendo la caída de actividad y si el volumen vuelve sin ajustar la estructura vamos a tener cuellos de botella. Adicionalmente hay que auditar un movimiento de 2,650M+ en cuentas de provisión QUICK HELP que se compensa casi neto entre sí y podría estar distorsionando la lectura del ingreso contable.",
+  "method": "1) Traje margin_table para cost_center 2002 (mayo/junio/julio) para el diagnóstico base. 2) Traje account_delta_breakdown jun→jul para 2002 para identificar qué cuentas de ingreso y costo explican la variación. 3) Traje all_lines_margin_table para comparar Warehouse contra las otras 6 líneas y confirmar que es la única con deterioro real de margen. Verificación cruzada: los valores de margin_table(2002) coinciden exactamente (ingreso, costo, margen, variacion_pp) con la entrada '2002' de all_lines_margin_table, confirmando consistencia entre ambas herramientas. Además verifiqué que la suma de los deltas de ingreso principales (-655.3M almacenamiento + -60M neto provisión QUICK HELP + resto menor) es coherente en magnitud con variacion_ingreso total de -733.6M reportado por margin_table.",
+  "code": "margin_table(cost_center_id='2002', project_id='') ; account_delta_breakdown(period_a='6', period_b='7', cost_center_id='2002', project_id='', top_n=10) ; all_lines_margin_table() — llamadas en paralelo, sin filtrar por proyecto (análisis a nivel línea completa).",
+  "caveats": [
+    "El análisis es a nivel línea (CostCenterId 2002) sin desagregar por proyecto; si Warehouse tiene varios proyectos, la causa podría concentrarse en uno solo — recomendaría correr project_novelties sobre el/los proyectos principales de Warehouse para precisión.",
+    "No se investigó la causa raíz de la caída de volumen de almacenamiento (¿pérdida de cliente, estacionalidad, renegociación de tarifa?) porque la herramienta de deltas de cuenta no da ese detalle; requeriría info comercial adicional.",
+    "El neto de las cuentas de provisión QUICK HELP (~-60M) podría no ser una simple reclasificación; sin acceso a más detalle contable no puedo confirmar si hay impacto real en caja."
+  ],
+  "conventions": [
+    "Ninguna distinta a las indicadas; se usó el umbral de semáforo ±1.0pp ya aplicado por la herramienta."
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "question_id": "q01",
+  "answer": {
+    "margin_by_line_by_month": {
+      "2001_LONG_HAUL": {
+        "mayo": 13.16,
+        "junio": 13.42,
+        "julio": 14.03
+      },
+      "2002_WAREHOUSE": {
+        "mayo": 18.12,
+        "junio": 17.38,
+        "julio": 13.8
+      },
+      "2003_FIRST_MILE": {
+        "mayo": 14.51,
+        "junio": 14.0,
+        "julio": 14.03
+      },
+      "3001_LAST_MILE_COLOMBIA": {
+        "mayo": 19.22,
+        "junio": 20.21,
+        "julio": 20.49
+      },
+      "4001_GERENCIAS": {
+        "mayo": 100.0,
+        "junio": 100.0,
+        "julio": 100.0,
+        "nota": "excluida del ranking, sin costo 6/7"
+      },
+      "5001_COURIER_COLOMBIA": {
+        "mayo": -18.18,
+        "junio": 9.84,
+        "julio": 19.13,
+        "nota": "excluida del ranking, ingreso <0.5% del total"
+      },
+      "1001_GLOBAL_COLOMBIA": {
+        "mayo": null,
+        "junio": null,
+        "julio": null,
+        "nota": "sin actividad, excluida"
+      }
+    },
+    "winner_line": {
+      "cost_center_id": "3001",
+      "line_name": "LAST MILE COLOMBIA",
+      "variacion_pp_may_a_jul": 1.27
+    },
+    "causes": [
+      {
+        "tipo": "ingreso",
+        "descripcion": "Caída de -$386.3M COP en cuenta 'LAST MILE - ENTREGAS ULTIMA MILLA' más que compensada por provisiones de ingreso QUICK HELP (+$325.1M no gravada, +$80.9M gravada) y menor devolución de ventas (+$81.4M)",
+        "efecto_neto_ingreso_jun_jul_cop": 71655066,
+        "signo": "positivo"
+      },
+      {
+        "tipo": "costo",
+        "descripcion": "Alza en 'CORREO, TRANSPORTES Y TELEGRAMAS' (+$113.1M) parcialmente compensada por ahorro en VIGILANCIA (-$25.1M) y SUELDOS (-$20.9M)",
+        "efecto_neto_costo_jun_jul_aprox_cop": 39262423,
+        "signo": "leve incremento, menor al del ingreso"
+      }
+    ]
+  },
+  "summary": "En el trimestre mayo-julio, la línea con mejor evolución de rentabilidad fue LAST MILE COLOMBIA (3001), pasando de 19.22% a 20.49% de margen (+1.27 pp), con mejora sostenida en cada mes, no un rebote puntual. El motor fue un ingreso creciendo más rápido que el costo entre junio y julio: aunque cayeron las entregas de última milla directas, se compensaron con provisiones de ingreso Quick Help y menores devoluciones, mientras el costo solo subió modestamente (transporte/correo subió pero vigilancia y sueldos bajaron). LONG HAUL fue la segunda mejor (+0.87 pp) pero concentrado casi todo en jun→jul. WAREHOUSE fue la peor, cayendo -4.32 pp. GERENCIAS, COURIER y GLOBAL se excluyeron del ranking por no ser comparables (sin costo real, o ingreso irrelevante/nulo).",
+  "method": "1) Traje márgenes de mayo/junio/julio de las 7 líneas con all_lines_margin_table(). 2) Excluí GERENCIAS (margen 100% por construcción, sin costo 6/7), COURIER y GLOBAL COLOMBIA (ingreso <0.5% del total o nulo), según la convención indicada. 3) Ranqueé por (margen julio - margen mayo): LAST MILE +1.27pp es el mayor, y confirmé que la tendencia es consistente (no rebote de un solo mes) revisando variacion_pp jun→jul (+0.28pp) además del salto may→jun. 4) Para explicar la causa, corrí account_delta_breakdown(6,7,'3001','',5) que descompone el delta de ingreso y costo por cuenta contable. Verificación cruzada: sumé los deltas de ingreso de las 5 cuentas principales (~+75.2M) y lo comparé contra variacion_ingreso reportado por la tabla de márgenes (+71.7M COP) — coinciden con diferencia atribuible a cuentas menores no listadas en el top 5, confirmando consistencia de las cifras.",
+  "code": "all_lines_margin_table() -> márgenes may/jun/jul por línea. account_delta_breakdown(period_a='6', period_b='7', cost_center_id='3001', project_id='', top_n=5) -> descomposición de causas de la línea ganadora.",
+  "caveats": [
+    "El breakdown de cuentas usa top_n=5, por lo que la suma de los deltas mostrados no cierra exactamente contra el delta total de ingreso/costo (diferencia de ~3-40M COP atribuible a cuentas menores no listadas).",
+    "COURIER COLOMBIA tuvo la mayor variación porcentual (+37.31pp) pero se excluyó por tener ingreso marginal (montos en millones de pesos, no comparable en escala con las demás líneas).",
+    "GERENCIAS tiene margen 100% por construcción (no registra costo en cuentas 6/7), por lo que no es una métrica de rentabilidad comparable."
+  ],
+  "conventions": [
+    "Se aplicó estrictamente el criterio de exclusión sugerido: GERENCIAS, y líneas con ingreso <0.5% del total (COURIER, GLOBAL) quedan fuera del ranking de 'mejor evolución', aunque se reportan sus cifras como contexto."
+  ]
+}

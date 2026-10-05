@@ -1,0 +1,17 @@
+{
+  "question_id": "q04",
+  "answer": {
+    "2026-05": 22086527729,
+    "2026-06": 23907954440,
+    "2026-07": 25660530002,
+    "definicion": "Facturación real = Sigma crédito de documentos FC menos Sigma débito de devoluciones DV, más/menos notas netas (NC/NF/NB/DB), en cuentas de ingreso clase 4. Excluye provisiones de ingreso no facturado (PI) y sus reversiones (RI)."
+  },
+  "summary": "La facturación real de Quick Logística fue de $22.086.527.729 en mayo, $23.907.954.440 en junio y $25.660.530.002 en julio, es decir un crecimiento sostenido mes a mes (+8,2% may→jun y +7,3% jun→jul). Este dato difiere del ingreso contable neto (que incluye provisiones): en julio, por ejemplo, el ingreso contable neto fue de $24.553.077.703, casi $1.107 millones por debajo de la facturación real, porque las reversiones de provisión (RI) superaron a las nuevas provisiones (PI) ese mes.",
+  "method": "Llamé facturacion_real(period) para 5, 6 y 7. Verificación cruzada: recalculé facturacion_real = fc_credito - dv_debito + notas_netas para cada mes y confirmé que coincide con el valor reportado por la herramienta (mayo, junio y julio cuadran exactamente). También verifiqué que diferencia_ingreso_vs_facturacion = ingreso_contable_neto - facturacion_real es consistente en los tres meses, confirmando que la brecha entre ambas métricas se explica por el neto de provisión PI y reversión RI, no por un error de cálculo.",
+  "code": "facturacion_real(period='5'), facturacion_real(period='6'), facturacion_real(period='7')",
+  "caveats": [
+    "La facturación real es un proxy contable basado en documentos FC/DV/notas; no se verificó contra un sistema de facturación externo (ERP comercial) fuera de este dataset.",
+    "El ingreso contable neto y la facturación real difieren por el efecto de provisiones (PI) y reversiones (RI), que no representan facturación efectiva pero sí afectan el margen contable reportado en otras herramientas."
+  ],
+  "conventions": []
+}

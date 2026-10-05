@@ -1,0 +1,104 @@
+{
+  "question_id": "q06",
+  "answer": {
+    "metrics": {
+      "ingreso_junio": 143019411,
+      "ingreso_julio": 179129225,
+      "costo_junio": 99561140,
+      "costo_julio": 111159366,
+      "margen_junio_pp": 30.39,
+      "margen_julio_pp": 37.94,
+      "variacion_pp": 7.55
+    },
+    "novelties": [
+      {
+        "cuenta": "41459512 LAST MILE - ENTREGAS ULTIMA MILLA",
+        "tipo": "ingreso",
+        "delta_cop": 20598295,
+        "efecto_margen": "positivo",
+        "importancia": "principal"
+      },
+      {
+        "cuenta": "41709501 PROVISION DE INGRESO NO GRAVADA QUICK HELP",
+        "tipo": "ingreso",
+        "delta_cop": 12982009,
+        "efecto_margen": "positivo (contable, no facturación real)",
+        "importancia": "principal"
+      },
+      {
+        "cuenta": "42505003 INCAPACIDADES (ingreso)",
+        "tipo": "ingreso",
+        "delta_cop": 2529510,
+        "efecto_margen": "positivo",
+        "importancia": "secundaria"
+      },
+      {
+        "cuenta": "73354001 CORREO, TRANSPORTES Y TELEGRAMAS",
+        "tipo": "costo",
+        "delta_cop": 7267644,
+        "efecto_margen": "negativo",
+        "importancia": "principal"
+      },
+      {
+        "cuenta": "74352001 TRANSFERENCIAS MO",
+        "tipo": "costo",
+        "delta_cop": 3406149,
+        "efecto_margen": "negativo",
+        "importancia": "secundaria"
+      },
+      {
+        "cuenta": "72050601 SUELDOS",
+        "tipo": "costo",
+        "delta_cop": 1925995,
+        "efecto_margen": "negativo",
+        "importancia": "secundaria"
+      },
+      {
+        "cuenta": "72052404 INCAPACIDADES LICENCIA DE MATERNIDAD",
+        "tipo": "costo",
+        "delta_cop": -1108907,
+        "efecto_margen": "positivo (menor costo)",
+        "importancia": "secundaria"
+      },
+      {
+        "cuenta": "72052401 INCAPACIDADES MENOR A 3 DIAS",
+        "tipo": "costo",
+        "delta_cop": -875453,
+        "efecto_margen": "positivo (menor costo)",
+        "importancia": "secundaria"
+      },
+      {
+        "cuenta": "72059501 RODAMIENTO ADICIONAL",
+        "tipo": "costo",
+        "delta_cop": 511412,
+        "efecto_margen": "negativo",
+        "importancia": "menor"
+      },
+      {
+        "cuenta": "72051501 HORAS EXTRAS Y RECARGOS",
+        "tipo": "costo",
+        "delta_cop": -459651,
+        "efecto_margen": "positivo (menor costo)",
+        "importancia": "menor"
+      },
+      {
+        "cuenta": "72059502 RODAMIENTO NO SALARIAL ADICIONALES",
+        "tipo": "costo",
+        "delta_cop": 329649,
+        "efecto_margen": "negativo",
+        "importancia": "menor"
+      }
+    ]
+  },
+  "summary": "El proyecto 594 mejoró su margen 7,55 pp entre junio (30,39%) y julio (37,94%), pasando de una utilidad implícita menor a 67,97M COP en julio. El ingreso creció 36,1M COP (25,2%), impulsado principalmente por más entregas de última milla (+20,6M) y por una provisión de ingreso no gravada Quick Help (+13,0M, ojo: es provisión contable, no facturación real cobrada). El costo subió solo 11,6M COP (11,6%), con incrementos en transporte/correo (+7,3M) y mano de obra (transferencias MO +3,4M, sueldos +1,9M), parcialmente compensados por menor gasto en incapacidades (maternidad -1,1M, menores a 3 días -0,9M) y horas extra (-0,5M). El crecimiento de ingreso superó proporcionalmente al de costo, expandiendo el margen.",
+  "method": "No pude leer el resultado completo de project_novelties (archivo de 55.862 caracteres excede el límite de tokens de la herramienta de lectura, y no tengo herramienta de archivos disponible), por lo que reconstruí el análisis solo con margin_table y account_delta_breakdown, sin datos de nómina (altas/bajas, conceptos) ni ausencias. Verificación cruzada: sumé los deltas de ingreso por cuenta (20.598.295+12.982.009+2.529.510=36.109.814) y coincidió exactamente con variacion_ingreso de margin_table (36.109.814), confirmando integridad del desglose de ingreso. Para costo, la suma del top 8 (≈10.996.838) se aproximó a la variación real de costo (11.598.226), con diferencia de ~601.388 COP atribuible a cuentas menores fuera del top 8 solicitado — diferencia razonable y sin alertas.",
+  "code": "1) margin_table(cost_center_id='', project_id='594') -> métricas jun/jul/may. 2) account_delta_breakdown(period_a='6', period_b='7', cost_center_id='', project_id='594', top_n=8) -> cuentas de ingreso y costo con mayor variación. Se intentó primero project_novelties('594') pero el resultado excedió el límite de tokens y no pudo leerse.",
+  "caveats": [
+    "No se pudo acceder a los datos de nómina (altas/bajas de personal, conceptos de nómina) ni a ausencias del proyecto porque project_novelties no pudo leerse completo; estos podrían aportar causas adicionales (ej. rotación de personal) no capturadas aquí.",
+    "La cuenta 'PROVISION DE INGRESO NO GRAVADA QUICK HELP' (+12,98M) es una provisión contable, no facturación real cobrada — infla el ingreso contable pero no necesariamente el flujo de caja del mes.",
+    "El desglose de costo con top_n=8 no captura el 100% de la variación (~601.388 COP residual en cuentas menores no listadas)."
+  ],
+  "conventions": [
+    "Ante la imposibilidad de leer project_novelties completo, usé margin_table + account_delta_breakdown como fuente principal en lugar de re-intentar la herramienta que falló, para evitar costo repetido sin beneficio."
+  ]
+}

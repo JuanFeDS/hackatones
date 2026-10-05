@@ -1,0 +1,109 @@
+{
+  "question_id": "q07",
+  "answer": {
+    "metrics": {
+      "junio": {
+        "ingreso": 147138341,
+        "costo": 121228067,
+        "margen_pp": 17.61
+      },
+      "julio": {
+        "ingreso": 138420313,
+        "costo": 119370619,
+        "margen_pp": 13.76
+      },
+      "variacion_pp": -3.85,
+      "variacion_ingreso": -8718028
+    },
+    "novelties": [
+      {
+        "fuente": "income_account_deltas_jun_jul",
+        "concepto": "DEVOL LAST MILE - ENTREGAS ULTIMA MILLA",
+        "cifra": -112115742,
+        "efecto_margen": "negativo",
+        "rol": "principal"
+      },
+      {
+        "fuente": "income_account_deltas_jun_jul",
+        "concepto": "LAST MILE - ENTREGAS ULTIMA MILLA",
+        "cifra": -28508728,
+        "efecto_margen": "negativo",
+        "rol": "principal"
+      },
+      {
+        "fuente": "income_account_deltas_jun_jul",
+        "concepto": "PROVISION DE INGRESO NO GRAVADA QUICK HELP",
+        "cifra": 134199765,
+        "efecto_margen": "positivo (no es facturación real)",
+        "rol": "compensatorio"
+      },
+      {
+        "fuente": "income_account_deltas_jun_jul",
+        "concepto": "REINTEGRO DE OTROS COSTOS Y GASTOS",
+        "cifra": -2293323,
+        "efecto_margen": "negativo",
+        "rol": "secundario"
+      },
+      {
+        "fuente": "cost_account_deltas_jun_jul",
+        "concepto": "HORAS EXTRAS Y RECARGOS",
+        "cifra": -4404181,
+        "efecto_margen": "positivo",
+        "rol": "secundario"
+      },
+      {
+        "fuente": "cost_account_deltas_jun_jul",
+        "concepto": "RODAMIENTO ADICIONAL",
+        "cifra": 3699268,
+        "efecto_margen": "negativo",
+        "rol": "secundario"
+      },
+      {
+        "fuente": "cost_account_deltas_jun_jul",
+        "concepto": "CORREO, TRANSPORTES Y TELEGRAMAS",
+        "cifra": 2253928,
+        "efecto_margen": "negativo",
+        "rol": "secundario"
+      },
+      {
+        "fuente": "nomina_concept_deltas_jun_jul",
+        "concepto": "PRIMA DE SERVICIOS (no repetición del pago de junio)",
+        "cifra": -35012142,
+        "efecto_margen": "positivo",
+        "rol": "secundario"
+      },
+      {
+        "fuente": "nomina_concept_deltas_jun_jul",
+        "concepto": "VACACIONES COMPENSADAS EN DINERO / DISFRUTADAS",
+        "cifra": 1784553,
+        "efecto_margen": "negativo leve",
+        "rol": "menor"
+      },
+      {
+        "fuente": "altas_jun_a_jul/bajas_jun_a_jul",
+        "concepto": "2 altas, 0 bajas",
+        "cifra": null,
+        "efecto_margen": "neutro",
+        "rol": "irrelevante"
+      },
+      {
+        "fuente": "ausencias_por_periodo",
+        "concepto": "Incapacidades prolongadas empleados 1917 y 2305, vacaciones de 698/1294/2188 en julio",
+        "cifra": null,
+        "efecto_margen": "negativo leve",
+        "rol": "menor"
+      }
+    ]
+  },
+  "summary": "El proyecto 600 pasó de un margen de 17,61% en junio a 13,76% en julio (-3,85 pp), con caída de utilidad. La causa principal es el ingreso: bajaron fuertemente las devoluciones facturadas contra Last Mile (-112,1 M) y la facturación de entregas de última milla (-28,5 M), efecto solo parcialmente compensado por una provisión de ingreso no gravada 'Quick Help' (+134,2 M) que no es facturación real. El costo bajó levemente (-1,9 M neto), con ahorro en horas extra y en prima de servicios (no repetida en julio), compensado por mayor rodamiento adicional y transporte. La plantilla se mantuvo estable (2 altas, 0 bajas) y las ausencias/incapacidades de julio (empleados 1917 y 2305) tuvieron un efecto costo menor. En síntesis: la compresión de margen es un tema de ingreso/facturación de Last Mile, no de nómina ni de personal.",
+  "method": "Llamé project_novelties('600') que trae de una sola vez métricas de margen, deltas de cuentas de ingreso/costo, altas/bajas y nómina/ausencias. Verifiqué cruzando: (1) recalculé margen jun (17,61%) y jul (13,76%) desde ingreso/costo de metrics, coincide con margen y variacion_pp reportados; (2) sumé los 4 deltas de income_account_deltas_jun_jul y obtuve exactamente -8.718.028, igual a variacion_ingreso reportado, confirmando que esas cuentas explican el 100% del movimiento de ingreso.",
+  "code": "project_novelties(project_id='600') — única llamada, trae metrics, cost/income_account_deltas, altas/bajas, nomina_concept_deltas y ausencias_por_periodo.",
+  "caveats": [
+    "La provisión 'QUICK HELP' (+134,2M) es contable, no facturación real, por lo que su efecto positivo en el ingreso contable no implica caja real recibida — conviene contrastar con facturacion_real si se requiere precisión de caja.",
+    "No se investigó la causa raíz de las devoluciones de Last Mile (podría requerir detalle operativo fuera del alcance de esta herramienta).",
+    "El gasto (clase 5) del proyecto es 0 en los tres meses según metrics, por lo que toda la nómina impacta vía costo (clase 6/7)."
+  ],
+  "conventions": [
+    "Se usó el criterio estándar de la herramienta (semáforo, definición de facturación vs ingreso contable) sin desviaciones."
+  ]
+}

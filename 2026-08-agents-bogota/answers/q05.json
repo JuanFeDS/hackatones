@@ -1,0 +1,77 @@
+{
+  "question_id": "q05",
+  "answer": {
+    "criterio_retroactivo": "Una fila se clasifica como retroactiva si su Observation menciona explícitamente un mes anterior al del periodo contable, o contiene una palabra de reversión/ajuste (REV, REVERSION, AJUSTE) sin citar el mes corriente, o revierte una provisión de un mes previo. Todo lo demás (incluye provisiones del propio mes, distribuciones, reclasificaciones internas del mes) se cuenta como corriente.",
+    "mayo": {
+      "gasto_clase_5": {
+        "corriente": 3236446073,
+        "retroactivo": 86128916,
+        "total": 3322574989,
+        "pct_retroactivo": 2.59
+      },
+      "costo_clase_6_7": {
+        "corriente": 21307740740,
+        "retroactivo": -1733518317,
+        "total": 19574222423,
+        "pct_retroactivo": -8.86
+      },
+      "total_clase_5_6_7": {
+        "corriente": 24544186813,
+        "retroactivo": -1647389401,
+        "total": 22896797412,
+        "pct_retroactivo": -7.19
+      }
+    },
+    "junio": {
+      "gasto_clase_5": {
+        "corriente": 3408244244,
+        "retroactivo": 65738507,
+        "total": 3473982751,
+        "pct_retroactivo": 1.89
+      },
+      "costo_clase_6_7": {
+        "corriente": 21260670527,
+        "retroactivo": -901127987,
+        "total": 20359542540,
+        "pct_retroactivo": -4.43
+      },
+      "total_clase_5_6_7": {
+        "corriente": 24668914771,
+        "retroactivo": -835389481,
+        "total": 23833525291,
+        "pct_retroactivo": -3.51
+      }
+    },
+    "julio": {
+      "gasto_clase_5": {
+        "corriente": 3208659154,
+        "retroactivo": 428356519,
+        "total": 3637015673,
+        "pct_retroactivo": 11.78
+      },
+      "costo_clase_6_7": {
+        "corriente": 22031159945,
+        "retroactivo": -1639695627,
+        "total": 20391464318,
+        "pct_retroactivo": -8.04
+      },
+      "total_clase_5_6_7": {
+        "corriente": 25239819099,
+        "retroactivo": -1211339108,
+        "total": 24028479991,
+        "pct_retroactivo": -5.04
+      }
+    }
+  },
+  "summary": "En los tres meses analizados (mayo, junio, julio 2026), el gasto clase 5 (nómina/administrativo) es mayoritariamente corriente: solo 1.9%-11.8% corresponde a ajustes retroactivos, con un salto notable en julio (11.78%, ~COP 428M) por reversiones de recargos y horas extras de junio y ajustes de pólizas de transporte y servicios de control de asistencia de meses previos. En cambio, el costo clase 6+7 (costo de venta/proyecto) muestra retroactivo NEGATIVO todos los meses (entre -3.5% y -8.9% del total): esto significa que las reversiones de provisiones de meses anteriores (ej. 'REV LM - HORAS EXTRAS...', 'REVERSION COSTO GEOVICTORIA') superan en valor a los cargos retroactivos nuevos, reduciendo el costo total del mes. En términos netos (5+6+7), el retroactivo resta entre 3.5% y 7.2% al total de cada mes: el gasto/costo 'real' del mes es mayor que el reportado, porque una porción del total contable corresponde a reversar provisiones de meses anteriores.",
+  "method": "Llamé retroactive_split para los periodos 5, 6 y 7 (los tres meses con datos disponibles). Verificación cruzada: en cada mes confirmé que corriente+retroactivo=total tanto en gasto_clase_5 como en costo_clase_6_7, y que la suma de ambos totales coincide (dentro de redondeo) con total_clase_5_6_7. Ejemplo julio: 3.208.659.154+428.356.519=3.637.015.673 (gasto); 22.031.159.945+(-1.639.695.627)=20.391.464.318 (costo); 3.637.015.673+20.391.464.318≈24.028.480.000 = total reportado. Esto confirma consistencia interna de la herramienta.",
+  "code": "retroactive_split(period='5'), retroactive_split(period='6'), retroactive_split(period='7')",
+  "caveats": [
+    "El criterio de clasificación depende del texto libre de Observation; observaciones ambiguas o mal etiquetadas pueden quedar mal clasificadas.",
+    "El signo negativo del retroactivo en costo 6+7 refleja que las reversiones de provisiones superan a los cargos retroactivos nuevos en ese mes — no implica que no haya ajustes retroactivos positivos, solo que netean negativo.",
+    "No se preguntó por un mes específico; se entregan los tres meses disponibles (mayo, junio, julio) para dar contexto completo."
+  ],
+  "conventions": [
+    "Se usó el criterio de clasificación tal como lo implementa la herramienta retroactive_split, descrito explícitamente en el campo answer.criterio_retroactivo."
+  ]
+}
