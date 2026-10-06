@@ -1982,7 +1982,42 @@ const sceneNueveAbril = {
     });
   },
 };
-const SCENES = { 1: sceneFundacion, 3: sceneVeinteJulio, 4: sceneTranvia, 5: sceneJimenez, 6: sceneNueveAbril, 7: scenePueblos, 8: sceneTransmilenio, 9: sceneMetro };
+
+/* Hito 1: la sabana muisca en oro; bohíos y figuras como ambientación, sin ubicar Bacatá */
+const BOHIOS = [[-6.2, 6.4], [-9.4, .4], [-4.4, -6.2]].map(([cx, cz]) => Array.from({ length: 9 }, (_, i) => {
+  const a = i / 9 * Math.PI * 2 + rndS() * .3, r = .06 + .05 * rndS();
+  return [cx + Math.cos(a) * r, cz + Math.sin(a) * r];
+}));
+const TUNJOS = Array.from({ length: 12 }, (_, i) => ({ v: Math.floor(i / 4), r: .03 + .1 * rndS(), ph: rndS() * 6.28, sp: (.12 + .1 * rndS()) * (i % 2 ? 1 : -1) }));
+const sceneSabana = {
+  dur: 17,
+  caps: [[1.2, 7.8, 'La sabana muisca', 'Territorio muisca: humedales, el río Bogotá —el Funza— al occidente y los cerros orientales al oriente'],
+         [9, 15.4, 'Bacatá', 'Un asentamiento muisca de la sabana. De su nombre viene «Bogotá»']],
+  cam(c) {
+    const A = KEYS[0], B = [-6.15, 6.35, .75, 24, -24], C = [-8.6, 4.2, 4.2, 18, -70], D = [-4.4, 2.4, 26, 44, 12];
+    let k = blendKey(A, B, ease(win(c, .5, 5.5)));
+    k = blendKey(k, C, ease(win(c, 6, 9.5)));
+    k = blendKey(k, D, ease(win(c, 9.5, 14.5)));
+    return [k, ease(win(c, 0, 1.5)) * (1 - ease(win(c, 15, 17)))];
+  },
+  update(c, w) {
+    const time = S.time;
+    BOHIOS.forEach((v, j) => v.forEach(([x, z], i) => {
+      const g = ease(win(c, .8 + i * .15 + j * .3, 1.6 + i * .15 + j * .3)) * w;
+      put(ACT.tent, x, gy(x, z), z, i, .026 * g, .03 * g, .026 * g, [1, .8, .4]);
+      if (i % 3 === 0) for (let k = 0; k < 6; k++) {
+        const u = fract(time * .07 + k / 6 + i * .13);
+        particle(x + u * .02, gy(x, z) + .03 + u * .07, z + u * .006, (.005 + u * .012) * g, [.55, .45, .3], (1 - u) * .25 * g);
+      }
+    }));
+    TUNJOS.forEach((p, i) => {
+      const [cx, cz] = BOHIOS[p.v][0], a = p.ph + time * p.sp;
+      const g = ease(win(c, 2 + i * .2, 2.8 + i * .2)) * w;
+      walker(cx + Math.cos(a) * p.r, cz + Math.sin(a) * p.r, a + Math.sign(p.sp) * Math.PI / 2, time * 6 + i, g * 1.4, i);
+    });
+  },
+};
+const SCENES = { 0: sceneSabana, 1: sceneFundacion, 3: sceneVeinteJulio, 4: sceneTranvia, 5: sceneJimenez, 6: sceneNueveAbril, 7: scenePueblos, 8: sceneTransmilenio, 9: sceneMetro };
 
 const SC = { k: -1, clock: 0, hold: 0, w: 0, camW: 0, cam: null, hut: 1, jim: 1, metro: 1, pueblo: 1, ashV: -1, widenV: -1, tramV: -1 };
 const escena = $('#escena'), escFecha = escena.querySelector('.fecha'), escLugar = escena.querySelector('.lugar');
@@ -2250,7 +2285,8 @@ function updateUI(dt, cssW, cssH) {
   const yr = yearAt(t);
   const ytxt = off < .02 ? HITOS[near].etiqueta : (yr === null ? 'antes de 1538' : String(Math.round(yr)));
   if (ytxt !== lastYearTxt) { anioTir.textContent = ytxt; lastYearTxt = ytxt; }
-  pista.style.left = `${x}px`;
+  pista.style.left = `${Math.max(x, pista.offsetWidth / 2 + 16)}px`;
+  pista.style.opacity = SC.camW > .1 ? '0' : '';
 
   let best = null;
   if (yr !== null && yr >= 1778 - .5) best = POP.reduce((a, p) => Math.abs(p[0] - yr) < Math.abs(a[0] - yr) ? p : a, POP[0]);
