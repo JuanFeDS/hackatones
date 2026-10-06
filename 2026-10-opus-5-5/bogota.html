@@ -119,7 +119,12 @@ button{font:inherit;color:inherit}
 #intro{position:fixed;inset:0;z-index:9;display:grid;place-content:center;text-align:center;pointer-events:none;color:#f3dfa8;transition:opacity 1.6s ease}
 #intro h1{margin:0;font-family:"Palatino Linotype","Book Antiqua",Palatino,serif;font-weight:400;font-variant-caps:all-small-caps;letter-spacing:.16em;font-size:clamp(2.4rem,7vw,5.8rem);text-shadow:0 0 30px rgba(233,184,81,.45)}
 #intro p{margin:.6rem 0 0;font:400 clamp(.85rem,1.4vw,1.05rem)/1.4 var(--f-ui);letter-spacing:.2em;color:rgba(243,223,168,.7)}
-#intro.fuera{opacity:0}
+#intro.fuera{opacity:0;visibility:hidden;transition:opacity 1.6s ease,visibility 0s 1.6s}
+#escena{position:fixed;left:50%;top:13vh;z-index:5;transform:translateX(-50%);width:min(92vw,46rem);text-align:center;pointer-events:none;opacity:0;color:var(--tinta)}
+#escena::before{content:"";position:absolute;inset:-60% -20%;background:radial-gradient(closest-side,var(--velo),transparent);z-index:-1}
+#escena .fecha{margin:0;font-family:var(--f-cifra);font-style:var(--estilo);font-weight:var(--peso);font-size:clamp(1.6rem,3.4vw,2.8rem);line-height:1.05;letter-spacing:.01em}
+#escena .lugar{margin:.5rem auto 0;max-width:40ch;font:400 clamp(.85rem,1.2vw,1rem)/1.45 var(--f-ui);letter-spacing:.03em;color:var(--tinta-2)}
+@media (max-width:760px){#escena{top:7svh}}
 .sin-gl{position:fixed;inset:0;display:grid;place-content:center;padding:24px;text-align:center;font:400 1rem/1.5 var(--f-ui);color:#f3dfa8;background:#050403;z-index:10}
 
 @media (max-width:760px){
@@ -159,6 +164,7 @@ button{font:inherit;color:inherit}
 </nav>
 
 <article id="hito" class="ui" aria-live="polite"></article>
+<div id="escena" class="ui" aria-live="polite"><p class="fecha"></p><p class="lugar"></p></div>
 
 <section class="poblacion ui" aria-label="Población">
   <p class="cifra" id="cifra">—</p>
@@ -623,6 +629,7 @@ function buildBlocks() {
       if (x < EXT.x0 + 1.3 || x > EXT.x1 - 1.3 || z < EXT.z0 + 1.3 || z > EXT.z1 - 1.3) continue;
       if (d < .1 || Math.hypot(x - PT.santander[0], z - PT.santander[1]) < .07) continue;
       if (PUEBLOS.some(([px, pz]) => Math.hypot(x - px, z - pz) < .42)) continue;
+      if (polyDist(x, z, TRANVIA) < .03 + cs * .5) continue;
       const ap = appearT(x, z);
       if (ap > 9.5 || height(x, z) > .085) continue;
       const r = rnd(), r2 = rnd();
@@ -649,10 +656,29 @@ function buildHuts() {
   for (let k = 0; k < 12; k++) {
     const a = k / 12 * Math.PI * 2 + rnd() * .3, r = .075 + .035 * rnd();
     const x = PT.santander[0] + Math.cos(a) * r, z = PT.santander[1] + .01 + Math.sin(a) * r;
-    out.push(x, height(x, z), z, -1, .022, .022, .026, .026, rnd(), 2, 0, 0);
+    out.push(x, height(x, z), z, -1, .022, .022, .026, .026, k / 12, 2, 0, 0);
   }
   return new Float32Array(out);
 }
+function latheMesh(profile, seg = 9) {
+  const P = [], N = [], R = [], I = [];
+  for (let i = 0; i < profile.length; i++) {
+    const [r, y] = profile[i], a = profile[Math.max(0, i - 1)], b = profile[Math.min(profile.length - 1, i + 1)];
+    let nr = b[1] - a[1], ny = -(b[0] - a[0]);
+    const l = Math.hypot(nr, ny) || 1; nr /= l; ny /= l;
+    for (let j = 0; j <= seg; j++) {
+      const ang = j / seg * Math.PI * 2, c = Math.cos(ang), s = Math.sin(ang);
+      P.push(r * c, y, r * s); N.push(nr * c, ny, nr * s); R.push(0);
+    }
+  }
+  for (let i = 0; i < profile.length - 1; i++) for (let j = 0; j < seg; j++) {
+    const a = i * (seg + 1) + j, b = a + seg + 1;
+    I.push(a, b, a + 1, a + 1, b, b + 1);
+  }
+  return { P: new Float32Array(P), N: new Float32Array(N), R: new Float32Array(R), I: new Uint16Array(I) };
+}
+const FIGURE = [[0, 0], [.2, 0], [.23, .08], [.2, .4], [.15, .6], [.06, .66], [.12, .7], [.14, .8], [.11, .9], [0, .95]];
+const TENT = [[.5, 0], [.5, .02], [.0, 1]];
 function resample(path, stepKm) {
   const out = [path[0]];
   for (let i = 1; i < path.length; i++) {
@@ -847,6 +873,7 @@ void main(){
       c=mix(c,vec3(.62,.55,.46)*sh,hill*.35);
       c=mix(c,vec3(.33,.25,.21)*(.8+.3*dif),urban);
       vec3 wc=vec3(.16,.22,.25)+vec3(.6,.55,.5)*pow(max(dot(reflect(-L,vec3(0,1,0)),V),0.),20.)*.4;
+      wc+=vec3(.5,.55,.55)*pow(vnoise(q*55.+uTime*vec2(.7,.25)*(1.-uReduced)),7.)*1.4;
       c=mix(c,wc,smoothstep(.4,.6,water));
       c=mix(c,vec3(.3,.37,.31),wet);
       vec3 asph=vec3(.15,.13,.12);
@@ -874,6 +901,9 @@ void main(){
   col+=vec3(1.,.38,.08)*pow(e2,3.)*1.4;
   col=mix(col,vec3(.4,.13,.3),e3*.45);
   col+=vec3(1.,.48,.22)*pow(e3,5.)*.9;
+  float tc=uTime*(1.-uReduced);
+  float cloud=smoothstep(.5,.78,fbm3(q*.11+vec2(tc*.022,tc*.009)));
+  col*=1.-.26*cloud*(1.-wn)*(1.-wg*.6);
   float ash=uAsh*fld.b;
   col=mix(col,vec3(dot(col,vec3(.3,.5,.2)))*.5+vec3(.1),ash*.85);
   col=mix(uBg,col,mix(1.,smoothstep(0.,3.5,de),wn));
@@ -888,13 +918,14 @@ layout(location=3) in vec4 iA;
 layout(location=4) in vec4 iB;
 layout(location=5) in vec4 iC;
 out vec3 vW; out vec3 vN; out vec3 vLoc; out float vRoof; out vec3 vK; out vec4 vC; out float vCol;
+uniform float uHut;
 void main(){
   vec2 c=iA.xz; float ty=iC.y;
   vec3 k=fronts(c);
   float g;
   if(ty<.5) g=smoothstep(iA.w,iA.w+.12,uT);
   else if(ty<1.5) g=1.;
-  else g=smoothstep(.62,.95,uT)*(1.-smoothstep(1.5,1.95,uT));
+  else { g=smoothstep(.62,.95,uT)*(1.-smoothstep(1.5,1.95,uT)); float hs=ty<2.5?iC.x*.8:.86; g*=smoothstep(hs,hs+.12,uHut); }
   float hh=iB.z, gs=g;
   if(ty<1.5){
     hh=mix(mix(.0035,iB.z,k.y),iB.w,k.z);
@@ -961,6 +992,8 @@ void main(){
   col=mix(col,vec3(.04,.08,.06),smoothstep(.3,1.,e1)*.7);
   col+=vec3(1.,.38,.08)*pow(e2,3.)*1.2;
   col+=vec3(1.,.5,.25)*pow(e3,5.)*.6;
+  float tc=uTime*(1.-uReduced);
+  col*=1.-.26*smoothstep(.5,.78,fbm3(vW.xz*.11+vec2(tc*.022,tc*.009)))*(1.-wn);
   col=mix(col,vec3(dot(col,vec3(.3,.5,.2)))*.45+vec3(.1),ash*.9);
   o=vec4(col,1.);
 }`;
@@ -1031,6 +1064,53 @@ void main(){
   float a=exp(-d*3.2)*vA;
   vec3 c=mix(vec3(1.,.62,.3),vec3(.85,.92,1.),step(.84,vS));
   o=vec4(c*a*1.3,0.);
+}`;
+
+const ACTOR_VS = COMMON + `
+layout(location=0) in vec3 aPos;
+layout(location=1) in vec3 aNor;
+layout(location=3) in vec4 iP;
+layout(location=4) in vec4 iS;
+layout(location=5) in vec4 iCol;
+out vec3 vW; out vec3 vN; out vec4 vCol; out vec3 vK;
+void main(){
+  float c=cos(iP.w), s=sin(iP.w);
+  vec3 l=aPos*iS.xyz;
+  vec3 p=vec3(c*l.x-s*l.z,l.y,s*l.x+c*l.z)+iP.xyz;
+  p.y+=foldY(iP.xz);
+  vW=p; vN=vec3(c*aNor.x-s*aNor.z,aNor.y,s*aNor.x+c*aNor.z); vCol=iCol; vK=fronts(iP.xz);
+  gl_Position=uVP*vec4(p,1.);
+}`;
+const ACTOR_FS = COMMON + `
+in vec3 vW; in vec3 vN; in vec4 vCol; in vec3 vK;
+out vec4 o;
+void main(){
+  vec3 N=normalize(vN); vec3 L=normalize(uLight); vec3 V=normalize(uCam-vW);
+  float dif=max(dot(N,L),0.)*.75+.25;
+  vec3 k=vK; float wg=1.-k.x,wp=k.x*(1.-k.y),wb=k.x*k.y*(1.-k.z),wn=k.x*k.y*k.z;
+  vec3 base=vCol.rgb;
+  vec3 gold=vec3(1.,.74,.32)*(.3+.9*dif)+vec3(pow(max(dot(reflect(-L,N),V),0.),24.)*.8);
+  vec3 ink=mix(vec3(.2,.12,.06),base*.55,.3)*(.75+.35*dif);
+  vec3 col=wg*gold+wp*ink+wb*base*dif+wn*base*.12*dif+base*vCol.a;
+  col=mix(col,vec3(dot(col,vec3(.3,.5,.2)))*.5+vec3(.1),uAsh*.6);
+  o=vec4(col,1.);
+}`;
+const PART_VS = COMMON + `
+layout(location=0) in vec4 aP;
+layout(location=1) in vec4 aC;
+out vec4 vC;
+void main(){
+  vec3 p=aP.xyz; p.y+=foldY(p.xz); vC=aC;
+  gl_Position=uVP*vec4(p,1.);
+  gl_PointSize=clamp(aP.w*uPx*1380./length(uCam-p),1.,72.);
+}`;
+const PART_FS = COMMON + `
+in vec4 vC;
+out vec4 o;
+void main(){
+  vec2 q=gl_PointCoord*2.-1.; float d=dot(q,q); if(d>1.) discard;
+  float a=(1.-d)*(1.-d)*abs(vC.a);
+  o=vec4(vC.rgb*a,vC.a>0.?a:0.);
 }`;
 
 const FOG_VS = COMMON + `
@@ -1147,6 +1227,8 @@ try {
     ribbon: program(RIBBON_VS, RIBBON_FS),
     light: program(LIGHT_VS, LIGHT_FS),
     fog: program(FOG_VS, FOG_FS),
+    actor: program(ACTOR_VS, ACTOR_FS),
+    part: program(PART_VS, PART_FS),
     bg: program(POST_VS, BG_FS),
     down: program(POST_VS, DOWN_FS),
     blur: program(POST_VS, BLUR_FS),
@@ -1292,6 +1374,10 @@ function camKey(t) {
   const A = KEYS[i], B = KEYS[i + 1];
   return [lerp(A[0], B[0], e), lerp(A[1], B[1], e), Math.exp(lerp(Math.log(A[2]), Math.log(B[2]), e)), lerp(A[3], B[3], e), lerp(A[4], B[4], e)];
 }
+function blendKey(A, B, e) {
+  let da = ((B[4] - A[4]) % 360 + 540) % 360 - 180;
+  return [lerp(A[0], B[0], e), lerp(A[1], B[1], e), Math.exp(lerp(Math.log(A[2]), Math.log(B[2]), e)), lerp(A[3], B[3], e), A[4] + da * e];
+}
 function perspective(out, fovy, aspect, near, far) {
   const f = 1 / Math.tan(fovy / 2), nf = 1 / (near - far);
   out.fill(0);
@@ -1359,17 +1445,18 @@ function epochUniforms() {
 }
 function updateCamera(cssW, cssH) {
   let k = camKey(S.t);
-  if (S.intro < 1) { const e = sstep(0, 1, S.intro); k = INTRO_KEY.map((v, i) => i === 2 ? Math.exp(lerp(Math.log(v), Math.log(k[2]), e)) : lerp(v, k[i], e)); }
+  if (S.intro < 1) k = blendKey(INTRO_KEY, k, sstep(0, 1, S.intro));
+  if (SC.camW > .001 && SC.cam) k = blendKey(k, SC.cam, SC.camW);
   const drift = reduced ? 0 : Math.sin(S.time * .05) * 2.5;
   const az = (k[4] + drift + S.orbAz) * Math.PI / 180;
   const el = clamp(k[3] + S.orbEl, 8, 80) * Math.PI / 180;
   const tgt = [k[0], .02, k[1]];
   const eye = [tgt[0] + k[2] * Math.cos(el) * Math.cos(az), tgt[1] + k[2] * Math.sin(el), tgt[2] + k[2] * Math.cos(el) * Math.sin(az)];
-  eye[1] = Math.max(eye[1], height(eye[0], eye[2]) + .15);
+  eye[1] = Math.max(eye[1], height(eye[0], eye[2]) + .02 + k[2] * .05);
   CAM.eye = eye; CAM.az = az; CAM.dist = k[2];
   const wide = cssW > 760;
-  CAM.ox = wide ? .16 : 0; CAM.oy = wide ? .1 : .02;
-  perspective(MP, 36 * Math.PI / 180, cssW / cssH, Math.max(.03, k[2] * .015), 220);
+  CAM.ox = (wide ? .16 : 0) * (1 - SC.camW); CAM.oy = wide ? .1 : .02;
+  perspective(MP, 36 * Math.PI / 180, cssW / cssH, Math.max(.004, k[2] * .012), 220);
   lookAt(MV, eye, tgt);
   MT.fill(0); MT[0] = -1; MT[5] = 1; MT[10] = 1; MT[15] = 1; MT[12] = CAM.ox; MT[13] = CAM.oy;
   mul(VP, MP, MV);
@@ -1377,7 +1464,7 @@ function updateCamera(cssW, cssH) {
 }
 function lightDir() {
   const dirs = [[160, 28], [110, 55], [115, 22], [120, 40]].map(([off, el]) => {
-    const a = CAM.az + (off + S.mx * 60) * Math.PI / 180, e = clamp(el - S.my * 14, 6, 80) * Math.PI / 180;
+    const a = CAM.az + (off + S.mx * 60 + (reduced ? 0 : Math.sin(S.time * .05) * 18)) * Math.PI / 180, e = clamp(el - S.my * 14, 6, 80) * Math.PI / 180;
     return [Math.cos(a) * Math.cos(e), Math.sin(e), Math.sin(a) * Math.cos(e)];
   });
   return mixV(dirs, W4);
@@ -1443,8 +1530,15 @@ function draw(cssW, cssH) {
   gl.bindVertexArray(SCENE.terrain);
   gl.drawElements(gl.TRIANGLES, SCENE.terrainN, gl.UNSIGNED_INT, 0);
 
-  pr = PR.block; gl.useProgram(pr.p); sceneUniforms(pr, E, L);
+  pr = PR.block; gl.useProgram(pr.p); sceneUniforms(pr, E, L); u1(pr, 'uHut', SC.hut);
   for (const m of [SCENE.blocks, SCENE.huts]) { gl.bindVertexArray(m.vao); gl.drawElementsInstanced(gl.TRIANGLES, m.n, gl.UNSIGNED_SHORT, 0, m.count); }
+  if (ACT.batches.some(b => b.count)) {
+    pr = PR.actor; gl.useProgram(pr.p); sceneUniforms(pr, E, L);
+    for (const b of ACT.batches) if (b.count) {
+      gl.bindBuffer(gl.ARRAY_BUFFER, b.ibuf); gl.bufferSubData(gl.ARRAY_BUFFER, 0, b.data, 0, b.count * 12);
+      gl.bindVertexArray(b.vao); gl.drawElementsInstanced(gl.TRIANGLES, b.n, gl.UNSIGNED_SHORT, 0, b.count);
+    }
+  }
 
   gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false);
   pr = PR.ribbon; gl.useProgram(pr.p); sceneUniforms(pr, E, L); routeUniform(pr);
@@ -1452,6 +1546,12 @@ function draw(cssW, cssH) {
   if (W4[3] > .002) {
     pr = PR.light; gl.useProgram(pr.p); sceneUniforms(pr, E, L);
     gl.bindVertexArray(SCENE.lights); gl.drawArrays(gl.POINTS, 0, SCENE.lightsN);
+  }
+  if (ACT.parts.count) {
+    pr = PR.part; gl.useProgram(pr.p); sceneUniforms(pr, E, L);
+    const P = ACT.parts;
+    gl.bindBuffer(gl.ARRAY_BUFFER, P.buf); gl.bufferSubData(gl.ARRAY_BUFFER, 0, P.data, 0, P.count * 8);
+    gl.bindVertexArray(P.vao); gl.drawArrays(gl.POINTS, 0, P.count);
   }
   pr = PR.fog; gl.useProgram(pr.p); sceneUniforms(pr, E, L);
   const fc = FOG.map(f => f); const fogC = [0, 1, 2, 3].map(i => fc[0][i] * W4[0] + fc[1][i] * W4[1] + fc[2][i] * W4[2] + fc[3][i] * W4[3]);
@@ -1488,6 +1588,249 @@ function draw(cssW, cssH) {
   u3(pr, 'uTint', mixV(TINT, W4));
   gl.drawArrays(gl.TRIANGLES, 0, 3);
   return E;
+}
+
+/* ---------- Escenas: dioramas animados por hito ---------- */
+const ACT = { batches: [], parts: { count: 0 } };
+function actorBatch(mesh, max) {
+  const vao = gl.createVertexArray(); gl.bindVertexArray(vao);
+  attr(0, buffer(mesh.P), 3); attr(1, buffer(mesh.N), 3);
+  const data = new Float32Array(max * 12);
+  const ibuf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, ibuf); gl.bufferData(gl.ARRAY_BUFFER, data.byteLength, gl.DYNAMIC_DRAW);
+  attr(3, ibuf, 4, 48, 0, 1); attr(4, ibuf, 4, 48, 16, 1); attr(5, ibuf, 4, 48, 32, 1);
+  buffer(mesh.I, gl.ELEMENT_ARRAY_BUFFER);
+  gl.bindVertexArray(null);
+  const b = { vao, ibuf, data, max, n: mesh.I.length, count: 0 };
+  ACT.batches.push(b);
+  return b;
+}
+function buildActors() {
+  ACT.box = actorBatch(boxMesh(), 512);
+  ACT.fig = actorBatch(latheMesh(FIGURE), 256);
+  ACT.tent = actorBatch(latheMesh(TENT, 8), 64);
+  const max = 1024, data = new Float32Array(max * 8);
+  const vao = gl.createVertexArray(); gl.bindVertexArray(vao);
+  const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, data.byteLength, gl.DYNAMIC_DRAW);
+  attr(0, buf, 4, 32, 0); attr(1, buf, 4, 32, 16);
+  gl.bindVertexArray(null);
+  ACT.parts = { vao, buf, data, max, count: 0 };
+}
+function put(b, x, y, z, rot, sx, sy, sz, col, emit = 0) {
+  if (b.count >= b.max || sx <= 1e-5) return;
+  const o = b.count++ * 12, d = b.data;
+  d[o] = x; d[o + 1] = y; d[o + 2] = z; d[o + 3] = rot;
+  d[o + 4] = sx; d[o + 5] = sy; d[o + 6] = sz; d[o + 7] = 0;
+  d[o + 8] = col[0]; d[o + 9] = col[1]; d[o + 10] = col[2]; d[o + 11] = emit;
+}
+function particle(x, y, z, size, col, alpha) {
+  const P = ACT.parts;
+  if (P.count >= P.max) return;
+  const o = P.count++ * 8, d = P.data;
+  d[o] = x; d[o + 1] = y; d[o + 2] = z; d[o + 3] = size;
+  d[o + 4] = col[0]; d[o + 5] = col[1]; d[o + 6] = col[2]; d[o + 7] = alpha;
+}
+const ease = x => x * x * (3 - 2 * x);
+const win = (c, a, b) => clamp((c - a) / (b - a));
+const gy = (x, z) => height(x, z);
+function pathSampler(pts) {
+  const P = resample(chaikin(pts, 2), .01), cum = [0];
+  for (let i = 1; i < P.length; i++) cum.push(cum[i - 1] + Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]));
+  const L = cum[cum.length - 1];
+  const f = u => {
+    const s = clamp(u) * L;
+    let i = 1; while (i < P.length - 1 && cum[i] < s) i++;
+    const a = P[i - 1], b = P[i], k = (s - cum[i - 1]) / ((cum[i] - cum[i - 1]) || 1);
+    return [lerp(a[0], b[0], k), lerp(a[1], b[1], k), Math.atan2(b[1] - a[1], b[0] - a[0])];
+  };
+  f.len = L;
+  return f;
+}
+const tramPath = pathSampler(TRANVIA);
+const rndS = mulberry32(99);
+const COL = {
+  lona: [.86, .78, .6], gente: [.32, .22, .16], humo: [.62, .58, .52], carro: [.6, .2, .12],
+  mula: [.3, .2, .13], poste: [.15, .13, .12], chispa: [.75, .9, 1],
+};
+
+
+const ROPA = [[.32, .22, .16], [.45, .18, .12], [.2, .24, .3], [.5, .42, .3], [.28, .3, .2], [.58, .5, .44]];
+/* Figura con piernas y brazos que alternan al caminar; moving 0..1 */
+function walker(x, z, head, ph, g, i, moving = 1) {
+  if (g <= 1e-4) return;
+  const y = gy(x, z), k = .8 + .4 * ((i * 37) % 7) / 7, s = g * k;
+  const ch = Math.cos(head), sh = Math.sin(head), sw = Math.sin(ph) * moving;
+  const legH = .006 * s, col = ROPA[i % ROPA.length];
+  put(ACT.fig, x, y + legH * .85 + Math.abs(sw) * .0004 * s, z, head, .0055 * s, .011 * s, .0055 * s, col);
+  for (const side of [-1, 1]) {
+    const st = sw * side * .0022 * s, lat = side * .0012 * s;
+    put(ACT.box, x + ch * st - sh * lat, y, z + sh * st + ch * lat, head, .0013 * s, legH, .0013 * s, [.16, .12, .1]);
+    const ar = -sw * side * .0018 * s, al = side * .0034 * s;
+    put(ACT.box, x + ch * ar - sh * al, y + legH * 1.2, z + sh * ar + ch * al, head, .001 * s, .0055 * s, .001 * s, col);
+  }
+}
+function quadruped(x, y, z, head, ph, s, col) {
+  const ch = Math.cos(head), sh = Math.sin(head);
+  put(ACT.box, x, y + .006 * s, z, head, .016 * s, .006 * s, .0065 * s, col);
+  put(ACT.box, x + ch * .0095 * s, y + .0105 * s, z + sh * .0095 * s, head, .006 * s, .0045 * s, .004 * s, col);
+  [[.006, 1, 0], [.006, -1, Math.PI], [-.006, 1, Math.PI], [-.006, -1, 0]].forEach(([f, side, off]) => {
+    const st = Math.sin(ph + off) * .0018 * s, lx = f * s + st, lz = side * .0022 * s;
+    put(ACT.box, x + ch * lx - sh * lz, y, z + sh * lx + ch * lz, head, .0014 * s, .0062 * s, .0014 * s, col);
+  });
+}
+
+/* Hito 2: el campamento de 1538 y la fundación de 1539 */
+const CAMP = Array.from({ length: 8 }, (_, i) => { const a = i / 8 * Math.PI * 2 + .3, r = .042 + .018 * rndS(); return [PT.chorro[0] + Math.cos(a) * r, PT.chorro[1] + Math.sin(a) * r]; });
+const CAMP_PEOPLE = Array.from({ length: 10 }, () => ({ r: .015 + .03 * rndS(), ph: rndS() * 6.28, sp: (.2 + .25 * rndS()) * (rndS() < .5 ? -1 : 1) }));
+const GATHER = Array.from({ length: 9 }, (_, i) => { const a = i / 9 * Math.PI * 2; return { to: [PT.santander[0] - .02 + Math.cos(a) * .028, PT.santander[1] - .035 + Math.sin(a) * .02], d: rndS() * .8 }; });
+const sceneFundacion = {
+  dur: 16,
+  caps: [[.8, 6.3, '6 de agosto de 1538', 'Gonzalo Jiménez de Quesada levanta un campamento militar en el sitio que hoy se identifica con el Chorro de Quevedo'],
+         [7.6, 13.6, '27 de abril de 1539', 'Fundación jurídica en el actual Parque Santander: 12 chozas y una iglesia']],
+  cam(c) {
+    const A = [PT.chorro[0] - .01, PT.chorro[1] + .01, .5, 27, -26], B = [PT.santander[0] - .02, PT.santander[1] - .02, .58, 32, 10];
+    return [blendKey(A, B, ease(win(c, 6, 8.8))), ease(win(c, 0, 1.8)) * (1 - ease(win(c, 13.6, 16)))];
+  },
+  hut: c => win(c, 8.4, 12.4),
+  update(c, w) {
+    const time = S.time;
+    CAMP.forEach(([x, z], i) => {
+      const g = ease(win(c, 1 + i * .38, 1.7 + i * .38)) * w;
+      put(ACT.tent, x, gy(x, z), z, i, .02 * g, .022 * g, .02 * g, COL.lona);
+    });
+    const [fx, fz] = PT.chorro, fy = gy(fx, fz);
+    if (c > 1.2) for (let i = 0; i < 18; i++) {
+      const ph = fract(time * .11 + i / 18);
+      particle(fx + Math.sin(ph * 5 + i) * .006 + ph * .02, fy + .004 + ph * .06, fz + ph * .008, (.006 + ph * .016) * w, COL.humo, (1 - ph) * .32 * w);
+    }
+    if (c > 1.2) particle(fx, fy + .003, fz, .007 * w, [1, .6, .25], -(.7 + .3 * Math.sin(time * 9)) * w);
+    CAMP_PEOPLE.forEach((p, i) => {
+      const g = ease(win(c, 1.5 + i * .2, 2.3 + i * .2)) * w;
+      const a = p.ph + time * p.sp, x = fx + Math.cos(a) * p.r, z = fz + Math.sin(a) * p.r;
+      const pause = .5 + .5 * Math.sin(time * .4 + i * 1.7) > .8 ? 0 : 1;
+      walker(x, z, a + Math.sign(p.sp) * Math.PI / 2, time * 7 + i, g, i, pause);
+    });
+    GATHER.forEach((p, i) => {
+      const m = ease(win(c, 8 + p.d, 11.8 + p.d));
+      const g = ease(win(c, 7.6 + p.d, 8.2 + p.d)) * w;
+      const x = lerp(fx - .01, p.to[0], m), z = lerp(fz + .01, p.to[1], m);
+      walker(x, z, Math.atan2(p.to[1] - fz, p.to[0] - fx), time * 7 + i, g, i + 3, m > 0 && m < 1 ? 1 : 0);
+    });
+  },
+};
+
+/* Hito 5: el tranvía de mulas de 1884 y el eléctrico de 1910 */
+const WALKERS = Array.from({ length: 12 }, () => ({ u: rndS() * .3, side: rndS() < .5 ? -1 : 1, sp: .004 + .006 * rndS(), ph: rndS() }));
+const tramU = c => c < 10.8 ? .55 * ease(win(c, 2, 10)) : .55 + .45 * ease(win(c, 10.8, 15.6));
+const sceneTranvia = {
+  dur: 18,
+  caps: [[1, 7.4, '24 de diciembre de 1884', 'Empieza el tranvía de mulas: de la Plaza de Bolívar a Chapinero, por San Diego y la calle 26'],
+         [10.2, 16, '1910', 'Llega el tranvía eléctrico']],
+  cam(c) {
+    const [x, z, ang] = tramPath(tramU(c));
+    const chase = [x, z, .28, 19, ang * 180 / Math.PI - 70];
+    const open = [PT.plaza[0] + .05, PT.plaza[1] + .05, .75, 30, -40];
+    return [blendKey(open, chase, ease(win(c, 1.5, 4))), ease(win(c, 0, 2)) * (1 - ease(win(c, 15.6, 18)))];
+  },
+  update(c, w) {
+    const time = S.time, L = tramPath.len;
+    const u = tramU(c), [x, z, ang] = tramPath(u), y = gy(x, z);
+    const elec = ease(win(c, 10.2, 11.2));
+    const ca = Math.cos(ang), sa = Math.sin(ang);
+    put(ACT.box, x, y + .003, z, ang, .045 * w, .018 * w, .017 * w, COL.carro, .05 + .35 * elec);
+    put(ACT.box, x, y + .021, z, ang, .047 * w, .002 * w, .018 * w, COL.poste);
+    const mules = (1 - elec) * w;
+    for (let m = 0; m < 2; m++) {
+      const [mx, mz] = tramPath(u + (.036 + m * .018) / L);
+      const go = c > 2 && c < 10 ? 1 : 0;
+      quadruped(mx, gy(mx, mz) + Math.abs(Math.sin(time * 9 + m)) * .0006 * go, mz, ang, (time * 9 + m * 1.3) * go, mules * 1.3, COL.mula);
+    }
+    if (elec > .01) {
+      const px = x - ca * .012, pz = z - sa * .012;
+      put(ACT.box, px, y + .023, pz, ang, .03 * elec * w, .0016, .0016, COL.poste);
+      const moving = c > 10.8 && c < 15.6 ? 1 : .3;
+      for (let i = 0; i < 4; i++) {
+        const fl = Math.max(0, Math.sin(time * 37 + i * 2.1));
+        particle(px + ca * .015 + (rndS() - .5) * .004, y + .025 + rndS() * .003, pz + sa * .015 + (rndS() - .5) * .004, .004 * fl * w, COL.chispa, -fl * moving * elec * w);
+      }
+    }
+    WALKERS.forEach((p, i) => {
+      const g = ease(win(c, .5 + i * .15, 1.2 + i * .15)) * w;
+      const arg = time * p.sp * 20 + p.ph * 6, uu = p.u + Math.sin(arg) * .01;
+      const [wx, wz, wa] = tramPath(uu);
+      const ox = -Math.sin(wa) * .02 * p.side, oz = Math.cos(wa) * .02 * p.side;
+      walker(wx + ox, wz + oz, wa + (Math.cos(arg) < 0 ? Math.PI : 0), time * 6 + i, g, i, Math.min(1, Math.abs(Math.cos(arg)) * 3));
+    });
+  },
+};
+const SCENES = { 1: sceneFundacion, 4: sceneTranvia };
+
+const SC = { k: -1, clock: 0, hold: 0, w: 0, camW: 0, cam: null, hut: 1 };
+const escena = $('#escena'), escFecha = escena.querySelector('.fecha'), escLugar = escena.querySelector('.lugar');
+let capShown = '';
+function sceneTick(dt) {
+  for (const b of ACT.batches) b.count = 0;
+  ACT.parts.count = 0;
+  const near = Math.round(S.t);
+  const settled = !S.dragging && Math.abs(S.t - near) < .02 && Math.abs(S.target - near) < 1e-3 && S.intro >= 1;
+  if (settled && SCENES[near]) {
+    if (SC.k !== near) { SC.k = near; SC.clock = 0; SC.hold = 0; }
+    SC.hold += dt;
+    if (SC.hold > .5) SC.clock = reduced ? SCENES[near].dur : SC.clock + dt;
+  }
+  const want = settled && SC.k === near ? 1 : 0;
+  SC.w += (want - SC.w) * (1 - Math.exp(-dt * (want ? 2.5 : 4)));
+  if (SC.w < .005 && !want) { SC.w = 0; SC.k = -1; }
+  SC.camW = 0; SC.hut = 1;
+  let cap = null;
+  const sc = SCENES[SC.k];
+  if (sc) {
+    const c = SC.clock;
+    const [key, cw] = sc.cam(c);
+    SC.cam = key; SC.camW = reduced ? 0 : cw * SC.w;
+    if (sc.hut) SC.hut = lerp(1, sc.hut(c), SC.w);
+    sc.update(c, SC.w);
+    for (const [a, b, f, l] of sc.caps) if (c >= a && c <= b) cap = { f, l, o: Math.min(win(c, a, a + .7), 1 - win(c, b - .7, b)) * SC.w };
+  }
+  ambientLife();
+  const txt = cap ? cap.f + cap.l : '';
+  if (txt !== capShown) { capShown = txt; if (cap) { escFecha.textContent = cap.f; escLugar.textContent = cap.l; } }
+  escena.style.opacity = cap ? cap.o.toFixed(3) : '0';
+}
+const sceneNeed = k => SCENES[k] ? SCENES[k].dur + 1 : 0;
+
+const FLOCKS = Array.from({ length: 3 }, (_, f) => Array.from({ length: 9 }, () => [rndS() - .5, rndS() - .5, rndS() - .5, rndS()]));
+const CHIMNEYS = Array.from({ length: 16 }, () => [rndS() * 2 - 1, rndS() * 2 - 1, rndS()]);
+function ambientLife() {
+  if (reduced || S.intro < 1) return;
+  const day = 1 - W4[3], time = S.time;
+  const k = SC.camW > .3 && SC.cam ? SC.cam : camKey(S.t);
+  const [cx, cz, dist] = k, R = Math.min(dist * .5, 6);
+  if (day > .05) FLOCKS.forEach((fl, f) => {
+    const a = time * (.05 + f * .02) + f * 2.1;
+    const fx = cx + Math.cos(a) * R * (.5 + f * .2), fz = cz + Math.sin(a * 1.3) * R * .6;
+    const fy = gy(fx, fz) + dist * (.05 + f * .015);
+    const ink = W4[0] > .5 ? [1, .8, .4] : [.12, .09, .07];
+    fl.forEach(([ox, oy, oz, ph], i) => {
+      const sp = dist * .04;
+      const flap = .6 + .4 * Math.sin(time * 9 + ph * 20);
+      particle(fx + ox * sp + Math.sin(time * .7 + ph * 9) * sp * .2, fy + oy * sp * .4, fz + oz * sp, dist * .0028 * flap, ink, W4[0] > .5 ? -.8 * day : .75 * day);
+    });
+  });
+  if (W4[2] > .05 && S.t > 3.6) CHIMNEYS.forEach(([ox, oz, ph], i) => {
+    const x = cx + ox * dist * .45, z = cz + oz * dist * .45, ap = appearTCache(x, z);
+    if (ap > S.t) return;
+    const y = gy(x, z) + .03;
+    for (let j = 0; j < 4; j++) {
+      const u = fract(time * .08 + ph + j / 4);
+      particle(x + u * dist * .03, y + u * dist * .05, z + u * dist * .01, dist * (.004 + u * .01), [.78, .74, .7], (1 - u) * .22 * W4[2]);
+    }
+  });
+}
+const AP_CACHE = new Map();
+function appearTCache(x, z) {
+  const key = `${Math.round(x * 20)},${Math.round(z * 20)}`;
+  if (!AP_CACHE.has(key)) { if (AP_CACHE.size > 4000) AP_CACHE.clear(); AP_CACHE.set(key, appearT(x, z)); }
+  return AP_CACHE.get(key);
 }
 
 /* ---------- Sonido generativo (Web Audio, sin archivos) ---------- */
@@ -1672,7 +2015,7 @@ let shownHito = -1, popShown = null, popTarget = null, lastYearTxt = '', lastNot
 function updateUI(dt, cssW, cssH) {
   const t = S.t, near = Math.round(t), off = Math.abs(t - near);
   if (near !== shownHito) { shownHito = near; renderHito(near); }
-  const op = 1 - sstep(.12, .42, off);
+  const op = (1 - sstep(.12, .42, off)) * (1 - .88 * SC.camW);
   art.style.opacity = op.toFixed(3);
   art.style.transform = reduced ? '' : `translateY(${((t - near) * -26).toFixed(1)}px)`;
 
@@ -1875,11 +2218,12 @@ function frame(now) {
   if (PLAY.on && Math.abs(S.t - S.target) < .003 && Math.abs(S.vel) < .01) {
     PLAY.dwell += dt;
     const k = Math.round(S.target);
-    const need = 4 + HITOS[k].texto.join(' ').length / 60;
+    const need = Math.max(4 + HITOS[k].texto.join(' ').length / 60, sceneNeed(k) + .5);
     if (PLAY.dwell > need) { PLAY.dwell = 0; if (k >= 9) stopPlay(); else S.target = k + 1; }
   }
   if (S.t > .3) pista.classList.add('oculta');
 
+  sceneTick(dt);
   const E = draw(cssW, cssH);
   updateUI(dt, cssW, cssH);
   syncHash();
@@ -1893,7 +2237,7 @@ function frame(now) {
 }
 
 function start() {
-  try { buildScene(); } catch (err) { sinGL('No se pudo preparar el mapa en esta tarjeta gráfica.'); console.warn(err); return; }
+  try { buildScene(); buildActors(); } catch (err) { sinGL('No se pudo preparar el mapa en esta tarjeta gráfica.'); console.warn(err); return; }
   resize();
   new ResizeObserver(resize).observe(document.querySelector('.escena'));
   window.addEventListener('resize', buildTimeline);
@@ -1906,6 +2250,7 @@ function start() {
   window.addEventListener('keydown', skip, { once: true });
   const ms = reduced ? 300 : introLen * 1000;
   setTimeout(() => $('#intro').classList.add('fuera'), ms * .62);
+  setTimeout(() => $('#intro').remove(), ms * .62 + 1700);
   setTimeout(() => document.body.classList.add('listo'), ms * .7);
   requestAnimationFrame(frame);
 }
