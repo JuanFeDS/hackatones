@@ -1762,7 +1762,33 @@ const sceneTranvia = {
     });
   },
 };
-const SCENES = { 1: sceneFundacion, 4: sceneTranvia };
+
+/* Hito 4: la gente llena la Plaza Mayor el 20 de julio de 1810 */
+const CROWD = Array.from({ length: 64 }, (_, i) => {
+  const a = rndS() * Math.PI * 2, from = .16 + .1 * rndS(), r = Math.sqrt(rndS()) * .055;
+  return { from: [PT.plaza[0] + Math.cos(a) * from, PT.plaza[1] + Math.sin(a) * from], to: [PT.plaza[0] + Math.cos(a + rndS() - .5) * r, PT.plaza[1] + Math.sin(a + rndS() - .5) * r], d: rndS() * 3.5, ph: rndS() * 6 };
+});
+const sceneVeinteJulio = {
+  dur: 15,
+  caps: [[.8, 6.6, '20 de julio de 1810', 'En la Plaza Mayor, hoy Plaza de Bolívar'],
+         [7.4, 13.8, 'Cabildo abierto', 'El episodio del florero de Llorente desemboca en un cabildo abierto y en el grito de independencia']],
+  cam(c) {
+    const A = [PT.plaza[0] + .04, PT.plaza[1] + .02, .75, 38, -30], B = [PT.plaza[0], PT.plaza[1], .32, 22, -8];
+    return [blendKey(A, B, ease(win(c, .5, 9))), ease(win(c, 0, 1.6)) * (1 - ease(win(c, 13, 15)))];
+  },
+  update(c, w) {
+    const time = S.time, cheer = ease(win(c, 9, 10.5));
+    CROWD.forEach((p, i) => {
+      const m = ease(win(c, 1 + p.d, 5.5 + p.d));
+      const x = lerp(p.from[0], p.to[0], m), z = lerp(p.from[1], p.to[1], m);
+      const toPlaza = Math.atan2(PT.plaza[1] - z, PT.plaza[0] - x);
+      const g = ease(win(c, .3 + p.d * .3, 1 + p.d * .3)) * w;
+      const walking = m > 0 && m < 1 ? 1 : 0;
+      walker(x, z, walking ? Math.atan2(p.to[1] - p.from[1], p.to[0] - p.from[0]) : toPlaza, time * (walking ? 7 : 11) + p.ph, g, i, Math.max(walking, cheer * (.5 + .5 * Math.sin(time * 3 + p.ph))));
+    });
+  },
+};
+const SCENES = { 1: sceneFundacion, 3: sceneVeinteJulio, 4: sceneTranvia };
 
 const SC = { k: -1, clock: 0, hold: 0, w: 0, camW: 0, cam: null, hut: 1 };
 const escena = $('#escena'), escFecha = escena.querySelector('.fecha'), escLugar = escena.querySelector('.lugar');
