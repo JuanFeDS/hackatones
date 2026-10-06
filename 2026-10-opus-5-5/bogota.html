@@ -630,6 +630,7 @@ function buildBlocks() {
       if (d < .1 || Math.hypot(x - PT.santander[0], z - PT.santander[1]) < .07) continue;
       if (PUEBLOS.some(([px, pz]) => Math.hypot(x - px, z - pz) < .42)) continue;
       if (polyDist(x, z, TRANVIA) < .03 + cs * .5) continue;
+      if (Math.min(polyDist(x, z, SAN_FRANCISCO), polyDist(x, z, SAN_AGUSTIN)) < .05 + cs * .5) continue;
       const ap = appearT(x, z);
       if (ap > 9.5 || height(x, z) > .085) continue;
       const r = rnd(), r2 = rnd();
@@ -800,7 +801,9 @@ void main(){
   float fwr=fwidth(fld.r)*1.4+1e-4;
   float wline=(1.-smoothstep(0.,fwr,abs(fld.r-wthr)))*(1.-urban);
   float wring=(1.-smoothstep(0.,fwr,abs(fld.r-wthr+.09)))*(1.-urban);
-  float sf=geo.g*(1.-uJim), jim=geo.g*uJim;
+  float jimX=mix(2.6,-4.2,uJim);
+  float jimL=smoothstep(jimX-.04,jimX+.04,q.x);
+  float sf=geo.g*(1.-jimL), jim=geo.g*jimL;
   float water=max(max(geo.r,geo.b),sf);
   float rline=1.-smoothstep(0.,fwidth(water)*1.3+1e-4,abs(water-.5));
   float d0=length(q); float cs=d0<1.5?.11:(d0<4.2?.22:.4);
@@ -1437,7 +1440,7 @@ function epochUniforms() {
   return {
     gp, pb, bn,
     ash: sstep(5.45, 5.95, t) * (1 - sstep(6.15, 6.75, t)),
-    jim: sstep(4.4, 4.95, t),
+    jim: sstep(4.4, 4.95, t) * SC.jim,
     widen: sstep(6.2, 6.8, t),
     pueblo: sstep(6.45, 6.95, t),
     skirt: .85 * W4[0] + .012 * W4[1] + .3 * W4[2] + .15 * W4[3],
@@ -1788,9 +1791,54 @@ const sceneVeinteJulio = {
     });
   },
 };
-const SCENES = { 1: sceneFundacion, 3: sceneVeinteJulio, 4: sceneTranvia };
 
-const SC = { k: -1, clock: 0, hold: 0, w: 0, camW: 0, cam: null, hut: 1 };
+/* Hito 6: el río San Francisco se canaliza y se vuelve la Avenida Jiménez */
+const jimPath = pathSampler(SAN_FRANCISCO);
+const jimFrontX = v => lerp(2.6, -4.2, v);
+const CARS = Array.from({ length: 14 }, (_, i) => ({ u: rndS(), dir: i % 2 ? 1 : -1, sp: .012 + .01 * rndS(), col: [[.12, .12, .14], [.5, .1, .08], [.15, .25, .35], [.75, .7, .6]][i % 4] }));
+const WORKERS = Array.from({ length: 10 }, () => ({ o: rndS() * .06 - .03, side: rndS() < .5 ? -1 : 1, ph: rndS() * 6 }));
+const sceneJimenez = {
+  dur: 17,
+  caps: [[1, 7.4, '1915', 'El Gobierno ordena canalizar el río San Francisco'],
+         [8.4, 15.2, '1938', 'Se inaugura la Avenida Jiménez, la primera gran avenida de la ciudad']],
+  cover: c => ease(win(c, 7.6, 12.6)),
+  cam(c) {
+    const [x, z, ang] = jimPath(lerp(.24, .58, ease(win(c, 1, 14))));
+    const key = [x, z, .5, 30, ang * 180 / Math.PI - 75];
+    return [key, ease(win(c, 0, 1.8)) * (1 - ease(win(c, 14.6, 17)))];
+  },
+  update(c, w) {
+    const time = S.time, cover = this.cover(c), fx = jimFrontX(cover);
+    const build = win(c, 1.5, 7.5);
+    for (let u = .18; u < .7; u += .012) {
+      const g = ease(win(build, (u - .18) / .52 - .05, (u - .18) / .52 + .08)) * w;
+      if (g < .01) continue;
+      const [x, z, ang] = jimPath(u), nx = -Math.sin(ang), nz = Math.cos(ang);
+      for (const side of [-1, 1]) {
+        const wx = x + nx * .04 * side, wz = z + nz * .04 * side;
+        put(ACT.box, wx, gy(wx, wz), wz, ang, .014 * g, .004 * g, .003 * g, [.62, .6, .55]);
+      }
+    }
+    if (c < 8.5) WORKERS.forEach((p, i) => {
+      const u = lerp(.2, .66, build) + p.o * .3;
+      const [x, z, ang] = jimPath(clamp(u, .18, .7)), nx = -Math.sin(ang), nz = Math.cos(ang);
+      const g = ease(win(c, 1.5, 2.5)) * (1 - ease(win(c, 7.6, 8.5))) * w;
+      walker(x + nx * .05 * p.side, z + nz * .05 * p.side, ang + Math.PI / 2 * p.side, time * 6 + p.ph, g, i + 2, .5 + .5 * Math.sin(time * 2 + p.ph));
+    });
+    if (cover > .05) CARS.forEach((p, i) => {
+      const u = .18 + fract(p.u + time * p.sp * p.dir) * .52;
+      const [x, z, ang] = jimPath(u);
+      if (x < fx + .05) return;
+      const nx = -Math.sin(ang), nz = Math.cos(ang), lane = p.dir * .014;
+      const cx = x + nx * lane, cz = z + nz * lane, g = ease(win(c, 8.6 + i * .2, 9.3 + i * .2)) * w;
+      put(ACT.box, cx, gy(cx, cz) + .0012, cz, ang + (p.dir < 0 ? Math.PI : 0), .016 * g, .006 * g, .0075 * g, p.col, .04);
+      put(ACT.box, cx, gy(cx, cz) + .0072, cz, ang + (p.dir < 0 ? Math.PI : 0), .009 * g, .004 * g, .0068 * g, p.col);
+    });
+  },
+};
+const SCENES = { 1: sceneFundacion, 3: sceneVeinteJulio, 4: sceneTranvia, 5: sceneJimenez };
+
+const SC = { k: -1, clock: 0, hold: 0, w: 0, camW: 0, cam: null, hut: 1, jim: 1 };
 const escena = $('#escena'), escFecha = escena.querySelector('.fecha'), escLugar = escena.querySelector('.lugar');
 let capShown = '';
 function sceneTick(dt) {
@@ -1806,7 +1854,7 @@ function sceneTick(dt) {
   const want = settled && SC.k === near ? 1 : 0;
   SC.w += (want - SC.w) * (1 - Math.exp(-dt * (want ? 2.5 : 4)));
   if (SC.w < .005 && !want) { SC.w = 0; SC.k = -1; }
-  SC.camW = 0; SC.hut = 1;
+  SC.camW = 0; SC.hut = 1; SC.jim = 1;
   let cap = null;
   const sc = SCENES[SC.k];
   if (sc) {
@@ -1814,6 +1862,7 @@ function sceneTick(dt) {
     const [key, cw] = sc.cam(c);
     SC.cam = key; SC.camW = reduced ? 0 : cw * SC.w;
     if (sc.hut) SC.hut = lerp(1, sc.hut(c), SC.w);
+    if (sc.cover) SC.jim = lerp(1, sc.cover(c), SC.w);
     sc.update(c, SC.w);
     for (const [a, b, f, l] of sc.caps) if (c >= a && c <= b) cap = { f, l, o: Math.min(win(c, a, a + .7), 1 - win(c, b - .7, b)) * SC.w };
   }
