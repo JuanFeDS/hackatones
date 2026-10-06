@@ -629,7 +629,7 @@ function buildBlocks() {
       if (x < EXT.x0 + 1.3 || x > EXT.x1 - 1.3 || z < EXT.z0 + 1.3 || z > EXT.z1 - 1.3) continue;
       if (d < .1 || Math.hypot(x - PT.santander[0], z - PT.santander[1]) < .07) continue;
       if (PUEBLOS.some(([px, pz]) => Math.hypot(x - px, z - pz) < .42)) continue;
-      if (polyDist(x, z, TRANVIA) < .03 + cs * .5) continue;
+      if (Math.min(polyDist(x, z, TRANVIA), polyDist(x, z, TM)) < .03 + cs * .5) continue;
       if (Math.min(polyDist(x, z, SAN_FRANCISCO), polyDist(x, z, SAN_AGUSTIN)) < .05 + cs * .5) continue;
       const ap = appearT(x, z);
       if (ap > 9.5 || height(x, z) > .085) continue;
@@ -1028,7 +1028,7 @@ void main(){
     vec4 R=uRoute[1]; if(s>R.y||R.x<.002) discard;
     float sp=tt*.012, seg=R.z/7.;
     float d1=(fract(s*7.-sp)-.5)*seg, d2=(fract(s*7.+sp+.37)-.5)*seg;
-    float bus=exp(-pow(d1/.07,2.))+exp(-pow(d2/.07,2.));
+    float bus=(exp(-pow(d1/.07,2.))+exp(-pow(d2/.07,2.)))*R.w;
     cover=core*.3*(1.-wn)*R.x;
     base=vec3(.55,.12,.07)*cover;
     add=(vec3(1.,.28,.14)*(.35+bus*1.8)*core+vec3(1.,.9,.8)*bus*core*core*.8)*R.x;
@@ -1494,7 +1494,7 @@ function routeUniform(pr) {
   const t = S.t;
   const r = new Float32Array([
     sstep(3.5, 3.75, t) * (1 - sstep(5.85, 6.45, t)), sstep(3.55, 3.98, t) * 1.02, ROUTE_LEN[0], 0,
-    sstep(7.55, 7.8, t), sstep(7.55, 7.98, t) * 1.02, ROUTE_LEN[1], 0,
+    sstep(7.55, 7.8, t), sstep(7.55, 7.98, t) * 1.02, ROUTE_LEN[1], SC.k === 8 ? 1 - SC.w : 1,
     sstep(8.3, 8.5, t), sstep(8.35, 8.97, t) * 1.02, ROUTE_LEN[2], 0,
   ]);
   const l = loc(pr, 'uRoute');
@@ -1836,7 +1836,44 @@ const sceneJimenez = {
     });
   },
 };
-const SCENES = { 1: sceneFundacion, 3: sceneVeinteJulio, 4: sceneTranvia, 5: sceneJimenez };
+
+/* Hito 9: el primer día de TransMilenio, de noche */
+const tmPath = pathSampler(TM);
+const busU = (c, i) => 1 - clamp((c - 1.6 - i * .5) * .052);
+const sceneTransmilenio = {
+  dur: 17,
+  caps: [[1, 7.6, '18 de diciembre de 2000', 'Primer día de TransMilenio: 14 buses entre el Portal de la 80 y la estación Tercer Milenio'],
+         [8.6, 15.4, '18.618 pasajeros', 'Viajan ese día por la troncal de la Avenida Caracas']],
+  cam(c) {
+    const [x, z, ang] = tmPath(busU(c, 0));
+    const zoom = ease(win(c, 4, 13.5));
+    const key = [x, z, lerp(.42, 4.2, zoom), lerp(18, 40, zoom), ang * 180 / Math.PI + 105 + zoom * 30];
+    return [key, ease(win(c, 0, 1.8)) * (1 - ease(win(c, 14.8, 17)))];
+  },
+  update(c, w) {
+    const time = S.time;
+    for (const [px, pz] of [PT.portal, PT.tercer]) {
+      const g = w * ease(win(c, .3, 1.2));
+      put(ACT.box, px, gy(px, pz) + .001, pz, 0, .05 * g, .004 * g, .02 * g, [.9, .9, .85], .8);
+      put(ACT.box, px, gy(px, pz) + .012, pz, 0, .055 * g, .0015 * g, .024 * g, [.6, .65, .7], .3);
+    }
+    for (let i = 0; i < 14; i++) {
+      const u = busU(c, i), g = w * ease(win(c, 1 + i * .5, 1.5 + i * .5));
+      if (g < .01) continue;
+      const [x, z, ang] = tmPath(u), y = gy(x, z) + .004, head = ang + Math.PI;
+      const ch = Math.cos(head), sh = Math.sin(head);
+      put(ACT.box, x, y, z, head, .036 * g, .011 * g, .01 * g, [.86, .13, .08], .9);
+      put(ACT.box, x, y + .011 * g, z, head, .034 * g, .0012 * g, .0095 * g, [.95, .9, .85], .6);
+      particle(x + ch * .02, y + .004, z + sh * .02, .006 * g, [1, .95, .8], -.9 * g);
+      particle(x - ch * .02, y + .004, z - sh * .02, .004 * g, [1, .15, .08], -.8 * g);
+      if (u < 1 && u > 0) for (let j = 1; j <= 3; j++) {
+        const [tx, tz] = tmPath(u + j * .0025);
+        particle(tx, gy(tx, tz) + .006, tz, .005 * g, [1, .3, .15], -.25 * g / j);
+      }
+    }
+  },
+};
+const SCENES = { 1: sceneFundacion, 3: sceneVeinteJulio, 4: sceneTranvia, 5: sceneJimenez, 8: sceneTransmilenio };
 
 const SC = { k: -1, clock: 0, hold: 0, w: 0, camW: 0, cam: null, hut: 1, jim: 1 };
 const escena = $('#escena'), escFecha = escena.querySelector('.fecha'), escLugar = escena.querySelector('.lugar');
