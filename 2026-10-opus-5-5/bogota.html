@@ -1439,9 +1439,9 @@ function epochUniforms() {
   S.crease = .03 * W4[1];
   return {
     gp, pb, bn,
-    ash: sstep(5.45, 5.95, t) * (1 - sstep(6.15, 6.75, t)),
+    ash: SC.ashV < 0 ? sstep(5.45, 5.95, t) * (1 - sstep(6.15, 6.75, t)) : lerp(sstep(5.45, 5.95, t) * (1 - sstep(6.15, 6.75, t)), SC.ashV, SC.w),
     jim: sstep(4.4, 4.95, t) * SC.jim,
-    widen: sstep(6.2, 6.8, t),
+    widen: SC.widenV < 0 ? sstep(6.2, 6.8, t) : lerp(sstep(6.2, 6.8, t), SC.widenV, SC.w),
     pueblo: sstep(6.45, 6.95, t) * SC.pueblo,
     skirt: .85 * W4[0] + .012 * W4[1] + .3 * W4[2] + .15 * W4[3],
   };
@@ -1493,7 +1493,7 @@ function sceneUniforms(pr, E, L) {
 function routeUniform(pr) {
   const t = S.t;
   const r = new Float32Array([
-    sstep(3.5, 3.75, t) * (1 - sstep(5.85, 6.45, t)), sstep(3.55, 3.98, t) * 1.02, ROUTE_LEN[0], 0,
+    sstep(3.5, 3.75, t) * (1 - sstep(5.85, 6.45, t)) * (SC.tramV < 0 ? 1 : lerp(1, SC.tramV, SC.w)), sstep(3.55, 3.98, t) * 1.02, ROUTE_LEN[0], 0,
     sstep(7.55, 7.8, t), sstep(7.55, 7.98, t) * 1.02, ROUTE_LEN[1], SC.k === 8 ? 1 - SC.w : 1,
     sstep(8.3, 8.5, t), sstep(8.35, 8.97, t) * 1.02 * SC.metro, ROUTE_LEN[2], 0,
   ]);
@@ -1947,9 +1947,44 @@ const scenePueblos = {
     });
   },
 };
-const SCENES = { 1: sceneFundacion, 3: sceneVeinteJulio, 4: sceneTranvia, 5: sceneJimenez, 7: scenePueblos, 8: sceneTransmilenio, 9: sceneMetro };
 
-const SC = { k: -1, clock: 0, hold: 0, w: 0, camW: 0, cam: null, hut: 1, jim: 1, metro: 1, pueblo: 1 };
+/* Hito 7: el 9 de abril de 1948, contado con sobriedad: sin fuego ni figuras */
+const SMOKE = [[.05, .28], [.3, .55], [-.15, .5], [.42, .2], [.1, .75]];
+const septPath = pathSampler(SEPTIMA);
+const sceneNueveAbril = {
+  dur: 19,
+  caps: [[1, 5.8, '9 de abril de 1948', 'Jorge Eliécer Gaitán es asesinado en la carrera Séptima, cerca de la Avenida Jiménez'],
+         [6.4, 10.4, 'Incendios, saqueos y cientos de muertos', 'Se queman tranvías'],
+         [11, 15, 'Después', 'Se amplían calles del centro, entre ellas la Séptima, desde la Plaza de Bolívar hasta San Diego'],
+         [15.6, 18.6, '1951', 'El tranvía deja de funcionar']],
+  ash: c => 1 - ease(win(c, 11, 14.5)),
+  widen: c => ease(win(c, 11.5, 15)),
+  tram: c => 1 - ease(win(c, 15.6, 17.5)),
+  cam(c) {
+    const [x, z, ang] = septPath(lerp(.15, .7, ease(win(c, 0, 16))));
+    const key = [x, z, lerp(.55, .95, ease(win(c, 9, 16))), lerp(30, 46, ease(win(c, 6, 14))), ang * 180 / Math.PI - 85];
+    return [key, ease(win(c, 0, 2.2)) * (1 - ease(win(c, 16.5, 19)))];
+  },
+  update(c, w) {
+    const time = S.time, smoke = ease(win(c, 6, 8)) * (1 - ease(win(c, 11, 14))) * w;
+    if (smoke > .01) SMOKE.forEach(([x, z], i) => {
+      const y = gy(x, z) + .02;
+      for (let k = 0; k < 9; k++) {
+        const u = fract(time * .045 + k / 9 + i * .17);
+        particle(x + u * .05 + Math.sin(time * .3 + k) * .006, y + u * .16, z + u * .015, .02 + u * .05, [.42, .42, .44], (1 - u) * .28 * smoke);
+      }
+    });
+    const tg = (1 - ease(win(c, 15.6, 17.5))) * ease(win(c, 6, 7.5)) * w;
+    [.32, .52].forEach(u => {
+      const [x, z, ang] = tramPath(u);
+      put(ACT.box, x, gy(x, z) + .003, z, ang, .045 * tg, .018 * tg, .017 * tg, [.3, .29, .28]);
+      put(ACT.box, x, gy(x, z) + .021, z, ang, .047 * tg, .002 * tg, .018 * tg, [.2, .2, .2]);
+    });
+  },
+};
+const SCENES = { 1: sceneFundacion, 3: sceneVeinteJulio, 4: sceneTranvia, 5: sceneJimenez, 6: sceneNueveAbril, 7: scenePueblos, 8: sceneTransmilenio, 9: sceneMetro };
+
+const SC = { k: -1, clock: 0, hold: 0, w: 0, camW: 0, cam: null, hut: 1, jim: 1, metro: 1, pueblo: 1, ashV: -1, widenV: -1, tramV: -1 };
 const escena = $('#escena'), escFecha = escena.querySelector('.fecha'), escLugar = escena.querySelector('.lugar');
 let capShown = '';
 function sceneTick(dt) {
@@ -1965,7 +2000,7 @@ function sceneTick(dt) {
   const want = settled && SC.k === near ? 1 : 0;
   SC.w += (want - SC.w) * (1 - Math.exp(-dt * (want ? 2.5 : 4)));
   if (SC.w < .005 && !want) { SC.w = 0; SC.k = -1; }
-  SC.camW = 0; SC.hut = 1; SC.jim = 1; SC.metro = 1; SC.pueblo = 1;
+  SC.camW = 0; SC.hut = 1; SC.jim = 1; SC.metro = 1; SC.pueblo = 1; SC.ashV = -1; SC.widenV = -1; SC.tramV = -1;
   let cap = null;
   const sc = SCENES[SC.k];
   if (sc) {
@@ -1976,6 +2011,7 @@ function sceneTick(dt) {
     if (sc.cover) SC.jim = lerp(1, sc.cover(c), SC.w);
     if (sc.build) SC.metro = lerp(1, sc.build(c), SC.w);
     if (sc.absorb) SC.pueblo = lerp(1, sc.absorb(c), SC.w);
+    if (sc.ash) { SC.ashV = sc.ash(c); SC.widenV = sc.widen(c); SC.tramV = sc.tram(c); }
     sc.update(c, SC.w);
     for (const [a, b, f, l] of sc.caps) if (c >= a && c <= b) cap = { f, l, o: Math.min(win(c, a, a + .7), 1 - win(c, b - .7, b)) * SC.w };
   }
