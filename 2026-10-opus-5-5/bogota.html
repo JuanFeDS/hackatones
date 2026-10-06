@@ -1442,7 +1442,7 @@ function epochUniforms() {
     ash: sstep(5.45, 5.95, t) * (1 - sstep(6.15, 6.75, t)),
     jim: sstep(4.4, 4.95, t) * SC.jim,
     widen: sstep(6.2, 6.8, t),
-    pueblo: sstep(6.45, 6.95, t),
+    pueblo: sstep(6.45, 6.95, t) * SC.pueblo,
     skirt: .85 * W4[0] + .012 * W4[1] + .3 * W4[2] + .15 * W4[3],
   };
 }
@@ -1909,9 +1909,47 @@ const sceneMetro = {
     }
   },
 };
-const SCENES = { 1: sceneFundacion, 3: sceneVeinteJulio, 4: sceneTranvia, 5: sceneJimenez, 8: sceneTransmilenio, 9: sceneMetro };
 
-const SC = { k: -1, clock: 0, hold: 0, w: 0, camW: 0, cam: null, hut: 1, jim: 1, metro: 1 };
+/* Hito 8: Distrito Especial; la ciudad alcanza a los seis pueblos */
+const CENTRO = [-.6, 2.6];
+const scenePueblos = {
+  dur: 16,
+  caps: [[1, 7, '17 de diciembre de 1954', 'Decreto Ley 3640: Bogotá pasa a ser Distrito Especial'],
+         [7.6, 14.4, 'Seis municipios anexados', 'Usaquén, Suba, Engativá, Fontibón, Bosa y Usme']],
+  absorb: c => ease(win(c, 8.4, 10.2)),
+  cam(c) {
+    const o = ease(win(c, .5, 15));
+    return [[lerp(-1.5, -5, o), lerp(2.6, 1.8, o), lerp(9, 30, ease(win(c, 1, 8.5))), lerp(30, 50, o), lerp(-35, 25, o)], ease(win(c, 0, 1.8)) * (1 - ease(win(c, 14, 16)))];
+  },
+  update(c, w) {
+    const time = S.time, flow = win(c, 5.5, 9), lit = this.absorb(c);
+    const [cx, cz] = CENTRO, cy = gy(cx, cz);
+    if (c > 1.2 && c < 9) for (let i = 0; i < 6; i++) {
+      const a = time * 1.5 + i * 1.05, r = .4 + .25 * Math.sin(time * 2 + i);
+      particle(cx + Math.cos(a) * r, cy + .15, cz + Math.sin(a) * r, .14 * w, [1, .7, .35], -.8 * w * ease(win(c, 1.2, 2.5)));
+    }
+    PUEBLOS.forEach(([px, pz], i) => {
+      if (flow > 0 && flow < 1.2) for (let k = 0; k < 14; k++) {
+        const u = clamp(flow * 1.15 - k * .035);
+        if (u <= 0 || u >= 1) continue;
+        const x = lerp(cx, px, u), z = lerp(cz, pz, u), arc = Math.sin(u * Math.PI) * 1.2;
+        particle(x, gy(x, z) + .1 + arc, z, (.16 - k * .008) * w, [1, .62, .28], -(1 - k / 15) * w);
+      }
+      if (lit > 0) {
+        const py = gy(px, pz);
+        for (let k = 0; k < 9; k++) particle(px, py + k * .12 * lit, pz, (.22 - k * .018) * w, [1, .7, .38], -(1 - k / 10) * lit * w * (.75 + .25 * Math.sin(time * 3 + i)));
+        const ring = fract(time * .35 + i / 6);
+        for (let k = 0; k < 16; k++) {
+          const a = k / 16 * Math.PI * 2, r = .2 + ring * 1.4;
+          particle(px + Math.cos(a) * r, py + .03, pz + Math.sin(a) * r, .09 * w, [1, .6, .3], -(1 - ring) * .6 * lit * w);
+        }
+      }
+    });
+  },
+};
+const SCENES = { 1: sceneFundacion, 3: sceneVeinteJulio, 4: sceneTranvia, 5: sceneJimenez, 7: scenePueblos, 8: sceneTransmilenio, 9: sceneMetro };
+
+const SC = { k: -1, clock: 0, hold: 0, w: 0, camW: 0, cam: null, hut: 1, jim: 1, metro: 1, pueblo: 1 };
 const escena = $('#escena'), escFecha = escena.querySelector('.fecha'), escLugar = escena.querySelector('.lugar');
 let capShown = '';
 function sceneTick(dt) {
@@ -1927,7 +1965,7 @@ function sceneTick(dt) {
   const want = settled && SC.k === near ? 1 : 0;
   SC.w += (want - SC.w) * (1 - Math.exp(-dt * (want ? 2.5 : 4)));
   if (SC.w < .005 && !want) { SC.w = 0; SC.k = -1; }
-  SC.camW = 0; SC.hut = 1; SC.jim = 1; SC.metro = 1;
+  SC.camW = 0; SC.hut = 1; SC.jim = 1; SC.metro = 1; SC.pueblo = 1;
   let cap = null;
   const sc = SCENES[SC.k];
   if (sc) {
@@ -1937,6 +1975,7 @@ function sceneTick(dt) {
     if (sc.hut) SC.hut = lerp(1, sc.hut(c), SC.w);
     if (sc.cover) SC.jim = lerp(1, sc.cover(c), SC.w);
     if (sc.build) SC.metro = lerp(1, sc.build(c), SC.w);
+    if (sc.absorb) SC.pueblo = lerp(1, sc.absorb(c), SC.w);
     sc.update(c, SC.w);
     for (const [a, b, f, l] of sc.caps) if (c >= a && c <= b) cap = { f, l, o: Math.min(win(c, a, a + .7), 1 - win(c, b - .7, b)) * SC.w };
   }
