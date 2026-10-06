@@ -1,0 +1,2521 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Bacatá → Bogotá</title>
+<meta name="description" content="El crecimiento de Bogotá en diez hitos, de la sabana muisca a la primera línea del metro, contado como un solo mapa que cambia de materia con el tiempo.">
+<link rel="icon" href="data:,">
+<style>
+*{box-sizing:border-box}
+:root{
+  --tinta:#f3dfa8;--tinta-2:rgba(243,223,168,.7);--velo:rgba(6,4,2,.78);--acento:#e9b851;--fondo:#050403;
+  --f-display:"Palatino Linotype","Book Antiqua",Palatino,"URW Palladio L",serif;
+  --f-texto:"Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;
+  --f-cifra:"Palatino Linotype","Book Antiqua",Palatino,serif;
+  --f-ui:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",sans-serif;
+  --caps:all-small-caps;--track:.14em;--peso:400;--estilo:normal;
+}
+body[data-epoca="papel"]{
+  --f-display:"Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;
+  --f-cifra:"Apple Chancery","Segoe Script","Snell Roundhand","URW Chancery L",cursive;
+  --f-texto:Georgia,"Iowan Old Style","Palatino Linotype",serif;
+  --caps:normal;--track:.005em;--estilo:italic;
+}
+body[data-epoca="ladrillo"]{
+  --f-display:Bahnschrift,"DIN Alternate","DIN Condensed","Avenir Next Condensed","Franklin Gothic Medium","Arial Narrow",sans-serif;
+  --f-cifra:Bahnschrift,"DIN Alternate","Avenir Next Condensed","Arial Narrow",sans-serif;
+  --f-texto:"Segoe UI","Avenir Next","Helvetica Neue",system-ui,sans-serif;
+  --caps:normal;--track:.01em;--peso:600;
+}
+body[data-epoca="noche"]{
+  --f-display:"Segoe UI Variable Display","SF Pro Display","Helvetica Neue",system-ui,sans-serif;
+  --f-cifra:"Segoe UI Variable Display","SF Pro Display","Helvetica Neue",system-ui,sans-serif;
+  --f-texto:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",sans-serif;
+  --caps:normal;--track:-.015em;--peso:300;
+}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--fondo);color:var(--tinta)}
+body{font-family:var(--f-texto);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+.escena{position:fixed;inset:0}
+#gl{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+#gl:active{cursor:grabbing}
+.ui{transition:opacity 1.2s ease}
+body:not(.listo) .ui{opacity:0;pointer-events:none}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--tinta);outline-offset:3px}
+
+.marca{position:fixed;top:20px;left:clamp(16px,4.2vw,72px);z-index:3;pointer-events:none}
+.marca h1{margin:0;font-family:var(--f-display);font-weight:400;font-size:1.05rem;letter-spacing:.12em;font-variant-caps:all-small-caps}
+.marca p{margin:.25rem 0 0;font:400 .76rem/1.3 var(--f-ui);color:var(--tinta-2);letter-spacing:.04em}
+.marca .aviso{margin-top:.55rem;font-size:.68rem;max-width:30ch}
+
+.acciones{position:fixed;top:14px;right:clamp(16px,3vw,48px);z-index:5;display:flex;gap:1.3rem}
+.accion{background:none;border:0;border-bottom:1px solid transparent;padding:.6rem .1rem .45rem;cursor:pointer;display:inline-flex;align-items:center;gap:.5rem;font:500 .82rem/1 var(--f-ui);letter-spacing:.05em;color:var(--tinta)}
+.accion:hover{border-bottom-color:var(--acento)}
+.accion svg{width:13px;height:13px;fill:currentColor;flex:none}
+
+#hito{position:fixed;left:clamp(16px,4.2vw,72px);bottom:172px;width:min(31rem,40vw);z-index:3;pointer-events:none;color:var(--tinta);will-change:opacity,transform}
+#hito::before{content:"";position:absolute;inset:-36% -48% -32% -42%;background:radial-gradient(closest-side,var(--velo) 0%,var(--velo) 40%,transparent 100%);z-index:-1}
+#hito .num{margin:0 0 .9rem;font:500 .74rem/1 var(--f-ui);letter-spacing:.24em;color:var(--tinta-2)}
+#hito .num b{font-weight:600;color:var(--acento)}
+#hito .etiqueta{margin:0 0 .35rem;font-family:var(--f-cifra);font-style:var(--estilo);font-size:clamp(1.05rem,1.5vw,1.32rem);color:var(--acento)}
+#hito h2{margin:0 0 1rem;font-family:var(--f-display);font-weight:var(--peso);font-style:var(--estilo);font-variant-caps:var(--caps);letter-spacing:var(--track);font-size:clamp(1.9rem,3.6vw,3.3rem);line-height:1.02;text-wrap:balance}
+#hito .cuerpo p{margin:0 0 .55rem;max-width:52ch;font-family:var(--f-texto);font-size:clamp(.98rem,1.1vw,1.08rem);line-height:1.55}
+#hito .previsto{color:var(--tinta-2);font-size:.92rem}
+#hito .previsto span{display:inline-block;margin-right:.5rem;padding:0 .1rem;border-bottom:1px dashed var(--acento);color:var(--acento);font:600 .72rem/1.6 var(--f-ui);letter-spacing:.16em}
+
+.poblacion{position:fixed;right:clamp(16px,4vw,64px);bottom:172px;z-index:3;text-align:right;pointer-events:none}
+.poblacion::before{content:"";position:absolute;inset:-50% -40% -50% -60%;background:radial-gradient(closest-side,var(--velo),transparent);z-index:-1}
+.poblacion .cifra{margin:0;font-family:var(--f-cifra);font-weight:var(--peso);font-size:clamp(2.2rem,5vw,4.4rem);line-height:1;font-variant-numeric:tabular-nums lining-nums;letter-spacing:-.01em}
+.poblacion .unidad{margin:.35rem 0 0;font:500 .74rem/1.2 var(--f-ui);letter-spacing:.22em;color:var(--tinta)}
+.poblacion .nota{margin:.3rem 0 0;font:400 .74rem/1.3 var(--f-ui);color:var(--tinta-2)}
+
+#linea{position:fixed;left:0;right:0;bottom:0;height:136px;z-index:4;touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none}
+#linea::before{content:"";position:absolute;inset:-70px 0 0;background:linear-gradient(to top,var(--velo) 0%,var(--velo) 35%,transparent);pointer-events:none;z-index:-1}
+#curva{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+#curva .curva{fill:none;stroke-width:1.5;opacity:.38}
+#curva .area{opacity:.1}
+#curva .on .curva{opacity:1;stroke-width:2}
+#curva .on .area{opacity:.32}
+#curva .pre{fill:none;stroke:var(--tinta-2);stroke-dasharray:2 6}
+#curva .base{stroke:var(--tinta-2);opacity:.35}
+#curva .tick{stroke:var(--tinta);opacity:.5}
+#curva .dato{fill:var(--tinta)}
+.paradas span{position:absolute;bottom:12px;transform:translateX(-50%);font:500 .68rem/1 var(--f-ui);letter-spacing:.04em;color:var(--tinta-2);white-space:nowrap;cursor:pointer;transition:color .3s}
+.paradas span.activa{color:var(--tinta);font-weight:700}
+#tirador{position:absolute;left:0;top:0;width:36px;height:36px;margin:-18px 0 0 -18px;border-radius:50%;cursor:grab;outline:none;z-index:2}
+#tirador::before{content:"";position:absolute;inset:10px;border-radius:50%;border:2px solid var(--acento);background:var(--velo);box-shadow:0 0 16px var(--acento)}
+#tirador::after{content:"";position:absolute;left:50%;top:27px;width:1px;height:var(--baja,40px);background:linear-gradient(var(--acento),transparent)}
+#tirador:focus-visible::before{outline:2px solid var(--tinta);outline-offset:5px}
+#tirador .anio{position:absolute;bottom:31px;left:50%;transform:translateX(-50%);font-family:var(--f-cifra);font-style:var(--estilo);font-size:1.08rem;white-space:nowrap;color:var(--tinta);text-shadow:0 0 8px var(--velo),0 0 3px var(--velo)}
+.pista{position:fixed;left:0;bottom:150px;z-index:4;transform:translateX(-50%);font:500 .8rem/1.3 var(--f-ui);letter-spacing:.04em;color:var(--tinta);text-align:center;pointer-events:none;transition:opacity .8s;text-shadow:0 0 10px var(--velo)}
+.pista small{display:block;color:var(--tinta-2);font-size:.7rem}
+.pista i{display:inline-block;font-style:normal;animation:vaiven 1.8s ease-in-out infinite}
+@keyframes vaiven{50%{transform:translateX(8px)}}
+.pista.oculta{opacity:0}
+
+#puntos{position:fixed;inset:0;z-index:2;pointer-events:none}
+.punto{position:absolute;left:0;top:0;width:26px;height:26px;margin:-13px 0 0 -13px;padding:0;border:0;background:none;border-radius:50%;pointer-events:auto;cursor:default;opacity:0;visibility:hidden;color:var(--tinta)}
+.punto::before{content:"";position:absolute;inset:9px;border-radius:50%;background:var(--acento);box-shadow:0 0 0 2px var(--velo),0 0 12px var(--acento)}
+.punto .r{position:absolute;left:24px;top:50%;transform:translateY(-50%);white-space:nowrap;text-align:left;font:600 .78rem/1.25 var(--f-ui);color:var(--tinta);text-shadow:0 0 6px var(--velo),0 0 2px var(--velo),0 0 12px var(--velo);opacity:0;transition:opacity .25s;pointer-events:none}
+.punto .r small{display:none;font-weight:400;font-size:.68rem;color:var(--tinta-2)}
+.punto.destacado .r{opacity:1}
+.punto:hover .r,.punto:focus-visible .r{opacity:1}
+.punto:hover .r small,.punto:focus-visible .r small{display:block}
+.rotulo-metro{position:absolute;left:0;top:0;font:600 .74rem/1.2 var(--f-ui);letter-spacing:.06em;color:#bdefff;text-shadow:0 0 8px #000,0 0 3px #000;white-space:nowrap;opacity:0;transform-origin:left center}
+.rotulo-metro span{border-bottom:1px dashed currentColor}
+
+#fuentes{position:fixed;top:0;right:0;bottom:0;width:min(440px,100%);z-index:7;overflow:auto;padding:76px 32px 170px;color:var(--tinta);background:var(--velo);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);transform:translateX(100%);visibility:hidden;transition:transform .5s cubic-bezier(.2,.7,.2,1),visibility 0s .5s}
+#fuentes.abierto{transform:none;visibility:visible;transition-delay:0s}
+#fuentes h2{margin:0 0 1rem;font-family:var(--f-display);font-weight:var(--peso);font-size:1.6rem}
+#fuentes p,#fuentes li{font:400 .9rem/1.5 var(--f-ui)}
+#fuentes .aviso{color:var(--tinta);margin:0 0 1.4rem}
+#fuentes ul{list-style:none;margin:0 0 1.4rem;padding:0}
+#fuentes li{margin:0 0 .8rem;color:var(--tinta-2)}
+#fuentes a{color:var(--tinta);text-underline-offset:3px}
+#fuentes .cerrar{position:absolute;top:18px;right:24px}
+
+#intro{position:fixed;inset:0;z-index:9;display:grid;place-content:center;text-align:center;pointer-events:none;color:#f3dfa8;transition:opacity 1.6s ease}
+#intro h1{margin:0;font-family:"Palatino Linotype","Book Antiqua",Palatino,serif;font-weight:400;font-variant-caps:all-small-caps;letter-spacing:.16em;font-size:clamp(2.4rem,7vw,5.8rem);text-shadow:0 0 30px rgba(233,184,81,.45)}
+#intro p{margin:.6rem 0 0;font:400 clamp(.85rem,1.4vw,1.05rem)/1.4 var(--f-ui);letter-spacing:.2em;color:rgba(243,223,168,.7)}
+#intro.fuera{opacity:0;visibility:hidden;transition:opacity 1.6s ease,visibility 0s 1.6s}
+#escena{position:fixed;left:50%;top:13vh;z-index:5;transform:translateX(-50%);width:min(92vw,46rem);text-align:center;pointer-events:none;opacity:0;color:var(--tinta)}
+#escena::before{content:"";position:absolute;inset:-60% -20%;background:radial-gradient(closest-side,var(--velo),transparent);z-index:-1}
+#escena .fecha{margin:0;font-family:var(--f-cifra);font-style:var(--estilo);font-weight:var(--peso);font-size:clamp(1.6rem,3.4vw,2.8rem);line-height:1.05;letter-spacing:.01em}
+#escena .lugar{margin:.5rem auto 0;max-width:40ch;font:400 clamp(.85rem,1.2vw,1rem)/1.45 var(--f-ui);letter-spacing:.03em;color:var(--tinta-2)}
+@media (max-width:760px){#escena{top:7svh}}
+.sin-gl{position:fixed;inset:0;display:grid;place-content:center;padding:24px;text-align:center;font:400 1rem/1.5 var(--f-ui);color:#f3dfa8;background:#050403;z-index:10}
+
+@media (max-width:760px){
+  .escena{bottom:auto;height:56svh}
+  #hito{left:0;right:0;top:56svh;bottom:116px;width:auto;padding:18px 18px 10px;overflow:auto;pointer-events:auto;background:var(--velo)}
+  #hito::before{display:none}
+  #hito h2{font-size:1.75rem}
+  .poblacion{top:calc(56svh - 80px);bottom:auto;right:14px}
+  .poblacion::before{inset:-40% -30%}
+  .poblacion .cifra{font-size:1.9rem}
+  .poblacion .nota{display:none}
+  .marca p:not(.aviso){display:none}
+  .marca .aviso{font-size:.62rem;max-width:22ch}
+  .acciones{gap:.8rem;top:8px}
+  .accion{font-size:.74rem}
+  #linea{height:116px}
+  .paradas span:not(.activa){display:none}
+  .pista{bottom:126px}
+}
+@media (prefers-reduced-motion:reduce){.pista i{animation:none}}
+</style>
+</head>
+<body data-epoca="oro">
+<div class="escena"><canvas id="gl" aria-label="Mapa de Bogotá que cambia con la línea de tiempo"></canvas></div>
+<div id="puntos" class="ui" aria-label="Lugares del mapa"></div>
+
+<header class="marca ui">
+  <h1>Bacatá → Bogotá</h1>
+  <p>cinco siglos de una ciudad en un mapa</p>
+  <p class="aviso">La forma de la ciudad es una ilustración, no un plano histórico.</p>
+</header>
+
+<nav class="acciones ui" aria-label="Controles">
+  <button class="accion" id="bReproducir" type="button" aria-pressed="false"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1l9 5-9 5z"/></svg><span>Reproducir</span></button>
+  <button class="accion" id="bSonido" type="button" aria-pressed="false"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1 4h2.5L7 1v10L3.5 8H1z"/><path d="M8.5 3.5q1.6 2.5 0 5" stroke="currentColor" fill="none" stroke-width="1.2"/></svg><span>Activar sonido</span></button>
+  <button class="accion" id="bFuentes" type="button" aria-expanded="false" aria-controls="fuentes"><span>Ver fuentes</span></button>
+</nav>
+
+<article id="hito" class="ui" aria-live="polite"></article>
+<div id="escena" class="ui" aria-live="polite"><p class="fecha"></p><p class="lugar"></p></div>
+
+<section class="poblacion ui" aria-label="Población">
+  <p class="cifra" id="cifra">—</p>
+  <p class="unidad">habitantes</p>
+  <p class="nota" id="nota"></p>
+</section>
+
+<div id="linea" class="ui">
+  <svg id="curva" aria-hidden="true"></svg>
+  <div class="paradas" id="paradas"></div>
+  <div id="tirador" role="slider" tabindex="0" aria-label="Línea de tiempo" aria-valuemin="1" aria-valuemax="10" aria-valuenow="1"><span class="anio" id="anioTirador"></span></div>
+</div>
+<p class="pista ui" id="pista">Arrastra la línea de tiempo <i>→</i><small>o usa la rueda, las flechas o Reproducir</small></p>
+
+<aside id="fuentes" aria-label="Fuentes" tabindex="-1">
+  <button class="accion cerrar" id="bCerrar" type="button">Cerrar fuentes</button>
+  <h2>Fuentes</h2>
+  <p class="aviso">La forma de la ciudad en cada hito es una ilustración, no un plano histórico. Las ubicaciones de los lugares son aproximadas (±500 m).</p>
+  <ul>
+    <li>Fundaciones de 1538 y 1539: <a href="https://canaltrece.com.co/noticias/fundacion-bogota-historia-6-de-agosto/" target="_blank" rel="noopener">Canal Trece</a>, <a href="https://www.eltiempo.com/bogota/historia-de-las-dos-fundaciones-de-santafe-de-bogota-154664" target="_blank" rel="noopener">El Tiempo</a></li>
+    <li>Población de Santafé en 1778 y 1800: <a href="https://urosario.edu.co/revista-nova-et-vetera/cultura/santafe-ilustrada" target="_blank" rel="noopener">Universidad del Rosario, Santafé ilustrada</a></li>
+    <li>Censos de 1912 a 2005: <a href="https://www.dane.gov.co/files/pqr/Respuesta-202510008545.pdf" target="_blank" rel="noopener">DANE</a>; censo de 2018: <a href="https://sitios.dane.gov.co/cnpv/app/views/informacion/fichas/11001.pdf" target="_blank" rel="noopener">DANE, CNPV 2018</a></li>
+    <li>Tranvía de 1884, 1910 y 1951: <a href="https://bogota.gov.co/mi-ciudad/movilidad/los-medios-de-transporte-que-han-usado-los-ciudadanos-en-bogota-lo-l" target="_blank" rel="noopener">Alcaldía de Bogotá</a></li>
+    <li>Avenida Jiménez: <a href="https://bogota.gov.co/mi-ciudad/gestion-publica/avenida-jimenez-de-quesada-cumple-80-anos" target="_blank" rel="noopener">Alcaldía de Bogotá</a></li>
+    <li>9 de abril de 1948: <a href="https://bogota.gov.co/mi-ciudad/gestion-publica/la-historia-del-bogotazo" target="_blank" rel="noopener">Alcaldía de Bogotá</a></li>
+    <li>Distrito Especial de 1954: <a href="https://es.hispanopedia.com/wiki/Distrito_Especial_de_Bogot%C3%A1" target="_blank" rel="noopener">Hispanopedia, Distrito Especial de Bogotá</a></li>
+    <li>TransMilenio: <a href="https://www.noticiasrcn.com/colombia/transmilenio-celebra-su-cumpleanos-numero-25-este-18-de-diciembre-972880" target="_blank" rel="noopener">Noticias RCN</a></li>
+    <li>Metro, fecha prevista: <a href="https://www.portafolio.co/economia/infraestructura/metro-de-bogota-galan-revela-la-fecha-en-la-que-iniciaria-la-operacion-de-la-primera-linea-501736" target="_blank" rel="noopener">Portafolio</a></li>
+  </ul>
+  <p>Hechos de conocimiento general, sin cita específica: el 20 de julio de 1810 y el origen muisca del nombre «Bogotá».</p>
+  <p>Población: Estudios sobre Santafé ilustrada (1778, 1800), censos (1912, 1938) y DANE (1964 a 2018).</p>
+</aside>
+
+<div id="intro" aria-hidden="true"><h1>Bacatá → Bogotá</h1><p>cinco siglos de una ciudad en un mapa</p></div>
+<noscript><div class="sin-gl">Esta pieza necesita JavaScript para dibujar el mapa.</div></noscript>
+
+<script>
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const sstep = (a, b, x) => { const t = clamp((x - a) / (b - a)); return t * t * (3 - 2 * t); };
+const fract = x => x - Math.floor(x);
+const motionQuery = matchMedia('(prefers-reduced-motion: reduce)');
+let reduced = motionQuery.matches;
+
+function mulberry32(seed) {
+  let a = seed;
+  return () => {
+    a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function hash2(i, j) {
+  let h = Math.imul(i, 374761393) + Math.imul(j, 668265263) | 0;
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  h ^= h >>> 16;
+  return (h >>> 0) / 4294967296;
+}
+function vnoise(x, z) {
+  const i = Math.floor(x), j = Math.floor(z), fx = x - i, fz = z - j;
+  const ux = fx * fx * (3 - 2 * fx), uz = fz * fz * (3 - 2 * fz);
+  const a = hash2(i, j), b = hash2(i + 1, j), c = hash2(i, j + 1), d = hash2(i + 1, j + 1);
+  return a + (b - a) * ux + (c - a) * uz + (a - b - c + d) * ux * uz;
+}
+function fbm(x, z, oct = 4) {
+  let s = 0, amp = .5, norm = 0;
+  for (let k = 0; k < oct; k++) { s += amp * vnoise(x, z); norm += amp; x = x * 2.03 + 1.7; z = z * 2.03 + 9.2; amp *= .5; }
+  return s / norm;
+}
+function ridged(x, z) {
+  let s = 0, amp = .5;
+  for (let k = 0; k < 4; k++) { s += amp * (1 - Math.abs(vnoise(x, z) * 2 - 1)); x = x * 2.1 + 3.1; z = z * 2.1 + 5.7; amp *= .5; }
+  return s / .9375;
+}
+const fmt = n => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+/* ---------- Hechos cerrados (§3 y §4) ---------- */
+const HITOS = [
+  { etiqueta: 'antes de 1538', titulo: 'La sabana muisca', epoca: 'oro', texto: [
+    'Esto es territorio muisca: una sabana de humedales, con el río Bogotá —el Funza— al occidente y los cerros orientales al oriente.',
+    'Bacatá era un asentamiento muisca de la sabana. De su nombre viene «Bogotá».'] },
+  { etiqueta: '1538–1539', titulo: 'Dos fundaciones', epoca: 'papel', texto: [
+    'El 6 de agosto de 1538, Gonzalo Jiménez de Quesada levanta un campamento militar en el sitio que hoy se identifica con el Chorro de Quevedo.',
+    'El 27 de abril de 1539, tras la llegada de Sebastián de Belalcázar y Nicolás de Federmán, llega la fundación jurídica en el actual Parque Santander: 12 chozas y una iglesia.',
+    'Los historiadores aún discuten cuál de las dos fechas es la fundación.'] },
+  { etiqueta: '1800', titulo: 'Santafé, capital virreinal', epoca: 'papel', texto: [
+    'Santafé es la capital del Virreinato de la Nueva Granada.',
+    'Pasa de 16.002 habitantes en 1778 a 21.464 en 1800.',
+    'La ciudad es una cuadrícula atravesada por los ríos San Francisco y San Agustín.'] },
+  { etiqueta: '1810', titulo: 'El 20 de julio', epoca: 'papel', texto: [
+    '20 de julio de 1810, en la Plaza Mayor, hoy Plaza de Bolívar.',
+    'El episodio del florero de Llorente desemboca en un cabildo abierto y en el grito de independencia.'] },
+  { etiqueta: '1884–1912', titulo: 'El tranvía', epoca: 'ladrillo', texto: [
+    'El 24 de diciembre de 1884 empieza el tranvía de mulas: va de la Plaza de Bolívar a Chapinero, pasando por San Diego y la calle 26.',
+    'En 1910 llega el tranvía eléctrico.',
+    'El censo de 1912 cuenta 121.257 habitantes.'] },
+  { etiqueta: '1938', titulo: 'Un río se vuelve avenida', epoca: 'ladrillo', texto: [
+    'En 1915, el Gobierno ordena canalizar el río San Francisco.',
+    'Sobre él se construye la Avenida Jiménez, inaugurada en 1938 como la primera gran avenida de la ciudad.',
+    'Censo de 1938: 330.312 habitantes.'] },
+  { etiqueta: '1948', titulo: 'El 9 de abril', epoca: 'ladrillo', texto: [
+    'El 9 de abril de 1948, Jorge Eliécer Gaitán es asesinado en la carrera Séptima, cerca de la Avenida Jiménez.',
+    'Siguen incendios, saqueos y cientos de muertos; se queman tranvías.',
+    'Después se amplían calles del centro, entre ellas la Séptima, desde la Plaza de Bolívar hasta San Diego.',
+    'El tranvía deja de funcionar en 1951.'] },
+  { etiqueta: '1954', titulo: 'Seis pueblos se vuelven ciudad', epoca: 'ladrillo', texto: [
+    'El 17 de diciembre de 1954, el Decreto Ley 3640 hace de Bogotá un Distrito Especial.',
+    'Se anexan seis municipios vecinos: Usaquén, Suba, Engativá, Fontibón, Bosa y Usme.',
+    'Censo de 1964: 1.697.311 habitantes.'] },
+  { etiqueta: '2000', titulo: 'TransMilenio', epoca: 'noche', texto: [
+    'El 18 de diciembre de 2000 es el primer día de TransMilenio.',
+    'Circulan 14 buses entre el Portal de la 80 y la estación Tercer Milenio, por la troncal de la Avenida Caracas.',
+    'Ese día viajan 18.618 pasajeros.'] },
+  { etiqueta: '2018–2028', titulo: 'La ciudad elevada', epoca: 'noche', texto: [
+    'Censo de 2018: 7.181.469 habitantes.',
+    'La primera línea del metro —unos 24 km, elevada, del suroccidente a la calle 72— tiene prevista su operación comercial para el 15 de marzo de 2028.',
+    '<span>previsto</span>En el mapa, su trazo es una previsión.'] },
+];
+const STOP_YEARS = [null, 1538, 1800, 1810, 1884, 1938, 1948, 1954, 2000, 2018];
+const POP = [
+  [1778, 16002, 'Estudios sobre Santafé ilustrada'], [1800, 21464, 'Estudios sobre Santafé ilustrada'],
+  [1912, 121257, 'Censo'], [1938, 330312, 'Censo'], [1964, 1697311, 'DANE'], [1973, 2571548, 'DANE'],
+  [1985, 3982941, 'DANE'], [1993, 4945448, 'DANE'], [2005, 6778691, 'DANE'], [2018, 7181469, 'DANE, CNPV 2018'],
+];
+const POINTS = [
+  { nombre: 'Plaza de Bolívar (Plaza Mayor)', lat: 4.5981, lon: -74.0760, hito: 2 },
+  { nombre: 'Chorro de Quevedo', lat: 4.5970, lon: -74.0688, hito: 2 },
+  { nombre: 'Parque Santander', lat: 4.6023, lon: -74.0732, hito: 2 },
+  { nombre: 'Cerro de Monserrate', lat: 4.6058, lon: -74.0556, hito: 1 },
+  { nombre: 'San Diego (calle 26 con Séptima)', lat: 4.6136, lon: -74.0688, hito: 5 },
+  { nombre: 'Chapinero', lat: 4.6486, lon: -74.0636, hito: 5 },
+  { nombre: 'Estación Tercer Milenio (Caracas con calle 6)', lat: 4.5970, lon: -74.0820, hito: 9 },
+  { nombre: 'Portal de la 80', lat: 4.7110, lon: -74.1120, hito: 9 },
+  { nombre: 'Usaquén', lat: 4.6950, lon: -74.0310, hito: 8, pueblo: true },
+  { nombre: 'Suba', lat: 4.7410, lon: -74.0840, hito: 8, pueblo: true },
+  { nombre: 'Engativá', lat: 4.7070, lon: -74.1150, hito: 8, pueblo: true },
+  { nombre: 'Fontibón', lat: 4.6720, lon: -74.1440, hito: 8, pueblo: true },
+  { nombre: 'Bosa', lat: 4.6180, lon: -74.1880, hito: 8, pueblo: true },
+  { nombre: 'Usme', lat: 4.4750, lon: -74.1260, hito: 8, pueblo: true },
+  { nombre: 'Metro, extremo norte (calle 72)', lat: 4.6580, lon: -74.0670, hito: 10 },
+  { nombre: 'Metro, extremo suroccidental', lat: 4.6300, lon: -74.2000, hito: 10 },
+];
+
+/* ---------- Geografía (km; x al oriente, z al norte, origen en la Plaza de Bolívar) ---------- */
+const LAT0 = 4.5981, LON0 = -74.0760;
+const KX = 111.32 * Math.cos(LAT0 * Math.PI / 180), KZ = 110.57;
+const toXZ = (lat, lon) => [(lon - LON0) * KX, (lat - LAT0) * KZ];
+POINTS.forEach(p => { [p.x, p.z] = toXZ(p.lat, p.lon); });
+const PT = Object.fromEntries(POINTS.map((p, i) => [['plaza', 'chorro', 'santander', 'monserrate', 'sandiego', 'chapinero', 'tercer', 'portal', 'usaquen', 'suba', 'engativa', 'fontibon', 'bosa', 'usme', 'metroN', 'metroS'][i], [p.x, p.z]]));
+const PUEBLOS = POINTS.filter(p => p.pueblo).map(p => [p.x, p.z]);
+const EXT = { x0: -19, x1: 9, z0: -17, z1: 19 };
+const EW = EXT.x1 - EXT.x0, EH = EXT.z1 - EXT.z0;
+
+const FOOT = [[-17, -5.2], [-13, -3.4], [-9, -2.0], [-5, -0.4], [-2, .6], [0, 1.1], [3, 1.7], [5.6, 2.1], [8, 3.6], [10.7, 5.5], [13, 6.2], [16, 6.8], [19, 7.2]];
+const CREST = [[-17, 1.0], [-10, .9], [-3, 1.0], [0, 1.05], [5, 1.0], [10, .95], [19, .85]];
+function interp(tab, z) {
+  if (z <= tab[0][0]) return tab[0][1];
+  for (let i = 1; i < tab.length; i++) if (z <= tab[i][0]) { const [z0, v0] = tab[i - 1], [z1, v1] = tab[i]; return lerp(v0, v1, (z - z0) / (z1 - z0)); }
+  return tab[tab.length - 1][1];
+}
+const foot = z => interp(FOOT, z);
+const riverX = z => -14.5 + .35 * Math.sin(z * .42 + .5) + .15 * Math.sin(z * 1.3 + 2);
+function height(x, z) {
+  const d = x - foot(z);
+  const rise = sstep(-.3, 2.2, d);
+  let h = rise * interp(CREST, z) * (.78 + .4 * fbm(x * .55 + 3, z * .55, 4));
+  h += rise * rise * .22 * (ridged(x * 1.1, z * 1.1) - .5);
+  h += .5 * Math.exp(-((x - PT.monserrate[0]) ** 2 + (z - PT.monserrate[1]) ** 2) / .25) * sstep(-.5, .6, d);
+  h += .012 * (fbm(x * .8, z * .8, 3) - .5) * (1 - rise);
+  const dr = x - riverX(z);
+  h -= .02 * Math.exp(-dr * dr / .6);
+  return Math.max(h, -.03);
+}
+
+function chaikin(pts, it = 2) {
+  let p = pts;
+  for (let n = 0; n < it; n++) {
+    const o = [p[0]];
+    for (let i = 0; i < p.length - 1; i++) {
+      const [ax, az] = p[i], [bx, bz] = p[i + 1];
+      o.push([ax * .75 + bx * .25, az * .75 + bz * .25], [ax * .25 + bx * .75, az * .25 + bz * .75]);
+    }
+    o.push(p[p.length - 1]);
+    p = o;
+  }
+  return p;
+}
+const TRANVIA = [PT.plaza, [.12, .45], [.45, 1.1], PT.sandiego, [.95, 2.6], [1.15, 3.9], [1.3, 4.8], PT.chapinero];
+const SEPTIMA = [[.08, 0], [.15, .4], [.45, 1.1], PT.sandiego];
+const TM = [PT.tercer, [-.35, 1.8], [.2, 3.8], [.7, 5.6], PT.metroN, [1.1, 7.6], [-.6, 9.0], [-2.4, 10.8], PT.portal];
+const METRO = [PT.metroS, [-11.5, 2.2], [-8.8, 1.0], [-6.0, .3], [-3.6, -.2], [-1.6, -.3], [-.7, .3], [-.35, 1.8], [.2, 3.8], [.7, 5.6], PT.metroN];
+const SAN_FRANCISCO = [[2.45, 1.15], [1.6, .75], [1.0, .5], [.4, .36], [-.4, .32], [-1.4, .42], [-2.6, .72], [-3.9, 1.2]];
+const SAN_AGUSTIN = [[1.95, -.72], [1.2, -.46], [.5, -.33], [-.2, -.3], [-1.0, -.42], [-2.2, -.8], [-3.4, -1.3]];
+const HUMEDALES = [[-2.6, 13.9, 1.0, .55], [-5.9, 12.9, .9, .5], [-3.4, 16.6, .8, .45], [-9.2, 8.6, 1.2, .6], [-11.2, 1.0, 1.0, .5], [-1.9, 9.6, .7, .4], [-8.3, 4.6, .9, .5], [-12.8, 7.4, 1.1, .55], [-12.4, 13.3, 1.2, .6], [-7.2, -3.5, 1.0, .5], [-10.8, -7.5, .9, .45], [-4.2, 7.2, .6, .35], [-6.6, 16.8, 1.0, .5]];
+const ASH_C = [.14, .4];
+
+function segDist(px, pz, ax, az, bx, bz) {
+  const dx = bx - ax, dz = bz - az;
+  const h = clamp(((px - ax) * dx + (pz - az) * dz) / (dx * dx + dz * dz));
+  return Math.hypot(px - ax - dx * h, pz - az - dz * h);
+}
+function polyDist(x, z, pts) {
+  let d = 1e9;
+  for (let i = 0; i < pts.length - 1; i++) d = Math.min(d, segDist(x, z, pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1]));
+  return d;
+}
+const sdEll = (x, z, cx, cz, rx, rz) => (Math.hypot((x - cx) / rx, (z - cz) / rz) - 1) * Math.min(rx, rz);
+function wetField(x, z) {
+  let v = 0;
+  for (const [cx, cz, rx, rz] of HUMEDALES) { const dx = (x - cx) / rx, dz = (z - cz) / rz; v += Math.exp(-(dx * dx + dz * dz) * 1.6); }
+  return Math.min(1, v * (.75 + .5 * fbm(x * 1.1 + 20, z * 1.1, 3)));
+}
+const ashZone = (x, z) => Math.exp(-((x - ASH_C[0]) ** 2 + (z - ASH_C[1]) ** 2) / .35);
+
+/* La mancha urbana es ilustrativa (§4.4): un frente que interpola entre formas por hito. */
+function appearT(x, z) {
+  const rv = riverX(z);
+  if (x < rv + .35) return 99;
+  if (wetField(x, z) > .8) return 99;
+  const n1 = fbm(x * .85 + 40, z * .85, 3) - .5, n2 = fbm(x * .22 + 70, z * .22, 3) - .5;
+  const east = x - (foot(z) + .2);
+  const dT = polyDist(x, z, TRANVIA);
+  let dP = 1e9, dPc = 1e9;
+  for (const [px, pz] of PUEBLOS) { dP = Math.min(dP, Math.hypot(x - px, z - pz)); dPc = Math.min(dPc, segDist(x, z, -.6, 2.6, px, pz)); }
+  const d = [0,
+    sdEll(x, z, .32, .3, .16, .16),
+    sdEll(x, z, .15, .18, .62, .72) + n1 * .06,
+    sdEll(x, z, .1, .22, .82, .98) + n1 * .08,
+    Math.min(sdEll(x, z, .05, .3, 1.05, 1.25), dT - .4) + n1 * .12,
+    Math.min(sdEll(x, z, -.2, 2.4, 1.9, 3.5), dT - .85) + n1 * .3 + n2 * .4,
+    sdEll(x, z, -.5, 2.6, 2.5, 4.3) + n1 * .4 + n2 * .6,
+    Math.min(sdEll(x, z, -2.8, 4.4, 5.4, 8.4), dPc - .75, dP - 1.25) + n1 * .5 + n2 * 1.4,
+    Math.max(rv + 1.4 - x, z - 15.2, -12.6 - z) + n1 * .6 + n2 * 2.4,
+    Math.max(rv + .45 - x, z - 17.6, -15.2 - z) + n1 * .4 + n2 * 1.2,
+  ];
+  for (let k = 1; k <= 9; k++) d[k] = Math.max(d[k], east);
+  if (d[1] < 0) return 1.1 + .3 * clamp(1 + d[1] / .16);
+  for (let k = 2; k <= 9; k++) if (d[k] < 0) return (k - 1) + .1 + .75 * clamp(d[k - 1] / (d[k - 1] - d[k]));
+  return 99;
+}
+
+/* ---------- Texturas de mundo, dibujadas con código ---------- */
+function bake(w, h, draw) {
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const g = c.getContext('2d');
+  g.fillStyle = '#000'; g.fillRect(0, 0, w, h);
+  g.globalCompositeOperation = 'lighter';
+  g.lineCap = 'round'; g.lineJoin = 'round';
+  const s = w / EW;
+  const P = (x, z) => [(x - EXT.x0) * s, (EXT.z1 - z) * s];
+  draw(g, P, s);
+  return c;
+}
+function strokePath(g, P, pts, width) {
+  const q = chaikin(pts, 3);
+  g.lineWidth = width;
+  g.beginPath();
+  q.forEach(([x, z], i) => { const [px, py] = P(x, z); if (i) g.lineTo(px, py); else g.moveTo(px, py); });
+  g.stroke();
+}
+function bakeGeo() {
+  return bake(1400, 1800, (g, P, s) => {
+    const rio = [];
+    for (let z = EXT.z0 - 1; z <= EXT.z1 + 1; z += .25) rio.push([riverX(z), z]);
+    g.strokeStyle = '#f00'; strokePath(g, P, rio, .18 * s);
+    g.strokeStyle = '#0f0'; strokePath(g, P, SAN_FRANCISCO, .075 * s);
+    g.strokeStyle = '#00f'; strokePath(g, P, SAN_AGUSTIN, .065 * s);
+  });
+}
+function spiralPx(g, cx, cy, r, turns, a0, dir) {
+  g.beginPath();
+  const n = 90;
+  let ex = cx, ey = cy;
+  for (let i = 0; i <= n; i++) {
+    const u = i / n, a = a0 + dir * u * turns * Math.PI * 2;
+    ex = cx + Math.cos(a) * r * u; ey = cy + Math.sin(a) * r * u;
+    if (i) g.lineTo(ex, ey); else g.moveTo(ex, ey);
+  }
+  g.stroke();
+  return [ex, ey];
+}
+function doubleSpiral(g, P, s, x, z, R, rot) {
+  const [cx, cy] = P(x, z), r = R * s * .5;
+  const ox = Math.cos(rot) * r, oy = Math.sin(rot) * r;
+  const e1 = spiralPx(g, cx + ox, cy + oy, r * .92, 2.1, rot + Math.PI, 1);
+  const e2 = spiralPx(g, cx - ox, cy - oy, r * .92, 2.1, rot, 1);
+  g.beginPath(); g.moveTo(e1[0], e1[1]); g.quadraticCurveTo(cx, cy, e2[0], e2[1]); g.stroke();
+}
+function sunDisc(g, P, s, x, z, R) {
+  const [cx, cy] = P(x, z), r = R * s;
+  [1, .82, .5, .2].forEach(k => { g.beginPath(); g.arc(cx, cy, r * k, 0, Math.PI * 2); g.stroke(); });
+  for (let i = 0; i < 20; i++) {
+    const a = i / 20 * Math.PI * 2;
+    g.beginPath(); g.moveTo(cx + Math.cos(a) * r * .52, cy + Math.sin(a) * r * .52); g.lineTo(cx + Math.cos(a) * r * .8, cy + Math.sin(a) * r * .8); g.stroke();
+  }
+  for (let i = 0; i < 28; i++) {
+    const a = i / 28 * Math.PI * 2;
+    g.beginPath(); g.arc(cx + Math.cos(a) * r * .91, cy + Math.sin(a) * r * .91, r * .035, 0, Math.PI * 2); g.fill();
+  }
+}
+function rectInset(g, P, ins) {
+  const [ax, ay] = P(EXT.x0 + ins, EXT.z1 - ins), [bx, by] = P(EXT.x1 - ins, EXT.z0 + ins);
+  g.strokeRect(ax, ay, bx - ax, by - ay);
+}
+function rosa(g, P, s, x, z, rKm, font) {
+  const [cx, cy] = P(x, z), R = rKm * s;
+  g.save(); g.translate(cx, cy);
+  g.lineWidth = Math.max(1, R * .012);
+  [1, .93, .34].forEach(k => { g.beginPath(); g.arc(0, 0, R * k, 0, Math.PI * 2); g.stroke(); });
+  for (let i = 0; i < 64; i++) {
+    const a = i / 64 * Math.PI * 2, l = i % 4 ? .965 : .93;
+    g.beginPath(); g.moveTo(Math.sin(a) * R * l, -Math.cos(a) * R * l); g.lineTo(Math.sin(a) * R, -Math.cos(a) * R); g.stroke();
+  }
+  for (let i = 0; i < 16; i++) {
+    const a = i * Math.PI / 8, L = i % 4 === 0 ? R * .98 : i % 2 === 0 ? R * .7 : R * .48, w = i % 4 === 0 ? R * .11 : R * .07;
+    const tip = [Math.sin(a) * L, -Math.cos(a) * L], side = [Math.cos(a) * w, Math.sin(a) * w];
+    g.beginPath(); g.moveTo(0, 0); g.lineTo(side[0], side[1]); g.lineTo(tip[0], tip[1]); g.closePath(); g.stroke();
+    g.beginPath(); g.moveTo(0, 0); g.lineTo(-side[0], -side[1]); g.lineTo(tip[0], tip[1]); g.closePath(); g.fill();
+  }
+  g.save(); g.translate(0, -R * 1.14); g.rotate(-Math.PI / 2);
+  g.font = `italic ${Math.round(R * .26)}px ${font}`; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillText('N', 0, 0);
+  g.restore(); g.restore();
+}
+function label(g, P, s, text, x, z, sizeKm, font, spacing = 0) {
+  const [px, py] = P(x, z);
+  g.save(); g.translate(px, py); g.rotate(-Math.PI / 2);
+  g.font = `italic ${Math.max(8, Math.round(sizeKm * s))}px ${font}`;
+  g.textAlign = 'center'; g.textBaseline = 'alphabetic';
+  if ('letterSpacing' in g) g.letterSpacing = `${Math.round(spacing * sizeKm * s)}px`;
+  g.fillText(text, 0, 0);
+  g.restore();
+}
+function bakeDeco() {
+  const CAL = '"Apple Chancery","Segoe Script","Snell Roundhand","URW Chancery L","Palatino Linotype",cursive';
+  return bake(2048, 2634, (g, P, s) => {
+    const rnd = mulberry32(11);
+    /* R: filigrana de oro */
+    g.strokeStyle = g.fillStyle = '#f00';
+    g.lineWidth = Math.max(1, .024 * s);
+    [.22, .3, 1.06, 1.14].forEach(k => rectInset(g, P, k));
+    const band = .68, step = 1.05;
+    for (let x = EXT.x0 + 1.2; x < EXT.x1 - 1; x += step) { doubleSpiral(g, P, s, x, EXT.z0 + band, .34, 0); doubleSpiral(g, P, s, x, EXT.z1 - band, .34, 0); }
+    for (let z = EXT.z0 + 1.2; z < EXT.z1 - 1; z += step) { doubleSpiral(g, P, s, EXT.x0 + band, z, .34, Math.PI / 2); doubleSpiral(g, P, s, EXT.x1 - band, z, .34, Math.PI / 2); }
+    g.lineWidth = Math.max(1, .02 * s);
+    for (let n = 0, tries = 0; n < 62 && tries < 3000; tries++) {
+      const x = lerp(EXT.x0 + 2, EXT.x1 - 2, rnd()), z = lerp(EXT.z0 + 2, EXT.z1 - 2, rnd());
+      if (x > foot(z) - .6 || Math.abs(x - riverX(z)) < .8 || Math.hypot(x, z) < 1.3 || wetField(x, z) > .3) continue;
+      doubleSpiral(g, P, s, x, z, .24 + .36 * rnd(), rnd() * Math.PI * 2); n++;
+    }
+    [[-8.2, 11.4, .9], [-10.4, -3.2, .8], [-4.8, -9.5, .7], [-15.6, 16.4, .7], [-6.3, 2.2, .6]].forEach(([x, z, r]) => sunDisc(g, P, s, x, z, r));
+    /* G: plano manuscrito en tinta */
+    g.strokeStyle = g.fillStyle = '#0f0';
+    g.lineWidth = Math.max(1, .035 * s); rectInset(g, P, .45);
+    g.lineWidth = Math.max(1, .012 * s); rectInset(g, P, .64);
+    for (let x = Math.ceil(EXT.x0 + 1); x < EXT.x1 - .5; x++) { const [a, b] = P(x, EXT.z1 - .45), [c, d] = P(x, EXT.z1 - .64); g.beginPath(); g.moveTo(a, b); g.lineTo(c, d); g.stroke(); const [e, f] = P(x, EXT.z0 + .45), [h, k] = P(x, EXT.z0 + .64); g.beginPath(); g.moveTo(e, f); g.lineTo(h, k); g.stroke(); }
+    g.globalAlpha = .3; g.lineWidth = Math.max(1, .008 * s);
+    for (let x = -18; x <= 8; x += 2) { const [a, b] = P(x, EXT.z1 - .7), [c, d] = P(x, EXT.z0 + .7); g.beginPath(); g.moveTo(a, b); g.lineTo(c, d); g.stroke(); }
+    for (let z = -16; z <= 18; z += 2) { const [a, b] = P(EXT.x0 + .7, z), [c, d] = P(EXT.x1 - .7, z); g.beginPath(); g.moveTo(a, b); g.lineTo(c, d); g.stroke(); }
+    g.globalAlpha = 1;
+    rosa(g, P, s, -2.35, -1.95, .55, CAL);
+    rosa(g, P, s, -12.6, 13.4, 1.7, CAL);
+    label(g, P, s, 'Río Bogotá', riverX(-6) + .75, -6, .55, CAL);
+    label(g, P, s, 'Río Bogotá', riverX(10) + .75, 10, .55, CAL);
+    label(g, P, s, 'Cerros orientales', foot(-3.6) + 1.3, -3.6, .3, CAL);
+    label(g, P, s, 'Cerros orientales', foot(9) + 1.7, 9, .5, CAL);
+    label(g, P, s, 'Río San Francisco', -2.15, 1.05, .15, CAL);
+    label(g, P, s, 'Río San Agustín', -2.45, -1.05, .15, CAL);
+    label(g, P, s, 'Humedales', -9.2 + 1.9, 8.6, .32, CAL);
+    label(g, P, s, 'Sabana', -7.6, 1.8, .9, CAL, .35);
+    /* B: la Séptima ensanchada (hito 7) */
+    g.strokeStyle = '#00f'; strokePath(g, P, SEPTIMA, .075 * s);
+  });
+}
+const FW = 448, FH = 576;
+function bakeField() {
+  const data = new Uint8Array(FW * FH * 4);
+  for (let j = 0; j < FH; j++) {
+    const z = EXT.z0 + (j + .5) / FH * EH;
+    for (let i = 0; i < FW; i++) {
+      const x = EXT.x0 + (i + .5) / FW * EW, o = (j * FW + i) * 4;
+      data[o] = Math.round(wetField(x, z) * 255);
+      data[o + 1] = Math.round(clamp(appearT(x, z) / 10) * 255);
+      data[o + 2] = Math.round(ashZone(x, z) * 255);
+      data[o + 3] = 255;
+    }
+  }
+  return data;
+}
+
+/* ---------- Mallas ---------- */
+function buildTerrain() {
+  const NX = 230, NZ = 296, row = NX + 1;
+  const hs = new Float32Array(row * (NZ + 1));
+  for (let j = 0; j <= NZ; j++) for (let i = 0; i <= NX; i++) hs[j * row + i] = height(EXT.x0 + i / NX * EW, EXT.z0 + j / NZ * EH);
+  const pos = [], nor = [], idx = [];
+  const dx = EW / NX, dz = EH / NZ;
+  for (let j = 0; j <= NZ; j++) for (let i = 0; i <= NX; i++) {
+    const h = hs[j * row + i];
+    const hl = hs[j * row + Math.max(0, i - 1)], hr = hs[j * row + Math.min(NX, i + 1)];
+    const hd = hs[Math.max(0, j - 1) * row + i], hu = hs[Math.min(NZ, j + 1) * row + i];
+    const gx = (hr - hl) / (2 * dx), gz = (hu - hd) / (2 * dz), l = Math.hypot(gx, 1, gz);
+    pos.push(EXT.x0 + i * dx, h, EXT.z0 + j * dz, 0);
+    nor.push(-gx / l, 1 / l, -gz / l);
+  }
+  for (let j = 0; j < NZ; j++) for (let i = 0; i < NX; i++) {
+    const a = j * row + i, b = a + 1, c = a + row, d = c + 1;
+    idx.push(a, b, d, a, d, c);
+  }
+  const side = (list, n) => {
+    for (let k = 0; k < list.length - 1; k++) {
+      const base = pos.length / 4;
+      for (const [x, z, h] of [list[k], list[k + 1]]) { pos.push(x, h, z, 1); nor.push(...n); pos.push(x, h, z, 2); nor.push(...n); }
+      idx.push(base, base + 2, base + 3, base, base + 3, base + 1);
+    }
+  };
+  const at = (i, j) => [EXT.x0 + i * dx, EXT.z0 + j * dz, hs[j * row + i]];
+  const S = [], N = [], E = [], W = [];
+  for (let i = 0; i <= NX; i++) { S.push(at(i, 0)); N.push(at(i, NZ)); }
+  for (let j = 0; j <= NZ; j++) { W.push(at(0, j)); E.push(at(NX, j)); }
+  side(S, [0, 0, -1]); side(N, [0, 0, 1]); side(W, [-1, 0, 0]); side(E, [1, 0, 0]);
+  return { pos: new Float32Array(pos), nor: new Float32Array(nor), idx: new Uint32Array(idx) };
+}
+function boxMesh() {
+  const P = [], N = [], R = [], I = [];
+  const face = (vs, n, roof) => { const b = P.length / 3; vs.forEach(v => { P.push(...v); N.push(...n); R.push(roof); }); I.push(b, b + 1, b + 2, b, b + 2, b + 3); };
+  face([[-.5, 1, -.5], [.5, 1, -.5], [.5, 1, .5], [-.5, 1, .5]], [0, 1, 0], 1);
+  face([[.5, 0, -.5], [.5, 0, .5], [.5, 1, .5], [.5, 1, -.5]], [1, 0, 0], 0);
+  face([[-.5, 0, .5], [-.5, 0, -.5], [-.5, 1, -.5], [-.5, 1, .5]], [-1, 0, 0], 0);
+  face([[-.5, 0, .5], [.5, 0, .5], [.5, 1, .5], [-.5, 1, .5]], [0, 0, 1], 0);
+  face([[.5, 0, -.5], [-.5, 0, -.5], [-.5, 1, -.5], [.5, 1, -.5]], [0, 0, -1], 0);
+  return { P: new Float32Array(P), N: new Float32Array(N), R: new Float32Array(R), I: new Uint16Array(I) };
+}
+function hutMesh() {
+  const P = [], N = [], R = [], I = [], seg = 10;
+  for (let k = 0; k < seg; k++) {
+    const a0 = k / seg * Math.PI * 2, a1 = (k + 1) / seg * Math.PI * 2, am = (a0 + a1) / 2;
+    let b = P.length / 3;
+    [[a0, 0], [a1, 0], [a1, .5], [a0, .5]].forEach(([a, y]) => { P.push(Math.cos(a) * .42, y, Math.sin(a) * .42); N.push(Math.cos(am), 0, Math.sin(am)); R.push(0); });
+    I.push(b, b + 1, b + 2, b, b + 2, b + 3);
+    b = P.length / 3;
+    const n = [Math.cos(am) * .8, .6, Math.sin(am) * .8];
+    [[Math.cos(a0) * .56, .46, Math.sin(a0) * .56], [Math.cos(a1) * .56, .46, Math.sin(a1) * .56], [0, 1, 0]].forEach(v => { P.push(...v); N.push(...n); R.push(1); });
+    I.push(b, b + 1, b + 2);
+  }
+  return { P: new Float32Array(P), N: new Float32Array(N), R: new Float32Array(R), I: new Uint16Array(I) };
+}
+function buildBlocks() {
+  const out = [], rnd = mulberry32(7);
+  const push = (x, z, sx, sz, hB, hN, ap, type, ash, band) => { out.push(x, height(x, z), z, ap, sx, sz, hB, hN, rnd(), type, ash, band); };
+  const rings = [[.11, 0, 1.5], [.22, 1.5, 4.2], [.4, 4.2, 99]];
+  for (const [cs, r0, r1] of rings) {
+    const i0 = Math.floor(EXT.x0 / cs), i1 = Math.ceil(EXT.x1 / cs), j0 = Math.floor(EXT.z0 / cs), j1 = Math.ceil(EXT.z1 / cs);
+    for (let i = i0; i < i1; i++) for (let j = j0; j < j1; j++) {
+      const x = (i + .5) * cs, z = (j + .5) * cs, d = Math.hypot(x, z);
+      if (d < r0 || d >= r1) continue;
+      if (x < EXT.x0 + 1.3 || x > EXT.x1 - 1.3 || z < EXT.z0 + 1.3 || z > EXT.z1 - 1.3) continue;
+      if (d < .1 || Math.hypot(x - PT.santander[0], z - PT.santander[1]) < .07) continue;
+      if (PUEBLOS.some(([px, pz]) => Math.hypot(x - px, z - pz) < .42)) continue;
+      if (Math.min(polyDist(x, z, TRANVIA), polyDist(x, z, TM)) < .03 + cs * .5) continue;
+      if (Math.min(polyDist(x, z, SAN_FRANCISCO), polyDist(x, z, SAN_AGUSTIN)) < .05 + cs * .5) continue;
+      const ap = appearT(x, z);
+      if (ap > 9.5 || height(x, z) > .085) continue;
+      const r = rnd(), r2 = rnd();
+      let hB, hN;
+      if (cs < .2) { hB = .010 + .011 * r; hN = .018 + .03 * r; }
+      else if (cs < .3) { hB = .014 + .02 * r; hN = .03 + .07 * r; if (r > .93) hN = .16 + .1 * r; }
+      else { hB = .012 + .016 * r; hN = .02 + .045 * r; }
+      if (z > 1 && polyDist(x, z, TM) < 1) hN += .14 * r * r * r;
+      const band = polyDist(x, z, SEPTIMA) < .09 ? 1 : 0;
+      push(x, z, cs * (.72 + .1 * r2), cs * (.72 + .1 * rnd()), hB, hN, ap, 0, cs < .3 ? ashZone(x, z) : 0, band);
+    }
+  }
+  for (const [px, pz] of PUEBLOS) for (let i = -2; i <= 2; i++) for (let j = -2; j <= 2; j++) {
+    if (Math.hypot(i, j) > 2.3 || rnd() < .2) continue;
+    const r = rnd();
+    push(px + i * .094, pz + j * .094, .07, .07, .01 + .008 * r, .02 + .03 * r, -1, 1, 0, 0);
+  }
+  push(PT.santander[0] - .01, PT.santander[1] - .04, .045, .022, .022, .022, -1, 3, 0, 0);
+  push(PT.santander[0] - .038, PT.santander[1] - .04, .014, .014, .05, .05, -1, 3, 0, 0);
+  return new Float32Array(out);
+}
+function buildHuts() {
+  const out = [], rnd = mulberry32(3);
+  for (let k = 0; k < 12; k++) {
+    const a = k / 12 * Math.PI * 2 + rnd() * .3, r = .075 + .035 * rnd();
+    const x = PT.santander[0] + Math.cos(a) * r, z = PT.santander[1] + .01 + Math.sin(a) * r;
+    out.push(x, height(x, z), z, -1, .022, .022, .026, .026, k / 12, 2, 0, 0);
+  }
+  return new Float32Array(out);
+}
+function latheMesh(profile, seg = 9) {
+  const P = [], N = [], R = [], I = [];
+  for (let i = 0; i < profile.length; i++) {
+    const [r, y] = profile[i], a = profile[Math.max(0, i - 1)], b = profile[Math.min(profile.length - 1, i + 1)];
+    let nr = b[1] - a[1], ny = -(b[0] - a[0]);
+    const l = Math.hypot(nr, ny) || 1; nr /= l; ny /= l;
+    for (let j = 0; j <= seg; j++) {
+      const ang = j / seg * Math.PI * 2, c = Math.cos(ang), s = Math.sin(ang);
+      P.push(r * c, y, r * s); N.push(nr * c, ny, nr * s); R.push(0);
+    }
+  }
+  for (let i = 0; i < profile.length - 1; i++) for (let j = 0; j < seg; j++) {
+    const a = i * (seg + 1) + j, b = a + seg + 1;
+    I.push(a, b, a + 1, a + 1, b, b + 1);
+  }
+  return { P: new Float32Array(P), N: new Float32Array(N), R: new Float32Array(R), I: new Uint16Array(I) };
+}
+const FIGURE = [[0, 0], [.2, 0], [.23, .08], [.2, .4], [.15, .6], [.06, .66], [.12, .7], [.14, .8], [.11, .9], [0, .95]];
+const TENT = [[.5, 0], [.5, .02], [.0, 1]];
+function resample(path, stepKm) {
+  const out = [path[0]];
+  for (let i = 1; i < path.length; i++) {
+    const [x0, z0] = path[i - 1], [x1, z1] = path[i], n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, z1 - z0) / stepKm));
+    for (let k = 1; k <= n; k++) out.push([x0 + (x1 - x0) * k / n, z0 + (z1 - z0) * k / n]);
+  }
+  return out;
+}
+const ROUTE_LEN = [];
+function buildRibbons() {
+  const P = [], E = [];
+  const add = (path, width, lift, route) => {
+    const pts = resample(chaikin(path, 2), .04);
+    const cum = [0];
+    for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+    const L = cum[cum.length - 1];
+    ROUTE_LEN[route] = L;
+    const vert = i => {
+      const a = pts[Math.max(0, i - 1)], b = pts[Math.min(pts.length - 1, i + 1)];
+      let tx = b[0] - a[0], tz = b[1] - a[1]; const l = Math.hypot(tx, tz) || 1; tx /= l; tz /= l;
+      const [x, z] = pts[i], y = height(x, z) + lift;
+      return [[x - tz * width / 2, y, z + tx * width / 2, cum[i] / L, -1], [x + tz * width / 2, y, z - tx * width / 2, cum[i] / L, 1]];
+    };
+    for (let i = 0; i < pts.length - 1; i++) {
+      const [a, b] = vert(i), [c, d] = vert(i + 1);
+      for (const v of [a, b, d, a, d, c]) { P.push(v[0], v[1], v[2]); E.push(v[3], v[4], 0, route); }
+    }
+    if (route === 2) {
+      for (let s = .15; s < L; s += .45) {
+        let i = cum.findIndex(c => c >= s); if (i < 0) i = pts.length - 1;
+        const [x, z] = pts[i], g = height(x, z), w = .007;
+        for (const [ux, uz] of [[1, 0], [0, 1]]) {
+          const q = [[x - ux * w, g, z - uz * w, 1], [x + ux * w, g, z + uz * w, 1], [x + ux * w, g + lift, z + uz * w, 0], [x - ux * w, g + lift, z - uz * w, 0]];
+          for (const k of [0, 1, 2, 0, 2, 3]) { P.push(q[k][0], q[k][1], q[k][2]); E.push(cum[i] / L, k === 1 || k === 2 ? 1 : -1, q[k][3], 3); }
+        }
+      }
+    }
+  };
+  add(TRANVIA, .022, .003, 0);
+  add(TM, .045, .004, 1);
+  add(METRO, .036, .07, 2);
+  return { P: new Float32Array(P), E: new Float32Array(E) };
+}
+function buildLights() {
+  const out = [], rnd = mulberry32(21);
+  let tries = 0;
+  while (out.length < 14000 * 5 && tries < 120000) {
+    tries++;
+    const x = lerp(EXT.x0 + 1, EXT.x1 - 1, rnd()), z = lerp(EXT.z0 + 1, EXT.z1 - 1, rnd());
+    const d = Math.hypot(x, z);
+    if (rnd() > .35 + .65 * Math.exp(-d / 6)) continue;
+    const ap = appearT(x, z);
+    if (ap > 9.4 || height(x, z) > .1) continue;
+    out.push(x, height(x, z) + .006, z, ap, rnd());
+  }
+  return new Float32Array(out);
+}
+
+/* ---------- Shaders ---------- */
+const f3 = v => v.toFixed(3);
+const v2 = ([x, z]) => `vec2(${f3(x)},${f3(z)})`;
+const SEGS = TRANVIA.slice(1).map((p, i) => `d=min(d,dseg(p,${v2(TRANVIA[i])},${v2(p)}));`).join('');
+const COMMON = `#version 300 es
+precision highp float;
+precision highp sampler2D;
+uniform mat4 uVP;
+uniform vec3 uCam;
+uniform vec3 uLight;
+uniform float uT,uTime,uGP,uPB,uBN,uAsh,uIntro,uJim,uWiden,uPueblo,uReduced,uPx,uFold,uCrease;
+uniform vec4 uExt;
+uniform sampler2D uGeo,uDeco,uField;
+float hash12(vec2 p){vec3 p3=fract(vec3(p.xyx)*.1031);p3+=dot(p3,p3.yzx+33.33);return fract((p3.x+p3.y)*p3.z);}
+float vnoise(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.-2.*f);return mix(mix(hash12(i),hash12(i+vec2(1,0)),u.x),mix(hash12(i+vec2(0,1)),hash12(i+vec2(1,1)),u.x),u.y);}
+float fbm(vec2 p){float s=0.,a=.5;for(int i=0;i<4;i++){s+=a*vnoise(p);p=p*2.03+vec2(1.7,9.2);a*=.5;}return s/.9375;}
+float fbm3(vec2 p){float s=0.,a=.5;for(int i=0;i<3;i++){s+=a*vnoise(p);p=p*2.03+vec2(1.7,9.2);a*=.5;}return s/.875;}
+float dseg(vec2 p,vec2 a,vec2 b){vec2 pa=p-a,ba=b-a;float h=clamp(dot(pa,ba)/dot(ba,ba),0.,1.);return length(pa-ba*h);}
+float dTranvia(vec2 p){float d=1e4;${SEGS}return d;}
+float front(float p,float f){return clamp((p*1.16-f)/.16,0.,1.);}
+vec3 fronts(vec2 q){
+  float n=fbm3(q*.45);
+  float fg=clamp(length(q-${v2(PT.chorro)})/24.,0.,1.)*.84+n*.16;
+  float fb=clamp(dTranvia(q)/17.,0.,1.)*.84+n*.16;
+  float fn=clamp((${f3(EXT.x1 + .5)}-q.x)/29.,0.,1.)*.84+(1.-n)*.16;
+  return vec3(front(uGP,fg),front(uPB,fb),front(uBN,fn));
+}
+float foldY(vec2 q){float u=(q.x-uExt.x)/uExt.z,w=(q.y-uExt.y)/uExt.w;float a=abs(fract(u*2.)-.5)*2.-.5;float b=abs(fract(w*1.5)-.5)*2.-.5;return uFold*(a+.45*b)+uCrease*(a+b);}
+`;
+const FRAG = `
+float lineAt(float x,float w){float d=1.-abs(fract(x)-.5)*2.;float f=fwidth(x)*1.2+1e-4;return 1.-smoothstep(w,w+f,d);}
+`;
+
+const TERRAIN_VS = COMMON + `
+layout(location=0) in vec4 aPos;
+layout(location=1) in vec3 aNor;
+uniform float uSkirt;
+out vec3 vW; out vec3 vN; out float vSk; out float vH;
+void main(){
+  vec3 p=aPos.xyz;
+  if(aPos.w>1.5) p.y=-uSkirt;
+  vH=p.y;
+  p.y+=foldY(p.xz);
+  vW=p; vN=aNor; vSk=aPos.w>.5?1.:0.;
+  gl_Position=uVP*vec4(p,1.);
+}`;
+
+const TERRAIN_FS = COMMON + FRAG + `
+in vec3 vW; in vec3 vN; in float vSk; in float vH;
+uniform vec3 uBg;
+out vec4 o;
+void main(){
+  vec2 q=vW.xz; vec2 uv=(q-uExt.xy)/uExt.zw;
+  vec3 N=normalize(vN); vec3 V=normalize(uCam-vW); vec3 L=normalize(uLight); vec3 H=normalize(L+V);
+  vec3 Ng=normalize(cross(dFdx(vW),dFdy(vW))); Ng*=Ng.y<0.?-1.:1.;
+  vec3 geo=texture(uGeo,uv).rgb; vec3 deco=texture(uDeco,uv).rgb; vec3 fld=texture(uField,uv).rgb;
+  float ap=fld.g*10.;
+  float urban=(1.-step(.975,fld.g))*smoothstep(ap,ap+.12,uT);
+  float wthr=mix(.32,.8,smoothstep(2.,9.,uT));
+  float wet=smoothstep(wthr,wthr+.03,fld.r)*(1.-urban);
+  float fwr=fwidth(fld.r)*1.4+1e-4;
+  float wline=(1.-smoothstep(0.,fwr,abs(fld.r-wthr)))*(1.-urban);
+  float wring=(1.-smoothstep(0.,fwr,abs(fld.r-wthr+.09)))*(1.-urban);
+  float jimX=mix(2.6,-4.2,uJim);
+  float jimL=smoothstep(jimX-.04,jimX+.04,q.x);
+  float sf=geo.g*(1.-jimL), jim=geo.g*jimL;
+  float water=max(max(geo.r,geo.b),sf);
+  float rline=1.-smoothstep(0.,fwidth(water)*1.3+1e-4,abs(water-.5));
+  float d0=length(q); float cs=d0<1.5?.11:(d0<4.2?.22:.4);
+  float grid=max(lineAt(q.x/cs,.08),lineAt(q.y/cs,.08))*urban;
+  float hill=smoothstep(.02,.16,vH);
+  float iso=lineAt(vH*10.,.05)*smoothstep(.03,.1,vH);
+  vec2 gd=normalize(N.xz+vec2(1e-4)); float slope=1.-N.y;
+  float hat=lineAt(dot(q,vec2(-gd.y,gd.x))*60.,.1+slope*.8);
+  float terr=lineAt(vH*14.,.06);
+  float strata=lineAt(vW.y*24.,.25);
+  vec2 dc=q/.05; float dots=(1.-smoothstep(.1,.2,length(fract(dc)-.5)))*step(.4,hash12(floor(dc)));
+  float de=min(min(q.x-uExt.x,uExt.x+uExt.z-q.x),min(q.y-uExt.y,uExt.y+uExt.w-q.y));
+  vec3 k=fronts(q);
+  float wg=1.-k.x, wp=k.x*(1.-k.y), wb=k.x*k.y*(1.-k.z), wn=k.x*k.y*k.z;
+  float dif=max(dot(N,L),0.);
+  vec3 gold=vec3(1.,.74,.32);
+  vec3 col=vec3(0.);
+  if(vSk>.5){
+    vec3 sg=gold*(.16+.55*pow(max(dot(N,H),0.),14.))*(1.-strata*.5);
+    vec3 spp=vec3(.78,.68,.5)*(.7+.3*dif);
+    vec3 sb=mix(vec3(.5,.26,.17),vec3(.66,.42,.3),strata)*(.55+.45*dif);
+    vec3 sn=vec3(.015,.018,.03);
+    col=wg*sg+wp*spp+wb*sb+wn*sn;
+  } else {
+    if(wg>.002){
+      vec2 hp=q*7.;
+      vec3 Np=normalize(N+vec3(vnoise(hp)-.5,0.,vnoise(hp+17.)-.5)*.5);
+      float sp=pow(max(dot(Np,H),0.),48.);
+      float dp=max(dot(Np,L),0.);
+      float ord=clamp(length(q-${v2(PT.monserrate)})/30.,0.,1.)*.85+hash12(floor(q*3.))*.15;
+      float rev=smoothstep(ord,ord+.06,uIntro*1.12);
+      float plate=smoothstep(.15,.9,uIntro);
+      vec3 base=(vec3(.028,.02,.012)+gold*(.06*dp+.3*sp)*(.4+.6*hill))*plate;
+      float lines=clamp(max(max(iso*.8,deco.r),max(rline,max(wline,wring*.7))),0.,1.);
+      vec3 lc=gold*(.42+.85*dp)+vec3(1.,.9,.7)*sp*1.6;
+      vec3 c=mix(base,lc,lines*rev);
+      vec2 rq=q*2.5; float tt=uTime*(1.-uReduced);
+      float r1=sin(dot(rq,vec2(1.3,.7))*3.+tt*1.2), r2=sin(dot(rq,vec2(-.6,1.1))*4.-tt*.9);
+      vec3 Nw=normalize(vec3(.07*r1,1.,.07*r2));
+      float wsp=pow(max(dot(Nw,H),0.),80.);
+      float fres=pow(1.-max(dot(Nw,V),0.),3.);
+      vec3 pool=gold*(.22+.5*fres+.25*max(dot(Nw,L),0.))+vec3(1.,.93,.78)*wsp*2.;
+      c=mix(c,pool*rev,wet*.92);
+      c+=gold*.12*water*rev;
+      col+=wg*c;
+    }
+    if(wp>.002){
+      float n=fbm3(q*1.2);
+      vec3 paper=mix(vec3(.94,.87,.71),vec3(.83,.72,.53),n);
+      float fox=smoothstep(.62,.7,fbm3(q*2.4+11.));
+      paper=mix(paper,vec3(.68,.52,.33),fox*.45);
+      paper*=.95+.07*vnoise(q*90.);
+      paper*=mix(.72,1.,smoothstep(0.,2.2,de));
+      vec3 ink=vec3(.22,.13,.07);
+      vec3 c=paper*(.8+.22*max(dot(Ng,L),0.));
+      float hatch=hat*step(.18,fract(vH*14.))*smoothstep(.02,.12,slope)*hill;
+      c=mix(c,ink,hatch*.75);
+      c=mix(c,mix(c,vec3(.58,.62,.6),.55),smoothstep(.4,.6,water));
+      c=mix(c,ink,rline*.9);
+      c=mix(c,ink,clamp(dots*wet*.6+wline*.85,0.,1.));
+      c=mix(c,ink,grid*.7);
+      c=mix(c,ink,deco.g*.9);
+      col+=wp*c;
+    }
+    if(wb>.002){
+      float n=fbm3(q*2.6);
+      vec3 cal=mix(vec3(.82,.77,.69),vec3(.70,.65,.57),n);
+      float sh=.5+.55*dif;
+      vec3 c=cal*sh*(1.-terr*hill*.25);
+      c=mix(c,vec3(.62,.55,.46)*sh,hill*.35);
+      c=mix(c,vec3(.33,.25,.21)*(.8+.3*dif),urban);
+      vec3 wc=vec3(.16,.22,.25)+vec3(.6,.55,.5)*pow(max(dot(reflect(-L,vec3(0,1,0)),V),0.),20.)*.4;
+      wc+=vec3(.5,.55,.55)*pow(vnoise(q*55.+uTime*vec2(.7,.25)*(1.-uReduced)),7.)*1.4;
+      c=mix(c,wc,smoothstep(.4,.6,water));
+      c=mix(c,vec3(.3,.37,.31),wet);
+      vec3 asph=vec3(.15,.13,.12);
+      c=mix(c,asph,smoothstep(.3,.6,jim));
+      c=mix(c,asph,smoothstep(.3,.6,deco.b)*uWiden);
+      col+=wb*c;
+    }
+    if(wn>.002){
+      vec3 c=vec3(.010,.013,.026);
+      float rim=pow(1.-max(dot(N,V),0.),2.5);
+      c+=vec3(.05,.07,.13)*(rim*.8+dif*.5)*hill;
+      float dens=urban*(.35+.65*fbm3(q*2.2+5.));
+      c+=vec3(1.,.52,.2)*dens*.1;
+      float gh=hash12(floor(q/cs));
+      c+=vec3(1.,.6,.28)*grid*.6*(.4+.6*gh);
+      c=mix(c,vec3(0.,.005,.012),smoothstep(.4,.6,water)*.9);
+      c+=vec3(.9,.7,.5)*(smoothstep(.3,.6,jim)+smoothstep(.3,.6,deco.b)*uWiden)*.25;
+      col+=wn*c;
+    }
+  }
+  float e1=k.x*(1.-k.x)*4., e2=k.y*(1.-k.y)*4.*k.x, e3=k.z*(1.-k.z)*4.*k.x*k.y;
+  col=mix(col,vec3(.03,.07,.05),smoothstep(.3,1.,e1)*.75);
+  col+=vec3(1.,.6,.25)*pow(e1,8.)*1.5;
+  col=mix(col,vec3(.25,.05,0.),smoothstep(.2,1.,e2)*.5);
+  col+=vec3(1.,.38,.08)*pow(e2,3.)*1.4;
+  col=mix(col,vec3(.4,.13,.3),e3*.45);
+  col+=vec3(1.,.48,.22)*pow(e3,5.)*.9;
+  float tc=uTime*(1.-uReduced);
+  float cloud=smoothstep(.5,.78,fbm3(q*.11+vec2(tc*.022,tc*.009)));
+  col*=1.-.26*cloud*(1.-wn)*(1.-wg*.6);
+  float ash=uAsh*fld.b;
+  col=mix(col,vec3(dot(col,vec3(.3,.5,.2)))*.5+vec3(.1),ash*.85);
+  col=mix(uBg,col,mix(1.,smoothstep(0.,3.5,de),wn));
+  o=vec4(col,1.);
+}`;
+
+const BLOCK_VS = COMMON + `
+layout(location=0) in vec3 aPos;
+layout(location=1) in vec3 aNor;
+layout(location=2) in float aRoof;
+layout(location=3) in vec4 iA;
+layout(location=4) in vec4 iB;
+layout(location=5) in vec4 iC;
+out vec3 vW; out vec3 vN; out vec3 vLoc; out float vRoof; out vec3 vK; out vec4 vC; out float vCol;
+uniform float uHut;
+void main(){
+  vec2 c=iA.xz; float ty=iC.y;
+  vec3 k=fronts(c);
+  float g;
+  if(ty<.5) g=smoothstep(iA.w,iA.w+.12,uT);
+  else if(ty<1.5) g=1.;
+  else { g=smoothstep(.62,.95,uT)*(1.-smoothstep(1.5,1.95,uT)); float hs=ty<2.5?iC.x*.8:.86; g*=smoothstep(hs,hs+.12,uHut); }
+  float hh=iB.z, gs=g;
+  if(ty<1.5){
+    hh=mix(mix(.0035,iB.z,k.y),iB.w,k.z);
+    float gq=g>=.999?1.:floor(g*7.)/7.;
+    gs=mix(g,gq,k.y*(1.-k.z));
+  }
+  float ash=uAsh*iC.z;
+  hh*=1.-.65*ash;
+  float vis=step(.001,g);
+  vec2 sz=iB.xy*mix(.55,1.,g)*vis;
+  sz.x*=1.-.32*uWiden*iC.w;
+  vec3 p=vec3(c.x+aPos.x*sz.x, iA.y-.003+aPos.y*hh*max(gs,.04)*vis, c.y+aPos.z*sz.y);
+  p.y+=foldY(c);
+  vW=p; vN=aNor; vLoc=aPos; vRoof=aRoof; vK=k; vC=vec4(iC.x,ty,ash,iA.y-.003+foldY(c));
+  vCol=(ty<.5&&iB.z<.021)?1.:0.;
+  gl_Position=uVP*vec4(p,1.);
+}`;
+
+const BLOCK_FS = COMMON + FRAG + `
+in vec3 vW; in vec3 vN; in vec3 vLoc; in float vRoof; in vec3 vK; in vec4 vC; in float vCol;
+out vec4 o;
+void main(){
+  vec3 N=normalize(vN); vec3 V=normalize(uCam-vW); vec3 L=normalize(uLight); vec3 H=normalize(L+V);
+  float dif=max(dot(N,L),0.);
+  vec3 k=vK; float wg=1.-k.x,wp=k.x*(1.-k.y),wb=k.x*k.y*(1.-k.z),wn=k.x*k.y*k.z;
+  float seed=vC.x, ty=vC.y, ash=vC.z, yy=vW.y-vC.w;
+  float hatch=lineAt((vW.x+vW.z)*140.,.18);
+  float edge=smoothstep(.40,.47,max(abs(vLoc.x),abs(vLoc.z)));
+  float course=lineAt(vW.y*240.,.12);
+  float wu=(abs(N.x)>.5?vW.z:vW.x)*95., wv=yy*270.;
+  vec3 col=vec3(0.);
+  if(wg>.002){ col+=wg*(vec3(.32,.30,.27)*(.35+.65*dif)+vec3(.5)*pow(max(dot(N,H),0.),30.)*.3); }
+  if(wp>.002){
+    vec3 paper=vec3(.90,.82,.64), ink=vec3(.22,.13,.07);
+    vec3 c=vRoof>.5?mix(paper*.93,ink,max(hatch*.55,edge*.9)):mix(ink,paper*.6,.25);
+    if(ty>1.5&&vRoof>.5) c=mix(paper*.85,ink,hatch*.6);
+    col+=wp*c;
+  }
+  if(wb>.002){
+    vec3 brick=mix(vec3(.58,.25,.15),vec3(.72,.36,.22),seed);
+    vec3 wall=mix(brick,vec3(.88,.85,.78),vCol*step(.45,seed))*(1.-course*.35);
+    vec3 roof=mix(mix(vec3(.66,.33,.2),vec3(.52,.24,.15),seed),vec3(.62,.28,.16),vCol);
+    vec3 c=(vRoof>.5?roof:wall)*(.42+.62*dif);
+    c*=mix(.62,1.,smoothstep(0.,.012,yy));
+    col+=wb*c;
+  }
+  if(wn>.002){
+    vec3 c=vec3(.018,.022,.038)+vec3(.04,.06,.11)*pow(1.-max(dot(N,V),0.),3.);
+    if(vRoof<.5){
+      vec2 cell=floor(vec2(wu,wv));
+      float win=step(.3,fract(wu))*step(.35,fract(wv));
+      float lit=step(.52,hash12(cell+seed*91.));
+      vec3 lc=mix(vec3(1.,.66,.32),vec3(.8,.9,1.),step(.8,hash12(cell+3.1)));
+      c+=lc*win*lit*.85;
+    }
+    col+=wn*c;
+  }
+  if(ty>.5&&ty<1.5){
+    float l=dot(col,vec3(.33));
+    col=mix(vec3(l)*.85+.04,col,uPueblo);
+    col+=vec3(1.,.6,.3)*uPueblo*(1.-uPueblo)*2.2;
+  }
+  float e1=k.x*(1.-k.x)*4., e2=k.y*(1.-k.y)*4.*k.x, e3=k.z*(1.-k.z)*4.*k.x*k.y;
+  col=mix(col,vec3(.04,.08,.06),smoothstep(.3,1.,e1)*.7);
+  col+=vec3(1.,.38,.08)*pow(e2,3.)*1.2;
+  col+=vec3(1.,.5,.25)*pow(e3,5.)*.6;
+  float tc=uTime*(1.-uReduced);
+  col*=1.-.26*smoothstep(.5,.78,fbm3(vW.xz*.11+vec2(tc*.022,tc*.009)))*(1.-wn);
+  col=mix(col,vec3(dot(col,vec3(.3,.5,.2)))*.45+vec3(.1),ash*.9);
+  o=vec4(col,1.);
+}`;
+
+const RIBBON_VS = COMMON + `
+layout(location=0) in vec3 aPos;
+layout(location=1) in vec4 aE;
+out vec4 vE; out vec3 vW;
+void main(){ vec3 p=aPos; p.y+=foldY(p.xz); vW=p; vE=aE; gl_Position=uVP*vec4(p,1.); }`;
+
+const RIBBON_FS = COMMON + `
+in vec4 vE; in vec3 vW;
+uniform vec4 uRoute[3];
+out vec4 o;
+void main(){
+  float s=vE.x, ac=abs(vE.y), vv=vE.z, r=vE.w;
+  float core=1.-smoothstep(.2,1.,ac);
+  float wn=fronts(vW.xz).z;
+  vec3 base=vec3(0.), add=vec3(0.); float cover=0.;
+  float tt=uTime*(1.-uReduced);
+  if(r<.5){
+    vec4 R=uRoute[0]; if(s>R.y||R.x<.002) discard;
+    float tp=fract(tt*.02+.1);
+    float tram=exp(-pow((s-tp)*R.z/.09,2.));
+    cover=core*.85*R.x;
+    base=mix(vec3(.16,.09,.06),vec3(.3),uAsh)*cover;
+    add=(vec3(1.,.82,.55)*tram*1.6+vec3(1.,.5,.2)*.15)*core*R.x*(1.-uAsh);
+  } else if(r<1.5){
+    vec4 R=uRoute[1]; if(s>R.y||R.x<.002) discard;
+    float sp=tt*.012, seg=R.z/7.;
+    float d1=(fract(s*7.-sp)-.5)*seg, d2=(fract(s*7.+sp+.37)-.5)*seg;
+    float bus=(exp(-pow(d1/.07,2.))+exp(-pow(d2/.07,2.)))*R.w;
+    cover=core*.3*(1.-wn)*R.x;
+    base=vec3(.55,.12,.07)*cover;
+    add=(vec3(1.,.28,.14)*(.35+bus*1.8)*core+vec3(1.,.9,.8)*bus*core*core*.8)*R.x;
+  } else {
+    vec4 R=uRoute[2]; if(s>R.y||R.x<.002) discard;
+    float dash=step(.38,fract(s*R.z/.14-tt*.25));
+    float lead=exp(-pow((R.y-s)*R.z/.25,2.))*step(R.y,.999);
+    float shim=.8+.2*sin(tt*3.+s*120.);
+    vec3 c=vec3(.35,.88,1.)*(.18+.7*dash)*shim;
+    if(r>2.5) c=vec3(.35,.88,1.)*(1.-vv)*.5;
+    add=(c*core+vec3(.8,1.,1.)*lead*core*2.)*R.x;
+  }
+  o=vec4(base+add,cover);
+}`;
+
+const LIGHT_VS = COMMON + `
+layout(location=0) in vec3 aPos;
+layout(location=1) in vec2 aD;
+out float vA; out float vS;
+void main(){
+  vec3 p=aPos; p.y+=foldY(p.xz);
+  vec3 k=fronts(p.xz);
+  float vis=smoothstep(aD.x,aD.x+.15,uT)*k.x*k.y*k.z;
+  vS=aD.y;
+  vA=vis*(.65+.35*sin(uTime*(.4+aD.y*1.7)*(1.-uReduced)+aD.y*60.));
+  if(vis<.01){ gl_Position=vec4(2.,2.,2.,1.); gl_PointSize=1.; return; }
+  gl_Position=uVP*vec4(p,1.);
+  float dist=length(uCam-p);
+  gl_PointSize=clamp((1.3+aD.y*2.4)*uPx*12./dist,1.,9.);
+}`;
+const LIGHT_FS = COMMON + `
+in float vA; in float vS;
+out vec4 o;
+void main(){
+  vec2 q=gl_PointCoord*2.-1.; float d=dot(q,q); if(d>1.) discard;
+  float a=exp(-d*3.2)*vA;
+  vec3 c=mix(vec3(1.,.62,.3),vec3(.85,.92,1.),step(.84,vS));
+  o=vec4(c*a*1.3,0.);
+}`;
+
+const ACTOR_VS = COMMON + `
+layout(location=0) in vec3 aPos;
+layout(location=1) in vec3 aNor;
+layout(location=3) in vec4 iP;
+layout(location=4) in vec4 iS;
+layout(location=5) in vec4 iCol;
+out vec3 vW; out vec3 vN; out vec4 vCol; out vec3 vK;
+void main(){
+  float c=cos(iP.w), s=sin(iP.w);
+  vec3 l=aPos*iS.xyz;
+  vec3 p=vec3(c*l.x-s*l.z,l.y,s*l.x+c*l.z)+iP.xyz;
+  p.y+=foldY(iP.xz);
+  vW=p; vN=vec3(c*aNor.x-s*aNor.z,aNor.y,s*aNor.x+c*aNor.z); vCol=iCol; vK=fronts(iP.xz);
+  gl_Position=uVP*vec4(p,1.);
+}`;
+const ACTOR_FS = COMMON + `
+in vec3 vW; in vec3 vN; in vec4 vCol; in vec3 vK;
+out vec4 o;
+void main(){
+  vec3 N=normalize(vN); vec3 L=normalize(uLight); vec3 V=normalize(uCam-vW);
+  float dif=max(dot(N,L),0.)*.75+.25;
+  vec3 k=vK; float wg=1.-k.x,wp=k.x*(1.-k.y),wb=k.x*k.y*(1.-k.z),wn=k.x*k.y*k.z;
+  vec3 base=vCol.rgb;
+  vec3 gold=vec3(1.,.74,.32)*(.3+.9*dif)+vec3(pow(max(dot(reflect(-L,N),V),0.),24.)*.8);
+  vec3 ink=mix(vec3(.2,.12,.06),base*.55,.3)*(.75+.35*dif);
+  vec3 col=wg*gold+wp*ink+wb*base*dif+wn*base*.12*dif+base*vCol.a;
+  col=mix(col,vec3(dot(col,vec3(.3,.5,.2)))*.5+vec3(.1),uAsh*.6);
+  o=vec4(col,1.);
+}`;
+const PART_VS = COMMON + `
+layout(location=0) in vec4 aP;
+layout(location=1) in vec4 aC;
+out vec4 vC;
+void main(){
+  vec3 p=aP.xyz; p.y+=foldY(p.xz); vC=aC;
+  gl_Position=uVP*vec4(p,1.);
+  gl_PointSize=clamp(aP.w*uPx*1380./length(uCam-p),1.,72.);
+}`;
+const PART_FS = COMMON + `
+in vec4 vC;
+out vec4 o;
+void main(){
+  vec2 q=gl_PointCoord*2.-1.; float d=dot(q,q); if(d>1.) discard;
+  float a=(1.-d)*(1.-d)*abs(vC.a);
+  o=vec4(vC.rgb*a,vC.a>0.?a:0.);
+}`;
+
+const FOG_VS = COMMON + `
+layout(location=0) in vec3 aPos;
+out vec3 vW;
+void main(){ vec3 p=aPos; p.y+=foldY(p.xz); vW=p; gl_Position=uVP*vec4(p,1.); }`;
+const FOG_FS = COMMON + `
+in vec3 vW;
+uniform vec4 uFogC;
+out vec4 o;
+void main(){
+  float tt=uTime*(1.-uReduced);
+  vec2 q=vW.xz*.09+vec2(tt*.010,tt*.004);
+  float n=fbm(q+vW.y*7.);
+  float a=smoothstep(.45,.85,n)*uFogC.a;
+  vec2 uv=(vW.xz-uExt.xy)/uExt.zw;
+  a*=smoothstep(0.,.06,uv.x)*smoothstep(1.,.94,uv.x)*smoothstep(0.,.06,uv.y)*smoothstep(1.,.94,uv.y);
+  o=vec4(uFogC.rgb*a,a);
+}`;
+
+const POST_VS = `#version 300 es
+out vec2 vUv;
+void main(){ vec2 p=vec2(float((gl_VertexID<<1)&2),float(gl_VertexID&2)); vUv=p; gl_Position=vec4(p*2.-1.,0.,1.); }`;
+const POST_HEAD = `#version 300 es
+precision highp float;
+in vec2 vUv;
+out vec4 o;
+`;
+const BG_FS = POST_HEAD + `
+uniform vec3 uBg0,uBg1;
+void main(){ vec3 c=mix(uBg1,uBg0,vUv.y); c+=uBg1*exp(-pow((vUv.y-.42)*3.,2.))*.25; o=vec4(c,1.); }`;
+const DOWN_FS = POST_HEAD + `
+uniform sampler2D uTex; uniform vec2 uTexel;
+void main(){ vec3 c=texture(uTex,vUv+uTexel*vec2(-1,-1)).rgb+texture(uTex,vUv+uTexel*vec2(1,-1)).rgb+texture(uTex,vUv+uTexel*vec2(-1,1)).rgb+texture(uTex,vUv+uTexel*vec2(1,1)).rgb; o=vec4(c*.25,1.); }`;
+const BLUR_FS = POST_HEAD + `
+uniform sampler2D uTex; uniform vec2 uDir;
+void main(){
+  vec3 c=texture(uTex,vUv).rgb*.2270270270;
+  c+=(texture(uTex,vUv+uDir*1.3846153846).rgb+texture(uTex,vUv-uDir*1.3846153846).rgb)*.3162162162;
+  c+=(texture(uTex,vUv+uDir*3.2307692308).rgb+texture(uTex,vUv-uDir*3.2307692308).rgb)*.0702702703;
+  o=vec4(c,1.);
+}`;
+const COMP_FS = POST_HEAD + `
+uniform sampler2D uScene,uBlur;
+uniform vec2 uRes;
+uniform float uTime,uBloom,uThr,uSat,uFade,uRain,uFocus,uTilt,uGrain,uVig;
+uniform vec3 uTint;
+float h12(vec2 p){vec3 p3=fract(vec3(p.xyx)*.1031);p3+=dot(p3,p3.yzx+33.33);return fract((p3.x+p3.y)*p3.z);}
+void main(){
+  vec3 c=texture(uScene,vUv).rgb;
+  vec3 b=texture(uBlur,vUv).rgb;
+  c=mix(c,b,smoothstep(.16,.55,abs(vUv.y-uFocus))*uTilt);
+  vec3 bl=max(b-uThr,0.)/(1.-uThr);
+  c+=bl*uBloom;
+  if(uRain>.001){
+    vec2 p=vUv*vec2(uRes.x/uRes.y,1.);
+    float r=0.;
+    for(int i=0;i<2;i++){
+      float sc=float(i)*.6+1.;
+      vec2 q=p*vec2(90.,2.2)*sc;
+      q.y+=uTime*(4.5+sc);
+      q.x+=q.y*.05;
+      vec2 id=floor(q), f=fract(q);
+      r+=step(.965,h12(id+float(i)*17.))*(1.-smoothstep(0.,.06,abs(f.x-.5)))*smoothstep(0.,.3,f.y)*(1.-smoothstep(.6,1.,f.y));
+    }
+    c+=vec3(.75,.8,.85)*r*uRain*.22;
+    c=mix(c,c*vec3(.9,.94,1.),uRain*.3);
+  }
+  float l=dot(c,vec3(.299,.587,.114));
+  c=mix(vec3(l),c,uSat)*uTint;
+  vec2 d=vUv-.5; c*=1.-uVig*dot(d,d)*1.6;
+  c+=(h12(vUv*uRes+fract(uTime)*91.)-.5)*uGrain;
+  o=vec4(c*uFade,1.);
+}`;
+
+/* ---------- WebGL 2 ---------- */
+const canvas = $('#gl');
+const gl = canvas.getContext('webgl2', { antialias: false, alpha: false, powerPreference: 'high-performance', preserveDrawingBuffer: false });
+function sinGL(msg) {
+  const d = document.createElement('div');
+  d.className = 'sin-gl';
+  d.textContent = msg;
+  document.body.appendChild(d);
+}
+if (!gl) { sinGL('Tu navegador no pudo iniciar WebGL 2, que esta pieza necesita para dibujar el mapa.'); return; }
+
+function compile(type, src) {
+  const s = gl.createShader(type);
+  gl.shaderSource(s, src);
+  gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+  return s;
+}
+function program(vs, fs) {
+  const p = gl.createProgram();
+  gl.attachShader(p, compile(gl.VERTEX_SHADER, vs));
+  gl.attachShader(p, compile(gl.FRAGMENT_SHADER, fs));
+  gl.linkProgram(p);
+  if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+  return { p, u: {} };
+}
+const loc = (pr, n) => { if (!(n in pr.u)) pr.u[n] = gl.getUniformLocation(pr.p, n); return pr.u[n]; };
+const u1 = (pr, n, v) => { const l = loc(pr, n); if (l) gl.uniform1f(l, v); };
+const u2 = (pr, n, a, b) => { const l = loc(pr, n); if (l) gl.uniform2f(l, a, b); };
+const u3 = (pr, n, v) => { const l = loc(pr, n); if (l) gl.uniform3f(l, v[0], v[1], v[2]); };
+const u4 = (pr, n, v) => { const l = loc(pr, n); if (l) gl.uniform4f(l, v[0], v[1], v[2], v[3]); };
+const ui = (pr, n, v) => { const l = loc(pr, n); if (l) gl.uniform1i(l, v); };
+
+let PR;
+try {
+  PR = {
+    terrain: program(TERRAIN_VS, TERRAIN_FS),
+    block: program(BLOCK_VS, BLOCK_FS),
+    ribbon: program(RIBBON_VS, RIBBON_FS),
+    light: program(LIGHT_VS, LIGHT_FS),
+    fog: program(FOG_VS, FOG_FS),
+    actor: program(ACTOR_VS, ACTOR_FS),
+    part: program(PART_VS, PART_FS),
+    bg: program(POST_VS, BG_FS),
+    down: program(POST_VS, DOWN_FS),
+    blur: program(POST_VS, BLUR_FS),
+    comp: program(POST_VS, COMP_FS),
+  };
+} catch (err) {
+  sinGL('No se pudo preparar el mapa en esta tarjeta gráfica.');
+  console.warn(err);
+  return;
+}
+
+function buffer(data, target = gl.ARRAY_BUFFER) {
+  const b = gl.createBuffer();
+  gl.bindBuffer(target, b);
+  gl.bufferData(target, data, gl.STATIC_DRAW);
+  return b;
+}
+function attr(index, buf, size, stride = 0, offset = 0, divisor = 0) {
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.enableVertexAttribArray(index);
+  gl.vertexAttribPointer(index, size, gl.FLOAT, false, stride, offset);
+  gl.vertexAttribDivisor(index, divisor);
+}
+function texture(src, w, h, flip) {
+  const t = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, t);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flip);
+  if (src instanceof Uint8Array) gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, src);
+  else gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, src);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+  gl.generateMipmap(gl.TEXTURE_2D);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  const an = gl.getExtension('EXT_texture_filter_anisotropic');
+  if (an) gl.texParameterf(gl.TEXTURE_2D, an.TEXTURE_MAX_ANISOTROPY_EXT, Math.min(8, gl.getParameter(an.MAX_TEXTURE_MAX_ANISOTROPY_EXT)));
+  return t;
+}
+
+const SCENE = {};
+function buildScene() {
+  SCENE.geo = texture(bakeGeo(), 0, 0, true);
+  SCENE.deco = texture(bakeDeco(), 0, 0, true);
+  SCENE.field = texture(bakeField(), FW, FH, false);
+
+  const T = buildTerrain();
+  SCENE.terrain = gl.createVertexArray(); gl.bindVertexArray(SCENE.terrain);
+  attr(0, buffer(T.pos), 4); attr(1, buffer(T.nor), 3);
+  buffer(T.idx, gl.ELEMENT_ARRAY_BUFFER);
+  SCENE.terrainN = T.idx.length;
+
+  const inst = (mesh, data) => {
+    const vao = gl.createVertexArray(); gl.bindVertexArray(vao);
+    attr(0, buffer(mesh.P), 3); attr(1, buffer(mesh.N), 3); attr(2, buffer(mesh.R), 1);
+    const ib = buffer(data);
+    attr(3, ib, 4, 48, 0, 1); attr(4, ib, 4, 48, 16, 1); attr(5, ib, 4, 48, 32, 1);
+    buffer(mesh.I, gl.ELEMENT_ARRAY_BUFFER);
+    return { vao, n: mesh.I.length, count: data.length / 12 };
+  };
+  SCENE.blocks = inst(boxMesh(), buildBlocks());
+  SCENE.huts = inst(hutMesh(), buildHuts());
+
+  const R = buildRibbons();
+  SCENE.ribbon = gl.createVertexArray(); gl.bindVertexArray(SCENE.ribbon);
+  attr(0, buffer(R.P), 3); attr(1, buffer(R.E), 4);
+  SCENE.ribbonN = R.P.length / 3;
+
+  const Lg = buildLights();
+  SCENE.lights = gl.createVertexArray(); gl.bindVertexArray(SCENE.lights);
+  const lb = buffer(Lg);
+  attr(0, lb, 3, 20, 0); attr(1, lb, 2, 20, 12);
+  SCENE.lightsN = Lg.length / 5;
+
+  const fog = [];
+  for (const y of [.05, .16]) {
+    const a = [EXT.x0, y, EXT.z0], b = [EXT.x1, y, EXT.z0], c = [EXT.x1, y, EXT.z1], d = [EXT.x0, y, EXT.z1];
+    fog.push(...a, ...b, ...c, ...a, ...c, ...d);
+  }
+  SCENE.fog = gl.createVertexArray(); gl.bindVertexArray(SCENE.fog);
+  attr(0, buffer(new Float32Array(fog)), 3);
+  SCENE.empty = gl.createVertexArray();
+  gl.bindVertexArray(null);
+}
+
+/* Framebuffers: escena con MSAA, resolución, y cadena de desenfoque a 1/4 */
+const FB = {};
+function target(w, h) {
+  const tex = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  const fb = gl.createFramebuffer();
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+  return { tex, fb, w, h };
+}
+function freeFB() {
+  for (const k of ['scene', 'q1', 'q2']) if (FB[k]) { gl.deleteTexture(FB[k].tex); gl.deleteFramebuffer(FB[k].fb); }
+  if (FB.msaa) { gl.deleteFramebuffer(FB.msaa); gl.deleteRenderbuffer(FB.color); gl.deleteRenderbuffer(FB.depth); }
+}
+function buildFB(w, h) {
+  freeFB();
+  const samples = Math.min(4, gl.getParameter(gl.MAX_SAMPLES));
+  FB.msaa = gl.createFramebuffer();
+  gl.bindFramebuffer(gl.FRAMEBUFFER, FB.msaa);
+  FB.color = gl.createRenderbuffer();
+  gl.bindRenderbuffer(gl.RENDERBUFFER, FB.color);
+  gl.renderbufferStorageMultisample(gl.RENDERBUFFER, samples, gl.RGBA8, w, h);
+  gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, FB.color);
+  FB.depth = gl.createRenderbuffer();
+  gl.bindRenderbuffer(gl.RENDERBUFFER, FB.depth);
+  gl.renderbufferStorageMultisample(gl.RENDERBUFFER, samples, gl.DEPTH_COMPONENT24, w, h);
+  gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, FB.depth);
+  FB.scene = target(w, h);
+  const qw = Math.max(1, w >> 2), qh = Math.max(1, h >> 2);
+  FB.q1 = target(qw, qh);
+  FB.q2 = target(qw, qh);
+  FB.w = w; FB.h = h;
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+}
+
+/* ---------- Cámara ---------- */
+const KEYS = [
+  [-4.6, 2.2, 34, 33, -6],
+  [0.5, 0.2, 2.5, 36, -14],
+  [0.0, 0.2, 4.8, 47, 6],
+  [0.05, 0.05, 2.0, 30, -20],
+  [0.75, 2.8, 8.2, 31, -36],
+  [0.2, 0.4, 3.6, 41, 14],
+  [0.3, 0.75, 2.9, 54, -4],
+  [-5.6, 2.2, 28, 41, 4],
+  [-1.2, 6.2, 15.5, 25, 26],
+  [-6.2, 3.2, 11.5, 15, -2],
+];
+const INTRO_KEY = [-4.6, 2.2, 52, 64, -70];
+function camKey(t) {
+  if (reduced) return KEYS[Math.round(clamp(t, 0, 9))];
+  const i = Math.min(8, Math.floor(t)), f = t - i, e = f * f * (3 - 2 * f);
+  const A = KEYS[i], B = KEYS[i + 1];
+  return [lerp(A[0], B[0], e), lerp(A[1], B[1], e), Math.exp(lerp(Math.log(A[2]), Math.log(B[2]), e)), lerp(A[3], B[3], e), lerp(A[4], B[4], e)];
+}
+function blendKey(A, B, e) {
+  let da = ((B[4] - A[4]) % 360 + 540) % 360 - 180;
+  return [lerp(A[0], B[0], e), lerp(A[1], B[1], e), Math.exp(lerp(Math.log(A[2]), Math.log(B[2]), e)), lerp(A[3], B[3], e), A[4] + da * e];
+}
+function perspective(out, fovy, aspect, near, far) {
+  const f = 1 / Math.tan(fovy / 2), nf = 1 / (near - far);
+  out.fill(0);
+  out[0] = f / aspect; out[5] = f; out[10] = (far + near) * nf; out[11] = -1; out[14] = 2 * far * near * nf;
+  return out;
+}
+function lookAt(out, e, c) {
+  let zx = e[0] - c[0], zy = e[1] - c[1], zz = e[2] - c[2];
+  let l = Math.hypot(zx, zy, zz); zx /= l; zy /= l; zz /= l;
+  let xx = zz, xy = 0, xz = -zx;
+  l = Math.hypot(xx, xy, xz) || 1; xx /= l; xy /= l; xz /= l;
+  const yx = zy * xz - zz * xy, yy = zz * xx - zx * xz, yz = zx * xy - zy * xx;
+  out[0] = xx; out[1] = yx; out[2] = zx; out[3] = 0;
+  out[4] = xy; out[5] = yy; out[6] = zy; out[7] = 0;
+  out[8] = xz; out[9] = yz; out[10] = zz; out[11] = 0;
+  out[12] = -(xx * e[0] + xy * e[1] + xz * e[2]);
+  out[13] = -(yx * e[0] + yy * e[1] + yz * e[2]);
+  out[14] = -(zx * e[0] + zy * e[1] + zz * e[2]);
+  out[15] = 1;
+  return out;
+}
+function mul(out, a, b) {
+  const r = new Float32Array(16);
+  for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) {
+    let s = 0;
+    for (let k = 0; k < 4; k++) s += a[k * 4 + i] * b[j * 4 + k];
+    r[j * 4 + i] = s;
+  }
+  out.set(r);
+  return out;
+}
+const MP = new Float32Array(16), MV = new Float32Array(16), MT = new Float32Array(16), VP = new Float32Array(16);
+const CAM = { eye: [0, 0, 0], az: 0, ox: 0, oy: 0 };
+
+/* El estado continuo de la historia: t va de 0 (hito 1) a 9 (hito 10) */
+const S = { t: 0, target: 0, vel: 0, dragging: false, time: 0, intro: 0, fold: 0, crease: 0, mx: 0, my: 0, orbAz: 0, orbEl: 0, orbIdle: 0 };
+const W4 = [1, 0, 0, 0];
+const mix4 = (a, w) => a[0] * w[0] + a[1] * w[1] + a[2] * w[2] + a[3] * w[3];
+const mixV = (arr, w) => [0, 1, 2].map(i => arr[0][i] * w[0] + arr[1][i] * w[1] + arr[2][i] * w[2] + arr[3][i] * w[3]);
+const BG0 = [[.02, .016, .012], [.105, .075, .05], [.23, .18, .155], [.008, .012, .04]];
+const BG1 = [[.07, .047, .02], [.17, .125, .09], [.11, .083, .07], [.028, .043, .1]];
+const FOG = [[.25, .18, .08, .18], [.95, .9, .8, .12], [.85, .72, .62, .14], [.25, .3, .45, .2]];
+const TINT = [[1.04, 1.0, .92], [1.02, 1.0, .96], [1.03, .99, .95], [.94, .98, 1.06]];
+function fogY(x, z) {
+  const u = (x - EXT.x0) / EW, w = (z - EXT.z0) / EH;
+  const a = Math.abs(fract(u * 2) - .5) * 2 - .5, b = Math.abs(fract(w * 1.5) - .5) * 2 - .5;
+  return S.fold * (a + .45 * b) + S.crease * (a + b);
+}
+const rainLevel = time => reduced ? 0 : sstep(.6, .88, vnoise(time * .012, 3.3));
+
+function epochUniforms() {
+  const t = S.t;
+  const gp = sstep(.30, .95, t), pb = sstep(3.2, 3.95, t), bn = sstep(7.2, 7.95, t);
+  W4[0] = 1 - gp; W4[1] = gp * (1 - pb); W4[2] = gp * pb * (1 - bn); W4[3] = gp * pb * bn;
+  S.fold = reduced ? 0 : 1.3 * Math.sin(Math.PI * gp) ** 2;
+  S.crease = .03 * W4[1];
+  return {
+    gp, pb, bn,
+    ash: SC.ashV < 0 ? sstep(5.45, 5.95, t) * (1 - sstep(6.15, 6.75, t)) : lerp(sstep(5.45, 5.95, t) * (1 - sstep(6.15, 6.75, t)), SC.ashV, SC.w),
+    jim: sstep(4.4, 4.95, t) * SC.jim,
+    widen: SC.widenV < 0 ? sstep(6.2, 6.8, t) : lerp(sstep(6.2, 6.8, t), SC.widenV, SC.w),
+    pueblo: sstep(6.45, 6.95, t) * SC.pueblo,
+    skirt: .85 * W4[0] + .012 * W4[1] + .3 * W4[2] + .15 * W4[3],
+  };
+}
+function updateCamera(cssW, cssH) {
+  let k = camKey(S.t);
+  if (S.intro < 1) k = blendKey(INTRO_KEY, k, sstep(0, 1, S.intro));
+  if (SC.camW > .001 && SC.cam) k = blendKey(k, SC.cam, SC.camW);
+  const drift = reduced ? 0 : Math.sin(S.time * .05) * 2.5;
+  const az = (k[4] + drift + S.orbAz) * Math.PI / 180;
+  const el = clamp(k[3] + S.orbEl, 8, 80) * Math.PI / 180;
+  const tgt = [k[0], .02, k[1]];
+  const eye = [tgt[0] + k[2] * Math.cos(el) * Math.cos(az), tgt[1] + k[2] * Math.sin(el), tgt[2] + k[2] * Math.cos(el) * Math.sin(az)];
+  eye[1] = Math.max(eye[1], height(eye[0], eye[2]) + .02 + k[2] * .05);
+  CAM.eye = eye; CAM.az = az; CAM.dist = k[2];
+  const wide = cssW > 760;
+  CAM.ox = (wide ? .16 : 0) * (1 - SC.camW); CAM.oy = wide ? .1 : .02;
+  perspective(MP, 36 * Math.PI / 180, cssW / cssH, Math.max(.004, k[2] * .012), 220);
+  lookAt(MV, eye, tgt);
+  MT.fill(0); MT[0] = -1; MT[5] = 1; MT[10] = 1; MT[15] = 1; MT[12] = CAM.ox; MT[13] = CAM.oy;
+  mul(VP, MP, MV);
+  mul(VP, MT, VP);
+}
+function lightDir() {
+  const dirs = [[160, 28], [110, 55], [115, 22], [120, 40]].map(([off, el]) => {
+    const a = CAM.az + (off + S.mx * 60 + (reduced ? 0 : Math.sin(S.time * .05) * 18)) * Math.PI / 180, e = clamp(el - S.my * 14, 6, 80) * Math.PI / 180;
+    return [Math.cos(a) * Math.cos(e), Math.sin(e), Math.sin(a) * Math.cos(e)];
+  });
+  return mixV(dirs, W4);
+}
+function project(x, y, z, cssW, cssH) {
+  const cx = VP[0] * x + VP[4] * y + VP[8] * z + VP[12];
+  const cy = VP[1] * x + VP[5] * y + VP[9] * z + VP[13];
+  const cw = VP[3] * x + VP[7] * y + VP[11] * z + VP[15];
+  if (cw <= .001) return null;
+  return [(cx / cw * .5 + .5) * cssW, (1 - (cy / cw * .5 + .5)) * cssH];
+}
+
+function sceneUniforms(pr, E, L) {
+  gl.uniformMatrix4fv(loc(pr, 'uVP'), false, VP);
+  u3(pr, 'uCam', CAM.eye); u3(pr, 'uLight', L);
+  u1(pr, 'uT', S.t); u1(pr, 'uTime', S.time);
+  u1(pr, 'uGP', E.gp); u1(pr, 'uPB', E.pb); u1(pr, 'uBN', E.bn);
+  u1(pr, 'uAsh', E.ash); u1(pr, 'uIntro', S.intro); u1(pr, 'uJim', E.jim); u1(pr, 'uWiden', E.widen); u1(pr, 'uPueblo', E.pueblo);
+  u1(pr, 'uReduced', reduced ? 1 : 0); u1(pr, 'uPx', FB.h / 900); u1(pr, 'uFold', S.fold); u1(pr, 'uCrease', S.crease);
+  u4(pr, 'uExt', [EXT.x0, EXT.z0, EW, EH]);
+  ui(pr, 'uGeo', 0); ui(pr, 'uDeco', 1); ui(pr, 'uField', 2);
+}
+function routeUniform(pr) {
+  const t = S.t;
+  const r = new Float32Array([
+    sstep(3.5, 3.75, t) * (1 - sstep(5.85, 6.45, t)) * (SC.tramV < 0 ? 1 : lerp(1, SC.tramV, SC.w)), sstep(3.55, 3.98, t) * 1.02, ROUTE_LEN[0], 0,
+    sstep(7.55, 7.8, t), sstep(7.55, 7.98, t) * 1.02, ROUTE_LEN[1], SC.k === 8 ? 1 - SC.w : 1,
+    sstep(8.3, 8.5, t), sstep(8.35, 8.97, t) * 1.02 * SC.metro, ROUTE_LEN[2], 0,
+  ]);
+  const l = loc(pr, 'uRoute');
+  if (l) gl.uniform4fv(l, r);
+}
+function fullscreen(pr) { gl.useProgram(pr.p); gl.bindVertexArray(SCENE.empty); return pr; }
+function pass(pr, fb, w, h, tex) {
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+  gl.viewport(0, 0, w, h);
+  fullscreen(pr);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tex);
+  ui(pr, 'uTex', 0);
+}
+function draw(cssW, cssH) {
+  const E = epochUniforms();
+  updateCamera(cssW, cssH);
+  const L = lightDir();
+  const bg0 = mixV(BG0, W4), bg1 = mixV(BG1, W4);
+  const W = FB.w, H = FB.h;
+
+  gl.bindFramebuffer(gl.FRAMEBUFFER, FB.msaa);
+  gl.viewport(0, 0, W, H);
+  gl.clearColor(bg1[0], bg1[1], bg1[2], 1);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  gl.disable(gl.DEPTH_TEST); gl.disable(gl.BLEND); gl.disable(gl.CULL_FACE);
+  const bg = fullscreen(PR.bg); u3(bg, 'uBg0', bg0); u3(bg, 'uBg1', bg1);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, SCENE.geo);
+  gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, SCENE.deco);
+  gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, SCENE.field);
+  gl.enable(gl.DEPTH_TEST); gl.depthMask(true);
+
+  let pr = PR.terrain; gl.useProgram(pr.p); sceneUniforms(pr, E, L);
+  u1(pr, 'uSkirt', E.skirt); u3(pr, 'uBg', bg1);
+  gl.bindVertexArray(SCENE.terrain);
+  gl.drawElements(gl.TRIANGLES, SCENE.terrainN, gl.UNSIGNED_INT, 0);
+
+  pr = PR.block; gl.useProgram(pr.p); sceneUniforms(pr, E, L); u1(pr, 'uHut', SC.hut);
+  for (const m of [SCENE.blocks, SCENE.huts]) { gl.bindVertexArray(m.vao); gl.drawElementsInstanced(gl.TRIANGLES, m.n, gl.UNSIGNED_SHORT, 0, m.count); }
+  if (ACT.batches.some(b => b.count)) {
+    pr = PR.actor; gl.useProgram(pr.p); sceneUniforms(pr, E, L);
+    for (const b of ACT.batches) if (b.count) {
+      gl.bindBuffer(gl.ARRAY_BUFFER, b.ibuf); gl.bufferSubData(gl.ARRAY_BUFFER, 0, b.data, 0, b.count * 12);
+      gl.bindVertexArray(b.vao); gl.drawElementsInstanced(gl.TRIANGLES, b.n, gl.UNSIGNED_SHORT, 0, b.count);
+    }
+  }
+
+  gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false);
+  pr = PR.ribbon; gl.useProgram(pr.p); sceneUniforms(pr, E, L); routeUniform(pr);
+  gl.bindVertexArray(SCENE.ribbon); gl.drawArrays(gl.TRIANGLES, 0, SCENE.ribbonN);
+  if (W4[3] > .002) {
+    pr = PR.light; gl.useProgram(pr.p); sceneUniforms(pr, E, L);
+    gl.bindVertexArray(SCENE.lights); gl.drawArrays(gl.POINTS, 0, SCENE.lightsN);
+  }
+  if (ACT.parts.count) {
+    pr = PR.part; gl.useProgram(pr.p); sceneUniforms(pr, E, L);
+    const P = ACT.parts;
+    gl.bindBuffer(gl.ARRAY_BUFFER, P.buf); gl.bufferSubData(gl.ARRAY_BUFFER, 0, P.data, 0, P.count * 8);
+    gl.bindVertexArray(P.vao); gl.drawArrays(gl.POINTS, 0, P.count);
+  }
+  pr = PR.fog; gl.useProgram(pr.p); sceneUniforms(pr, E, L);
+  const fc = FOG.map(f => f); const fogC = [0, 1, 2, 3].map(i => fc[0][i] * W4[0] + fc[1][i] * W4[1] + fc[2][i] * W4[2] + fc[3][i] * W4[3]);
+  fogC[3] *= 1 - .5 * E.ash;
+  u4(pr, 'uFogC', fogC);
+  gl.bindVertexArray(SCENE.fog); gl.drawArrays(gl.TRIANGLES, 0, 12);
+  gl.depthMask(true); gl.disable(gl.BLEND); gl.disable(gl.DEPTH_TEST);
+
+  gl.bindFramebuffer(gl.READ_FRAMEBUFFER, FB.msaa);
+  gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, FB.scene.fb);
+  gl.blitFramebuffer(0, 0, W, H, 0, 0, W, H, gl.COLOR_BUFFER_BIT, gl.NEAREST);
+  gl.bindFramebuffer(gl.READ_FRAMEBUFFER, null);
+  gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
+
+  const q1 = FB.q1, q2 = FB.q2;
+  pr = PR.down; pass(pr, q1.fb, q1.w, q1.h, FB.scene.tex); u2(pr, 'uTexel', 1 / W, 1 / H); gl.drawArrays(gl.TRIANGLES, 0, 3);
+  pr = PR.blur;
+  for (const rad of [1, 2.2]) {
+    pass(pr, q2.fb, q2.w, q2.h, q1.tex); u2(pr, 'uDir', rad / q1.w, 0); gl.drawArrays(gl.TRIANGLES, 0, 3);
+    pass(pr, q1.fb, q1.w, q1.h, q2.tex); u2(pr, 'uDir', 0, rad / q1.h); gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  gl.viewport(0, 0, canvas.width, canvas.height);
+  pr = fullscreen(PR.comp);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, FB.scene.tex);
+  gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, q1.tex);
+  ui(pr, 'uScene', 0); ui(pr, 'uBlur', 1);
+  u2(pr, 'uRes', W, H); u1(pr, 'uTime', S.time);
+  u1(pr, 'uBloom', mix4([.9, .12, .3, 1.25], W4)); u1(pr, 'uThr', mix4([.5, .82, .68, .32], W4));
+  u1(pr, 'uTilt', reduced ? 0 : mix4([.25, .45, .7, .35], W4)); u1(pr, 'uVig', mix4([.9, .6, .55, .85], W4));
+  u1(pr, 'uSat', 1 - .7 * E.ash); u1(pr, 'uFade', sstep(0, .25, S.intro)); u1(pr, 'uRain', rainLevel(S.time));
+  u1(pr, 'uFocus', .5 + CAM.oy * .5); u1(pr, 'uGrain', .045);
+  u3(pr, 'uTint', mixV(TINT, W4));
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+  return E;
+}
+
+/* ---------- Escenas: dioramas animados por hito ---------- */
+const ACT = { batches: [], parts: { count: 0 } };
+function actorBatch(mesh, max) {
+  const vao = gl.createVertexArray(); gl.bindVertexArray(vao);
+  attr(0, buffer(mesh.P), 3); attr(1, buffer(mesh.N), 3);
+  const data = new Float32Array(max * 12);
+  const ibuf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, ibuf); gl.bufferData(gl.ARRAY_BUFFER, data.byteLength, gl.DYNAMIC_DRAW);
+  attr(3, ibuf, 4, 48, 0, 1); attr(4, ibuf, 4, 48, 16, 1); attr(5, ibuf, 4, 48, 32, 1);
+  buffer(mesh.I, gl.ELEMENT_ARRAY_BUFFER);
+  gl.bindVertexArray(null);
+  const b = { vao, ibuf, data, max, n: mesh.I.length, count: 0 };
+  ACT.batches.push(b);
+  return b;
+}
+function buildActors() {
+  ACT.box = actorBatch(boxMesh(), 512);
+  ACT.fig = actorBatch(latheMesh(FIGURE), 256);
+  ACT.tent = actorBatch(latheMesh(TENT, 8), 64);
+  const max = 1024, data = new Float32Array(max * 8);
+  const vao = gl.createVertexArray(); gl.bindVertexArray(vao);
+  const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, data.byteLength, gl.DYNAMIC_DRAW);
+  attr(0, buf, 4, 32, 0); attr(1, buf, 4, 32, 16);
+  gl.bindVertexArray(null);
+  ACT.parts = { vao, buf, data, max, count: 0 };
+}
+function put(b, x, y, z, rot, sx, sy, sz, col, emit = 0) {
+  if (b.count >= b.max || sx <= 1e-5) return;
+  const o = b.count++ * 12, d = b.data;
+  d[o] = x; d[o + 1] = y; d[o + 2] = z; d[o + 3] = rot;
+  d[o + 4] = sx; d[o + 5] = sy; d[o + 6] = sz; d[o + 7] = 0;
+  d[o + 8] = col[0]; d[o + 9] = col[1]; d[o + 10] = col[2]; d[o + 11] = emit;
+}
+function particle(x, y, z, size, col, alpha) {
+  const P = ACT.parts;
+  if (P.count >= P.max) return;
+  const o = P.count++ * 8, d = P.data;
+  d[o] = x; d[o + 1] = y; d[o + 2] = z; d[o + 3] = size;
+  d[o + 4] = col[0]; d[o + 5] = col[1]; d[o + 6] = col[2]; d[o + 7] = alpha;
+}
+const ease = x => x * x * (3 - 2 * x);
+const win = (c, a, b) => clamp((c - a) / (b - a));
+const gy = (x, z) => height(x, z);
+function pathSampler(pts) {
+  const P = resample(chaikin(pts, 2), .01), cum = [0];
+  for (let i = 1; i < P.length; i++) cum.push(cum[i - 1] + Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]));
+  const L = cum[cum.length - 1];
+  const f = u => {
+    const s = clamp(u) * L;
+    let i = 1; while (i < P.length - 1 && cum[i] < s) i++;
+    const a = P[i - 1], b = P[i], k = (s - cum[i - 1]) / ((cum[i] - cum[i - 1]) || 1);
+    return [lerp(a[0], b[0], k), lerp(a[1], b[1], k), Math.atan2(b[1] - a[1], b[0] - a[0])];
+  };
+  f.len = L;
+  return f;
+}
+const tramPath = pathSampler(TRANVIA);
+const rndS = mulberry32(99);
+const COL = {
+  lona: [.86, .78, .6], gente: [.32, .22, .16], humo: [.62, .58, .52], carro: [.6, .2, .12],
+  mula: [.3, .2, .13], poste: [.15, .13, .12], chispa: [.75, .9, 1],
+};
+
+
+const ROPA = [[.32, .22, .16], [.45, .18, .12], [.2, .24, .3], [.5, .42, .3], [.28, .3, .2], [.58, .5, .44]];
+/* Figura con piernas y brazos que alternan al caminar; moving 0..1 */
+function walker(x, z, head, ph, g, i, moving = 1) {
+  if (g <= 1e-4) return;
+  const y = gy(x, z), k = .8 + .4 * ((i * 37) % 7) / 7, s = g * k;
+  const ch = Math.cos(head), sh = Math.sin(head), sw = Math.sin(ph) * moving;
+  const legH = .006 * s, col = ROPA[i % ROPA.length];
+  put(ACT.fig, x, y + legH * .85 + Math.abs(sw) * .0004 * s, z, head, .0055 * s, .011 * s, .0055 * s, col);
+  for (const side of [-1, 1]) {
+    const st = sw * side * .0022 * s, lat = side * .0012 * s;
+    put(ACT.box, x + ch * st - sh * lat, y, z + sh * st + ch * lat, head, .0013 * s, legH, .0013 * s, [.16, .12, .1]);
+    const ar = -sw * side * .0018 * s, al = side * .0034 * s;
+    put(ACT.box, x + ch * ar - sh * al, y + legH * 1.2, z + sh * ar + ch * al, head, .001 * s, .0055 * s, .001 * s, col);
+  }
+}
+function quadruped(x, y, z, head, ph, s, col) {
+  const ch = Math.cos(head), sh = Math.sin(head);
+  put(ACT.box, x, y + .006 * s, z, head, .016 * s, .006 * s, .0065 * s, col);
+  put(ACT.box, x + ch * .0095 * s, y + .0105 * s, z + sh * .0095 * s, head, .006 * s, .0045 * s, .004 * s, col);
+  [[.006, 1, 0], [.006, -1, Math.PI], [-.006, 1, Math.PI], [-.006, -1, 0]].forEach(([f, side, off]) => {
+    const st = Math.sin(ph + off) * .0018 * s, lx = f * s + st, lz = side * .0022 * s;
+    put(ACT.box, x + ch * lx - sh * lz, y, z + sh * lx + ch * lz, head, .0014 * s, .0062 * s, .0014 * s, col);
+  });
+}
+
+/* Hito 2: el campamento de 1538 y la fundación de 1539 */
+const CAMP = Array.from({ length: 8 }, (_, i) => { const a = i / 8 * Math.PI * 2 + .3, r = .042 + .018 * rndS(); return [PT.chorro[0] + Math.cos(a) * r, PT.chorro[1] + Math.sin(a) * r]; });
+const CAMP_PEOPLE = Array.from({ length: 10 }, () => ({ r: .015 + .03 * rndS(), ph: rndS() * 6.28, sp: (.2 + .25 * rndS()) * (rndS() < .5 ? -1 : 1) }));
+const GATHER = Array.from({ length: 9 }, (_, i) => { const a = i / 9 * Math.PI * 2; return { to: [PT.santander[0] - .02 + Math.cos(a) * .028, PT.santander[1] - .035 + Math.sin(a) * .02], d: rndS() * .8 }; });
+const sceneFundacion = {
+  dur: 16,
+  caps: [[.8, 6.3, '6 de agosto de 1538', 'Gonzalo Jiménez de Quesada levanta un campamento militar en el sitio que hoy se identifica con el Chorro de Quevedo'],
+         [7.6, 13.6, '27 de abril de 1539', 'Fundación jurídica en el actual Parque Santander: 12 chozas y una iglesia']],
+  cam(c) {
+    const A = [PT.chorro[0] - .01, PT.chorro[1] + .01, .5, 27, -26], B = [PT.santander[0] - .02, PT.santander[1] - .02, .58, 32, 10];
+    return [blendKey(A, B, ease(win(c, 6, 8.8))), ease(win(c, 0, 1.8)) * (1 - ease(win(c, 13.6, 16)))];
+  },
+  hut: c => win(c, 8.4, 12.4),
+  update(c, w) {
+    const time = S.time;
+    CAMP.forEach(([x, z], i) => {
+      const g = ease(win(c, 1 + i * .38, 1.7 + i * .38)) * w;
+      put(ACT.tent, x, gy(x, z), z, i, .02 * g, .022 * g, .02 * g, COL.lona);
+    });
+    const [fx, fz] = PT.chorro, fy = gy(fx, fz);
+    if (c > 1.2) for (let i = 0; i < 18; i++) {
+      const ph = fract(time * .11 + i / 18);
+      particle(fx + Math.sin(ph * 5 + i) * .006 + ph * .02, fy + .004 + ph * .06, fz + ph * .008, (.006 + ph * .016) * w, COL.humo, (1 - ph) * .32 * w);
+    }
+    if (c > 1.2) particle(fx, fy + .003, fz, .007 * w, [1, .6, .25], -(.7 + .3 * Math.sin(time * 9)) * w);
+    CAMP_PEOPLE.forEach((p, i) => {
+      const g = ease(win(c, 1.5 + i * .2, 2.3 + i * .2)) * w;
+      const a = p.ph + time * p.sp, x = fx + Math.cos(a) * p.r, z = fz + Math.sin(a) * p.r;
+      const pause = .5 + .5 * Math.sin(time * .4 + i * 1.7) > .8 ? 0 : 1;
+      walker(x, z, a + Math.sign(p.sp) * Math.PI / 2, time * 7 + i, g, i, pause);
+    });
+    GATHER.forEach((p, i) => {
+      const m = ease(win(c, 8 + p.d, 11.8 + p.d));
+      const g = ease(win(c, 7.6 + p.d, 8.2 + p.d)) * w;
+      const x = lerp(fx - .01, p.to[0], m), z = lerp(fz + .01, p.to[1], m);
+      walker(x, z, Math.atan2(p.to[1] - fz, p.to[0] - fx), time * 7 + i, g, i + 3, m > 0 && m < 1 ? 1 : 0);
+    });
+  },
+};
+
+/* Hito 5: el tranvía de mulas de 1884 y el eléctrico de 1910 */
+const WALKERS = Array.from({ length: 12 }, () => ({ u: rndS() * .3, side: rndS() < .5 ? -1 : 1, sp: .004 + .006 * rndS(), ph: rndS() }));
+const tramU = c => c < 10.8 ? .55 * ease(win(c, 2, 10)) : .55 + .45 * ease(win(c, 10.8, 15.6));
+const sceneTranvia = {
+  dur: 18,
+  caps: [[1, 7.4, '24 de diciembre de 1884', 'Empieza el tranvía de mulas: de la Plaza de Bolívar a Chapinero, por San Diego y la calle 26'],
+         [10.2, 16, '1910', 'Llega el tranvía eléctrico']],
+  cam(c) {
+    const [x, z, ang] = tramPath(tramU(c));
+    const chase = [x, z, .28, 19, ang * 180 / Math.PI - 70];
+    const open = [PT.plaza[0] + .05, PT.plaza[1] + .05, .75, 30, -40];
+    return [blendKey(open, chase, ease(win(c, 1.5, 4))), ease(win(c, 0, 2)) * (1 - ease(win(c, 15.6, 18)))];
+  },
+  update(c, w) {
+    const time = S.time, L = tramPath.len;
+    const u = tramU(c), [x, z, ang] = tramPath(u), y = gy(x, z);
+    const elec = ease(win(c, 10.2, 11.2));
+    const ca = Math.cos(ang), sa = Math.sin(ang);
+    put(ACT.box, x, y + .003, z, ang, .045 * w, .018 * w, .017 * w, COL.carro, .05 + .35 * elec);
+    put(ACT.box, x, y + .021, z, ang, .047 * w, .002 * w, .018 * w, COL.poste);
+    const mules = (1 - elec) * w;
+    for (let m = 0; m < 2; m++) {
+      const [mx, mz] = tramPath(u + (.036 + m * .018) / L);
+      const go = c > 2 && c < 10 ? 1 : 0;
+      quadruped(mx, gy(mx, mz) + Math.abs(Math.sin(time * 9 + m)) * .0006 * go, mz, ang, (time * 9 + m * 1.3) * go, mules * 1.3, COL.mula);
+    }
+    if (elec > .01) {
+      const px = x - ca * .012, pz = z - sa * .012;
+      put(ACT.box, px, y + .023, pz, ang, .03 * elec * w, .0016, .0016, COL.poste);
+      const moving = c > 10.8 && c < 15.6 ? 1 : .3;
+      for (let i = 0; i < 4; i++) {
+        const fl = Math.max(0, Math.sin(time * 37 + i * 2.1));
+        particle(px + ca * .015 + (rndS() - .5) * .004, y + .025 + rndS() * .003, pz + sa * .015 + (rndS() - .5) * .004, .004 * fl * w, COL.chispa, -fl * moving * elec * w);
+      }
+    }
+    WALKERS.forEach((p, i) => {
+      const g = ease(win(c, .5 + i * .15, 1.2 + i * .15)) * w;
+      const arg = time * p.sp * 20 + p.ph * 6, uu = p.u + Math.sin(arg) * .01;
+      const [wx, wz, wa] = tramPath(uu);
+      const ox = -Math.sin(wa) * .02 * p.side, oz = Math.cos(wa) * .02 * p.side;
+      walker(wx + ox, wz + oz, wa + (Math.cos(arg) < 0 ? Math.PI : 0), time * 6 + i, g, i, Math.min(1, Math.abs(Math.cos(arg)) * 3));
+    });
+  },
+};
+
+/* Hito 4: la gente llena la Plaza Mayor el 20 de julio de 1810 */
+const CROWD = Array.from({ length: 64 }, (_, i) => {
+  const a = rndS() * Math.PI * 2, from = .16 + .1 * rndS(), r = Math.sqrt(rndS()) * .055;
+  return { from: [PT.plaza[0] + Math.cos(a) * from, PT.plaza[1] + Math.sin(a) * from], to: [PT.plaza[0] + Math.cos(a + rndS() - .5) * r, PT.plaza[1] + Math.sin(a + rndS() - .5) * r], d: rndS() * 3.5, ph: rndS() * 6 };
+});
+const sceneVeinteJulio = {
+  dur: 15,
+  caps: [[.8, 6.6, '20 de julio de 1810', 'En la Plaza Mayor, hoy Plaza de Bolívar'],
+         [7.4, 13.8, 'Cabildo abierto', 'El episodio del florero de Llorente desemboca en un cabildo abierto y en el grito de independencia']],
+  cam(c) {
+    const A = [PT.plaza[0] + .04, PT.plaza[1] + .02, .75, 38, -30], B = [PT.plaza[0], PT.plaza[1], .32, 22, -8];
+    return [blendKey(A, B, ease(win(c, .5, 9))), ease(win(c, 0, 1.6)) * (1 - ease(win(c, 13, 15)))];
+  },
+  update(c, w) {
+    const time = S.time, cheer = ease(win(c, 9, 10.5));
+    CROWD.forEach((p, i) => {
+      const m = ease(win(c, 1 + p.d, 5.5 + p.d));
+      const x = lerp(p.from[0], p.to[0], m), z = lerp(p.from[1], p.to[1], m);
+      const toPlaza = Math.atan2(PT.plaza[1] - z, PT.plaza[0] - x);
+      const g = ease(win(c, .3 + p.d * .3, 1 + p.d * .3)) * w;
+      const walking = m > 0 && m < 1 ? 1 : 0;
+      walker(x, z, walking ? Math.atan2(p.to[1] - p.from[1], p.to[0] - p.from[0]) : toPlaza, time * (walking ? 7 : 11) + p.ph, g, i, Math.max(walking, cheer * (.5 + .5 * Math.sin(time * 3 + p.ph))));
+    });
+  },
+};
+
+/* Hito 6: el río San Francisco se canaliza y se vuelve la Avenida Jiménez */
+const jimPath = pathSampler(SAN_FRANCISCO);
+const jimFrontX = v => lerp(2.6, -4.2, v);
+const CARS = Array.from({ length: 14 }, (_, i) => ({ u: rndS(), dir: i % 2 ? 1 : -1, sp: .012 + .01 * rndS(), col: [[.12, .12, .14], [.5, .1, .08], [.15, .25, .35], [.75, .7, .6]][i % 4] }));
+const WORKERS = Array.from({ length: 10 }, () => ({ o: rndS() * .06 - .03, side: rndS() < .5 ? -1 : 1, ph: rndS() * 6 }));
+const sceneJimenez = {
+  dur: 17,
+  caps: [[1, 7.4, '1915', 'El Gobierno ordena canalizar el río San Francisco'],
+         [8.4, 15.2, '1938', 'Se inaugura la Avenida Jiménez, la primera gran avenida de la ciudad']],
+  cover: c => ease(win(c, 7.6, 12.6)),
+  cam(c) {
+    const [x, z, ang] = jimPath(lerp(.24, .58, ease(win(c, 1, 14))));
+    const key = [x, z, .5, 30, ang * 180 / Math.PI - 75];
+    return [key, ease(win(c, 0, 1.8)) * (1 - ease(win(c, 14.6, 17)))];
+  },
+  update(c, w) {
+    const time = S.time, cover = this.cover(c), fx = jimFrontX(cover);
+    const build = win(c, 1.5, 7.5);
+    for (let u = .18; u < .7; u += .012) {
+      const g = ease(win(build, (u - .18) / .52 - .05, (u - .18) / .52 + .08)) * w;
+      if (g < .01) continue;
+      const [x, z, ang] = jimPath(u), nx = -Math.sin(ang), nz = Math.cos(ang);
+      for (const side of [-1, 1]) {
+        const wx = x + nx * .04 * side, wz = z + nz * .04 * side;
+        put(ACT.box, wx, gy(wx, wz), wz, ang, .014 * g, .004 * g, .003 * g, [.62, .6, .55]);
+      }
+    }
+    if (c < 8.5) WORKERS.forEach((p, i) => {
+      const u = lerp(.2, .66, build) + p.o * .3;
+      const [x, z, ang] = jimPath(clamp(u, .18, .7)), nx = -Math.sin(ang), nz = Math.cos(ang);
+      const g = ease(win(c, 1.5, 2.5)) * (1 - ease(win(c, 7.6, 8.5))) * w;
+      walker(x + nx * .05 * p.side, z + nz * .05 * p.side, ang + Math.PI / 2 * p.side, time * 6 + p.ph, g, i + 2, .5 + .5 * Math.sin(time * 2 + p.ph));
+    });
+    if (cover > .05) CARS.forEach((p, i) => {
+      const u = .18 + fract(p.u + time * p.sp * p.dir) * .52;
+      const [x, z, ang] = jimPath(u);
+      if (x < fx + .05) return;
+      const nx = -Math.sin(ang), nz = Math.cos(ang), lane = p.dir * .014;
+      const cx = x + nx * lane, cz = z + nz * lane, g = ease(win(c, 8.6 + i * .2, 9.3 + i * .2)) * w;
+      put(ACT.box, cx, gy(cx, cz) + .0012, cz, ang + (p.dir < 0 ? Math.PI : 0), .016 * g, .006 * g, .0075 * g, p.col, .04);
+      put(ACT.box, cx, gy(cx, cz) + .0072, cz, ang + (p.dir < 0 ? Math.PI : 0), .009 * g, .004 * g, .0068 * g, p.col);
+    });
+  },
+};
+
+/* Hito 9: el primer día de TransMilenio, de noche */
+const tmPath = pathSampler(TM);
+const busU = (c, i) => 1 - clamp((c - 1.6 - i * .5) * .052);
+const sceneTransmilenio = {
+  dur: 17,
+  caps: [[1, 7.6, '18 de diciembre de 2000', 'Primer día de TransMilenio: 14 buses entre el Portal de la 80 y la estación Tercer Milenio'],
+         [8.6, 15.4, '18.618 pasajeros', 'Viajan ese día por la troncal de la Avenida Caracas']],
+  cam(c) {
+    const [x, z, ang] = tmPath(busU(c, 0));
+    const zoom = ease(win(c, 4, 13.5));
+    const key = [x, z, lerp(.42, 4.2, zoom), lerp(18, 40, zoom), ang * 180 / Math.PI + 105 + zoom * 30];
+    return [key, ease(win(c, 0, 1.8)) * (1 - ease(win(c, 14.8, 17)))];
+  },
+  update(c, w) {
+    const time = S.time;
+    for (const [px, pz] of [PT.portal, PT.tercer]) {
+      const g = w * ease(win(c, .3, 1.2));
+      put(ACT.box, px, gy(px, pz) + .001, pz, 0, .05 * g, .004 * g, .02 * g, [.9, .9, .85], .8);
+      put(ACT.box, px, gy(px, pz) + .012, pz, 0, .055 * g, .0015 * g, .024 * g, [.6, .65, .7], .3);
+    }
+    for (let i = 0; i < 14; i++) {
+      const u = busU(c, i), g = w * ease(win(c, 1 + i * .5, 1.5 + i * .5));
+      if (g < .01) continue;
+      const [x, z, ang] = tmPath(u), y = gy(x, z) + .004, head = ang + Math.PI;
+      const ch = Math.cos(head), sh = Math.sin(head);
+      put(ACT.box, x, y, z, head, .036 * g, .011 * g, .01 * g, [.86, .13, .08], .9);
+      put(ACT.box, x, y + .011 * g, z, head, .034 * g, .0012 * g, .0095 * g, [.95, .9, .85], .6);
+      particle(x + ch * .02, y + .004, z + sh * .02, .006 * g, [1, .95, .8], -.9 * g);
+      particle(x - ch * .02, y + .004, z - sh * .02, .004 * g, [1, .15, .08], -.8 * g);
+      if (u < 1 && u > 0) for (let j = 1; j <= 3; j++) {
+        const [tx, tz] = tmPath(u + j * .0025);
+        particle(tx, gy(tx, tz) + .006, tz, .005 * g, [1, .3, .15], -.25 * g / j);
+      }
+    }
+  },
+};
+
+/* Hito 10: la primera línea del metro, prevista, se dibuja como holograma */
+const metroPath = pathSampler(METRO);
+const METRO_LIFT = .07;
+const sceneMetro = {
+  dur: 18,
+  caps: [[1, 7.6, 'Primera línea del metro', 'Unos 24 km, elevada, del suroccidente a la calle 72'],
+         [8.6, 16, '15 de marzo de 2028', 'Fecha prevista para su operación comercial. Lo que ves es una previsión']],
+  build: c => ease(win(c, 1.4, 12)),
+  cam(c) {
+    const b = this.build(c), [x, z, ang] = metroPath(Math.min(b, .995));
+    const wide = ease(win(c, 11, 15));
+    const key = blendKey([x, z, 1.4, 24, ang * 180 / Math.PI - 80], [-6, 3, 10, 26, -12], wide);
+    return [key, ease(win(c, 0, 2)) * (1 - ease(win(c, 15.6, 18)))];
+  },
+  update(c, w) {
+    const time = S.time, b = this.build(c);
+    if (b > .002 && b < .999) {
+      const [x, z] = metroPath(b), y = gy(x, z) + METRO_LIFT;
+      for (let i = 0; i < 10; i++) {
+        const a = time * 4 + i * .63, r = .012 + .01 * Math.sin(time * 3 + i);
+        particle(x + Math.cos(a) * r, y + Math.sin(a * 1.7) * .008, z + Math.sin(a) * r, .006 * w, [.5, .95, 1], -.9 * w);
+      }
+      particle(x, y, z, .03 * w, [.4, .85, 1], -.6 * w);
+    }
+    if (c > 12.6) {
+      const head = fract((c - 12.6) * .09);
+      for (let k = 0; k < 6; k++) {
+        const u = head - k * .004;
+        if (u <= 0) continue;
+        const [x, z] = metroPath(u), y = gy(x, z) + METRO_LIFT + .006;
+        particle(x, y, z, .011 * w, [.6, .95, 1], -.55 * w * (1 - k / 7));
+      }
+    }
+  },
+};
+
+/* Hito 8: Distrito Especial; la ciudad alcanza a los seis pueblos */
+const CENTRO = [-.6, 2.6];
+const scenePueblos = {
+  dur: 16,
+  caps: [[1, 7, '17 de diciembre de 1954', 'Decreto Ley 3640: Bogotá pasa a ser Distrito Especial'],
+         [7.6, 14.4, 'Seis municipios anexados', 'Usaquén, Suba, Engativá, Fontibón, Bosa y Usme']],
+  absorb: c => ease(win(c, 8.4, 10.2)),
+  cam(c) {
+    const o = ease(win(c, .5, 15));
+    return [[lerp(-1.5, -5, o), lerp(2.6, 1.8, o), lerp(9, 30, ease(win(c, 1, 8.5))), lerp(30, 50, o), lerp(-35, 25, o)], ease(win(c, 0, 1.8)) * (1 - ease(win(c, 14, 16)))];
+  },
+  update(c, w) {
+    const time = S.time, flow = win(c, 5.5, 9), lit = this.absorb(c);
+    const [cx, cz] = CENTRO, cy = gy(cx, cz);
+    if (c > 1.2 && c < 9) for (let i = 0; i < 6; i++) {
+      const a = time * 1.5 + i * 1.05, r = .4 + .25 * Math.sin(time * 2 + i);
+      particle(cx + Math.cos(a) * r, cy + .15, cz + Math.sin(a) * r, .14 * w, [1, .7, .35], -.8 * w * ease(win(c, 1.2, 2.5)));
+    }
+    PUEBLOS.forEach(([px, pz], i) => {
+      if (flow > 0 && flow < 1.2) for (let k = 0; k < 14; k++) {
+        const u = clamp(flow * 1.15 - k * .035);
+        if (u <= 0 || u >= 1) continue;
+        const x = lerp(cx, px, u), z = lerp(cz, pz, u), arc = Math.sin(u * Math.PI) * 1.2;
+        particle(x, gy(x, z) + .1 + arc, z, (.16 - k * .008) * w, [1, .62, .28], -(1 - k / 15) * w);
+      }
+      if (lit > 0) {
+        const py = gy(px, pz);
+        for (let k = 0; k < 9; k++) particle(px, py + k * .12 * lit, pz, (.22 - k * .018) * w, [1, .7, .38], -(1 - k / 10) * lit * w * (.75 + .25 * Math.sin(time * 3 + i)));
+        const ring = fract(time * .35 + i / 6);
+        for (let k = 0; k < 16; k++) {
+          const a = k / 16 * Math.PI * 2, r = .2 + ring * 1.4;
+          particle(px + Math.cos(a) * r, py + .03, pz + Math.sin(a) * r, .09 * w, [1, .6, .3], -(1 - ring) * .6 * lit * w);
+        }
+      }
+    });
+  },
+};
+
+/* Hito 7: el 9 de abril de 1948, contado con sobriedad: sin fuego ni figuras */
+const SMOKE = [[.05, .28], [.3, .55], [-.15, .5], [.42, .2], [.1, .75]];
+const septPath = pathSampler(SEPTIMA);
+const sceneNueveAbril = {
+  dur: 19,
+  caps: [[1, 5.8, '9 de abril de 1948', 'Jorge Eliécer Gaitán es asesinado en la carrera Séptima, cerca de la Avenida Jiménez'],
+         [6.4, 10.4, 'Incendios, saqueos y cientos de muertos', 'Se queman tranvías'],
+         [11, 15, 'Después', 'Se amplían calles del centro, entre ellas la Séptima, desde la Plaza de Bolívar hasta San Diego'],
+         [15.6, 18.6, '1951', 'El tranvía deja de funcionar']],
+  ash: c => 1 - ease(win(c, 11, 14.5)),
+  widen: c => ease(win(c, 11.5, 15)),
+  tram: c => 1 - ease(win(c, 15.6, 17.5)),
+  cam(c) {
+    const [x, z, ang] = septPath(lerp(.15, .7, ease(win(c, 0, 16))));
+    const key = [x, z, lerp(.55, .95, ease(win(c, 9, 16))), lerp(30, 46, ease(win(c, 6, 14))), ang * 180 / Math.PI - 85];
+    return [key, ease(win(c, 0, 2.2)) * (1 - ease(win(c, 16.5, 19)))];
+  },
+  update(c, w) {
+    const time = S.time, smoke = ease(win(c, 6, 8)) * (1 - ease(win(c, 11, 14))) * w;
+    if (smoke > .01) SMOKE.forEach(([x, z], i) => {
+      const y = gy(x, z) + .02;
+      for (let k = 0; k < 9; k++) {
+        const u = fract(time * .045 + k / 9 + i * .17);
+        particle(x + u * .05 + Math.sin(time * .3 + k) * .006, y + u * .16, z + u * .015, .02 + u * .05, [.42, .42, .44], (1 - u) * .28 * smoke);
+      }
+    });
+    const tg = (1 - ease(win(c, 15.6, 17.5))) * ease(win(c, 6, 7.5)) * w;
+    [.32, .52].forEach(u => {
+      const [x, z, ang] = tramPath(u);
+      put(ACT.box, x, gy(x, z) + .003, z, ang, .045 * tg, .018 * tg, .017 * tg, [.3, .29, .28]);
+      put(ACT.box, x, gy(x, z) + .021, z, ang, .047 * tg, .002 * tg, .018 * tg, [.2, .2, .2]);
+    });
+  },
+};
+
+/* Hito 1: la sabana muisca en oro; bohíos y figuras como ambientación, sin ubicar Bacatá */
+const BOHIOS = [[-6.2, 6.4], [-9.4, .4], [-4.4, -6.2]].map(([cx, cz]) => Array.from({ length: 9 }, (_, i) => {
+  const a = i / 9 * Math.PI * 2 + rndS() * .3, r = .06 + .05 * rndS();
+  return [cx + Math.cos(a) * r, cz + Math.sin(a) * r];
+}));
+const TUNJOS = Array.from({ length: 12 }, (_, i) => ({ v: Math.floor(i / 4), r: .03 + .1 * rndS(), ph: rndS() * 6.28, sp: (.12 + .1 * rndS()) * (i % 2 ? 1 : -1) }));
+const sceneSabana = {
+  dur: 17,
+  caps: [[1.2, 7.8, 'La sabana muisca', 'Territorio muisca: humedales, el río Bogotá —el Funza— al occidente y los cerros orientales al oriente'],
+         [9, 15.4, 'Bacatá', 'Un asentamiento muisca de la sabana. De su nombre viene «Bogotá»']],
+  cam(c) {
+    const A = KEYS[0], B = [-6.15, 6.35, .75, 24, -24], C = [-8.6, 4.2, 4.2, 18, -70], D = [-4.4, 2.4, 26, 44, 12];
+    let k = blendKey(A, B, ease(win(c, .5, 5.5)));
+    k = blendKey(k, C, ease(win(c, 6, 9.5)));
+    k = blendKey(k, D, ease(win(c, 9.5, 14.5)));
+    return [k, ease(win(c, 0, 1.5)) * (1 - ease(win(c, 15, 17)))];
+  },
+  update(c, w) {
+    const time = S.time;
+    BOHIOS.forEach((v, j) => v.forEach(([x, z], i) => {
+      const g = ease(win(c, .8 + i * .15 + j * .3, 1.6 + i * .15 + j * .3)) * w;
+      put(ACT.tent, x, gy(x, z), z, i, .026 * g, .03 * g, .026 * g, [1, .8, .4]);
+      if (i % 3 === 0) for (let k = 0; k < 6; k++) {
+        const u = fract(time * .07 + k / 6 + i * .13);
+        particle(x + u * .02, gy(x, z) + .03 + u * .07, z + u * .006, (.005 + u * .012) * g, [.55, .45, .3], (1 - u) * .25 * g);
+      }
+    }));
+    TUNJOS.forEach((p, i) => {
+      const [cx, cz] = BOHIOS[p.v][0], a = p.ph + time * p.sp;
+      const g = ease(win(c, 2 + i * .2, 2.8 + i * .2)) * w;
+      walker(cx + Math.cos(a) * p.r, cz + Math.sin(a) * p.r, a + Math.sign(p.sp) * Math.PI / 2, time * 6 + i, g * 1.4, i);
+    });
+  },
+};
+const SCENES = { 0: sceneSabana, 1: sceneFundacion, 3: sceneVeinteJulio, 4: sceneTranvia, 5: sceneJimenez, 6: sceneNueveAbril, 7: scenePueblos, 8: sceneTransmilenio, 9: sceneMetro };
+
+const SC = { k: -1, clock: 0, hold: 0, w: 0, camW: 0, cam: null, hut: 1, jim: 1, metro: 1, pueblo: 1, ashV: -1, widenV: -1, tramV: -1 };
+const escena = $('#escena'), escFecha = escena.querySelector('.fecha'), escLugar = escena.querySelector('.lugar');
+let capShown = '';
+function sceneTick(dt) {
+  for (const b of ACT.batches) b.count = 0;
+  ACT.parts.count = 0;
+  const near = Math.round(S.t);
+  const settled = !S.dragging && Math.abs(S.t - near) < .02 && Math.abs(S.target - near) < 1e-3 && S.intro >= 1;
+  if (settled && SCENES[near]) {
+    if (SC.k !== near) { SC.k = near; SC.clock = 0; SC.hold = 0; }
+    SC.hold += dt;
+    if (SC.hold > .5) SC.clock = reduced ? SCENES[near].dur : SC.clock + dt;
+  }
+  const want = settled && SC.k === near ? 1 : 0;
+  SC.w += (want - SC.w) * (1 - Math.exp(-dt * (want ? 2.5 : 4)));
+  if (SC.w < .005 && !want) { SC.w = 0; SC.k = -1; }
+  SC.camW = 0; SC.hut = 1; SC.jim = 1; SC.metro = 1; SC.pueblo = 1; SC.ashV = -1; SC.widenV = -1; SC.tramV = -1;
+  let cap = null;
+  const sc = SCENES[SC.k];
+  if (sc) {
+    const c = SC.clock;
+    const [key, cw] = sc.cam(c);
+    SC.cam = key; SC.camW = reduced ? 0 : cw * SC.w;
+    if (sc.hut) SC.hut = lerp(1, sc.hut(c), SC.w);
+    if (sc.cover) SC.jim = lerp(1, sc.cover(c), SC.w);
+    if (sc.build) SC.metro = lerp(1, sc.build(c), SC.w);
+    if (sc.absorb) SC.pueblo = lerp(1, sc.absorb(c), SC.w);
+    if (sc.ash) { SC.ashV = sc.ash(c); SC.widenV = sc.widen(c); SC.tramV = sc.tram(c); }
+    sc.update(c, SC.w);
+    for (const [a, b, f, l] of sc.caps) if (c >= a && c <= b) cap = { f, l, o: Math.min(win(c, a, a + .7), 1 - win(c, b - .7, b)) * SC.w };
+  }
+  ambientLife();
+  const txt = cap ? cap.f + cap.l : '';
+  if (txt !== capShown) { capShown = txt; if (cap) { escFecha.textContent = cap.f; escLugar.textContent = cap.l; } }
+  escena.style.opacity = cap ? cap.o.toFixed(3) : '0';
+}
+const sceneNeed = k => SCENES[k] ? SCENES[k].dur + 1 : 0;
+
+const FLOCKS = Array.from({ length: 3 }, (_, f) => Array.from({ length: 9 }, () => [rndS() - .5, rndS() - .5, rndS() - .5, rndS()]));
+const CHIMNEYS = Array.from({ length: 16 }, () => [rndS() * 2 - 1, rndS() * 2 - 1, rndS()]);
+function ambientLife() {
+  if (reduced || S.intro < 1) return;
+  const day = 1 - W4[3], time = S.time;
+  const k = SC.camW > .3 && SC.cam ? SC.cam : camKey(S.t);
+  const [cx, cz, dist] = k, R = Math.min(dist * .5, 6);
+  if (day > .05) FLOCKS.forEach((fl, f) => {
+    const a = time * (.05 + f * .02) + f * 2.1;
+    const fx = cx + Math.cos(a) * R * (.5 + f * .2), fz = cz + Math.sin(a * 1.3) * R * .6;
+    const fy = gy(fx, fz) + dist * (.05 + f * .015);
+    const ink = W4[0] > .5 ? [1, .8, .4] : [.12, .09, .07];
+    fl.forEach(([ox, oy, oz, ph], i) => {
+      const sp = dist * .04;
+      const flap = .6 + .4 * Math.sin(time * 9 + ph * 20);
+      particle(fx + ox * sp + Math.sin(time * .7 + ph * 9) * sp * .2, fy + oy * sp * .4, fz + oz * sp, dist * .0028 * flap, ink, W4[0] > .5 ? -.8 * day : .75 * day);
+    });
+  });
+  if (W4[2] > .05 && S.t > 3.6) CHIMNEYS.forEach(([ox, oz, ph], i) => {
+    const x = cx + ox * dist * .45, z = cz + oz * dist * .45, ap = appearTCache(x, z);
+    if (ap > S.t) return;
+    const y = gy(x, z) + .03;
+    for (let j = 0; j < 4; j++) {
+      const u = fract(time * .08 + ph + j / 4);
+      particle(x + u * dist * .03, y + u * dist * .05, z + u * dist * .01, dist * (.004 + u * .01), [.78, .74, .7], (1 - u) * .22 * W4[2]);
+    }
+  });
+}
+const AP_CACHE = new Map();
+function appearTCache(x, z) {
+  const key = `${Math.round(x * 20)},${Math.round(z * 20)}`;
+  if (!AP_CACHE.has(key)) { if (AP_CACHE.size > 4000) AP_CACHE.clear(); AP_CACHE.set(key, appearT(x, z)); }
+  return AP_CACHE.get(key);
+}
+
+/* ---------- Sonido generativo (Web Audio, sin archivos) ---------- */
+const Son = {
+  c: null, on: false, g: {}, next: 0, bellAt: 0,
+  init() {
+    const C = window.AudioContext || window.webkitAudioContext;
+    if (!C) return false;
+    const c = this.c = new C();
+    const out = this.out = c.createGain(); out.gain.value = 0;
+    const comp = c.createDynamicsCompressor(); comp.threshold.value = -18; comp.ratio.value = 3;
+    out.connect(comp); comp.connect(c.destination);
+    const len = c.sampleRate * 4, wb = c.createBuffer(1, len, c.sampleRate), bb = c.createBuffer(1, len, c.sampleRate);
+    const w = wb.getChannelData(0), b = bb.getChannelData(0);
+    let last = 0;
+    for (let i = 0; i < len; i++) { const r = Math.random() * 2 - 1; w[i] = r; last = (last + .02 * r) / 1.02; b[i] = last * 3.5; }
+    const src = buf => { const s = c.createBufferSource(); s.buffer = buf; s.loop = true; s.start(); return s; };
+    const gain = (v = 0) => { const g = c.createGain(); g.gain.value = v; return g; };
+    const filt = (type, f, q = .7) => { const x = c.createBiquadFilter(); x.type = type; x.frequency.value = f; x.Q.value = q; return x; };
+    const osc = (type, f) => { const o = c.createOscillator(); o.type = type; o.frequency.value = f; o.start(); return o; };
+    const wind = gain(), wf = filt('bandpass', 380, .5);
+    src(bb).connect(wf).connect(wind).connect(out);
+    const lfo = osc('sine', .05), lg = gain(160); lfo.connect(lg).connect(wf.frequency);
+    const rain = gain(); src(wb).connect(filt('highpass', 1600)).connect(filt('lowpass', 7500)).connect(rain).connect(out);
+    const hum = gain(); src(bb).connect(filt('lowpass', 190, .5)).connect(hum).connect(out);
+    const dg = gain(.12); osc('sawtooth', 55).connect(filt('lowpass', 140)).connect(dg).connect(hum);
+    const gold = gain(); gold.connect(out);
+    [196, 293.66, 392, 440, 587.33, 783.99].forEach((f, i) => {
+      const g = gain(.5 / 6), l = osc('sine', .04 + i * .017), d = gain(.5 / 6);
+      l.connect(d).connect(g.gain); osc('sine', f).connect(g).connect(gold);
+    });
+    const pad = gain(), pf = filt('lowpass', 700); pf.connect(pad).connect(out);
+    [110, 164.81, 220.5].forEach(f => osc('triangle', f).connect(gain(.2)).connect(pf));
+    const night = gain(); night.connect(out);
+    [659.25, 987.77, 1318.5].forEach((f, i) => osc('sine', f * (1 + i * .002)).connect(gain(.15)).connect(night));
+    this.g = { wind, rain, hum, gold, pad, night };
+    return true;
+  },
+  set(name, v) { this.g[name].gain.setTargetAtTime(v, this.c.currentTime, .35); },
+  strike(freqs, dur, vol) {
+    const c = this.c, now = c.currentTime;
+    freqs.forEach((f, i) => {
+      const o = c.createOscillator(), g = c.createGain();
+      o.frequency.value = f; g.gain.setValueAtTime(0, now);
+      g.gain.linearRampToValueAtTime(vol / (i + 1), now + .01);
+      g.gain.exponentialRampToValueAtTime(.0001, now + dur / (1 + i * .4));
+      o.connect(g).connect(this.out); o.start(now); o.stop(now + dur + .1);
+    });
+  },
+  async toggle() {
+    if (!this.c && !this.init()) return false;
+    if (this.c.state === 'suspended') await this.c.resume();
+    this.on = !this.on;
+    this.out.gain.setTargetAtTime(this.on ? .75 : 0, this.c.currentTime, this.on ? .8 : .25);
+    return this.on;
+  },
+  update(st, dt) {
+    if (!this.on) return;
+    const now = this.c.currentTime;
+    if (now >= this.next) {
+      this.next = now + .1;
+      const duck = 1 - .85 * st.ash;
+      this.set('wind', .5);
+      this.set('rain', st.rain * .35 * duck);
+      this.set('hum', (.03 + .5 * st.popF) * duck);
+      this.set('gold', W4[0] * .11 * duck);
+      this.set('pad', (W4[1] * .06 + W4[2] * .05) * duck);
+      this.set('night', W4[3] * .035 * duck);
+    }
+    if (Math.random() < dt * .45 * W4[0]) { const f = [784, 880, 1174.7, 1318.5, 1568][Math.floor(Math.random() * 5)]; this.strike([f, f * 2.01, f * 3.02], 2.6, .05); }
+    if (Math.abs(S.t - 4) < .4 && now > this.bellAt) { this.bellAt = now + 6.5; this.strike([880, 880 * 2.76, 880 * 5.4], 1.8, .07); }
+  },
+};
+
+/* ---------- Interfaz ---------- */
+const art = $('#hito'), linea = $('#linea'), svg = $('#curva'), tir = $('#tirador'), anioTir = $('#anioTirador');
+const cifra = $('#cifra'), nota = $('#nota'), paradas = $('#paradas'), pista = $('#pista'), fuentes = $('#fuentes');
+const bPlay = $('#bReproducir'), bSon = $('#bSonido'), bFuentes = $('#bFuentes');
+
+function yearAt(t) {
+  if (t < 1) return null;
+  const i = Math.min(8, Math.floor(t)), f = t - i;
+  return lerp(STOP_YEARS[Math.max(1, i)], STOP_YEARS[i + 1], i < 1 ? 0 : f);
+}
+function yearToT(y) {
+  for (let i = 1; i < 9; i++) if (y <= STOP_YEARS[i + 1]) return i + (y - STOP_YEARS[i]) / (STOP_YEARS[i + 1] - STOP_YEARS[i]);
+  return 9;
+}
+function makeMono(xs, ys) {
+  const n = xs.length, dx = [], m = [], c = [];
+  for (let i = 0; i < n - 1; i++) { dx[i] = xs[i + 1] - xs[i]; m[i] = (ys[i + 1] - ys[i]) / dx[i]; }
+  c[0] = m[0];
+  for (let i = 1; i < n - 1; i++) {
+    if (m[i - 1] * m[i] <= 0) c[i] = 0;
+    else { const k = dx[i - 1] + dx[i]; c[i] = 3 * k / ((k + dx[i]) / m[i - 1] + (k + dx[i - 1]) / m[i]); }
+  }
+  c[n - 1] = m[n - 2];
+  return x => {
+    if (x <= xs[0]) return ys[0];
+    if (x >= xs[n - 1]) return ys[n - 1];
+    let i = 0; while (x > xs[i + 1]) i++;
+    const h = dx[i], t = (x - xs[i]) / h, t2 = t * t, t3 = t2 * t;
+    return (2 * t3 - 3 * t2 + 1) * ys[i] + (t3 - 2 * t2 + t) * h * c[i] + (-2 * t3 + 3 * t2) * ys[i + 1] + (t3 - t2) * h * c[i + 1];
+  };
+}
+const POP_T = POP.map(p => yearToT(p[0]));
+const popCurve = makeMono(POP_T, POP.map(p => p[1]));
+const TL = { w: 0, h: 0, pad: 30, base: 0, top: 0 };
+const tx = t => TL.pad + t / 9 * (TL.w - 2 * TL.pad);
+const xt = x => clamp((x - TL.pad) / (TL.w - 2 * TL.pad)) * 9;
+const cy = p => TL.base - p / 7.4e6 * (TL.base - TL.top);
+const curveY = t => t < POP_T[0] ? TL.base : cy(popCurve(Math.min(t, 9)));
+
+function buildTimeline() {
+  const r = linea.getBoundingClientRect();
+  TL.w = r.width; TL.h = r.height; TL.pad = Math.max(28, TL.w * .045);
+  TL.base = TL.h - 36; TL.top = 26;
+  svg.setAttribute('viewBox', `0 0 ${TL.w} ${TL.h}`);
+  const t0 = POP_T[0];
+  let d = '';
+  for (let i = 0; i <= 180; i++) { const t = t0 + (9 - t0) * i / 180; d += `${i ? 'L' : 'M'}${tx(t).toFixed(1)} ${cy(popCurve(t)).toFixed(1)}`; }
+  const area = `${d}L${tx(9).toFixed(1)} ${TL.base}L${tx(t0).toFixed(1)} ${TL.base}Z`;
+  const stops = [[0, '#e9b851'], [.07, '#e9b851'], [.12, '#9a6a35'], [.34, '#9a6a35'], [.44, '#d0704a'], [.78, '#d0704a'], [.88, '#9fe0ff'], [1, '#e8f4ff']]
+    .map(([o, c]) => `<stop offset="${o}" stop-color="${c}"/>`).join('');
+  const group = cls => `<g class="${cls}"><path class="area" d="${area}" fill="url(#gCurva)"/><path class="curva" d="${d}" stroke="url(#gCurva)"/></g>`;
+  const ticks = HITOS.map((_, k) => `<line class="tick" x1="${tx(k)}" x2="${tx(k)}" y1="${TL.base - 4}" y2="${TL.base + 5}"/>`).join('');
+  const dots = POP.map((p, i) => `<circle class="dato" cx="${tx(POP_T[i]).toFixed(1)}" cy="${cy(p[1]).toFixed(1)}" r="2.2"><title>${p[0]} · ${fmt(p[1])} habitantes · ${p[2]}</title></circle>`).join('');
+  svg.innerHTML = `<defs><linearGradient id="gCurva" gradientUnits="userSpaceOnUse" x1="${tx(0)}" x2="${tx(9)}" y1="0" y2="0">${stops}</linearGradient><clipPath id="cAvance"><rect id="rAvance" x="0" y="0" width="0" height="${TL.h}"/></clipPath></defs>
+    <line class="base" x1="${tx(0)}" x2="${tx(9)}" y1="${TL.base}" y2="${TL.base}"/>
+    <path class="pre" d="M${tx(0)} ${TL.base}L${tx(t0)} ${TL.base}"/>
+    ${group('')}<g clip-path="url(#cAvance)">${group('on')}</g>${ticks}${dots}`;
+  paradas.innerHTML = HITOS.map((h, k) => `<span data-k="${k}" style="left:${tx(k).toFixed(1)}px">${k ? STOP_YEARS[k] : '‹1538'}</span>`).join('');
+}
+
+function renderHito(i) {
+  const h = HITOS[i];
+  const cuerpo = h.texto.map(p => p.startsWith('<span>') ? `<p class="previsto">${p}</p>` : `<p>${p}</p>`).join('');
+  art.innerHTML = `<p class="num"><b>${String(i + 1).padStart(2, '0')}</b> / 10</p><p class="etiqueta">${h.etiqueta}</p><h2>${h.titulo}</h2><div class="cuerpo">${cuerpo}</div>`;
+  document.body.dataset.epoca = h.epoca;
+  tir.setAttribute('aria-valuenow', String(i + 1));
+  tir.setAttribute('aria-valuetext', `Hito ${i + 1} de 10: ${h.titulo}, ${h.etiqueta}`);
+  [...paradas.children].forEach((s, k) => s.classList.toggle('activa', k === i));
+}
+
+const marks = POINTS.map(p => {
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'punto'; b.tabIndex = -1;
+  const h = HITOS[p.hito - 1];
+  const extra = p.hito === 10 ? ' (previsto)' : '';
+  b.setAttribute('aria-label', `${p.nombre}. Entra en la historia en el hito ${p.hito}: ${h.titulo}${extra}`);
+  b.innerHTML = `<span class="r"><span class="n">${p.nombre}</span><small>Entra en la historia en el hito ${p.hito} · ${h.titulo}${extra}</small></span>`;
+  $('#puntos').appendChild(b);
+  return { p, b, y: height(p.x, p.z) + .015, shown: false };
+});
+const metroLbl = document.createElement('div');
+metroLbl.className = 'rotulo-metro'; metroLbl.innerHTML = '<span>Primera línea del metro · previsto</span>';
+$('#puntos').appendChild(metroLbl);
+const metroMid = [-6.0, .3];
+
+const PAL = {
+  tinta: [[243, 223, 168], [43, 25, 12], [251, 239, 226], [236, 242, 255]],
+  velo: [[6, 4, 2, .78], [238, 226, 198, .86], [30, 16, 10, .74], [3, 5, 12, .74]],
+  acento: [[233, 184, 81], [134, 56, 22], [244, 160, 104], [126, 220, 255]],
+  fondo: [[5, 4, 3], [26, 18, 12], [22, 15, 12], [3, 5, 12]],
+};
+const palMix = (arr, w) => arr[0].map((_, i) => arr.reduce((s, c, k) => s + c[i] * w[k], 0));
+let lastPal = '';
+function updatePalette() {
+  const key = W4.map(v => v.toFixed(2)).join();
+  if (key === lastPal) return;
+  lastPal = key;
+  const t = palMix(PAL.tinta, W4).map(Math.round), v = palMix(PAL.velo, W4), a = palMix(PAL.acento, W4).map(Math.round), f = palMix(PAL.fondo, W4).map(Math.round);
+  const st = document.documentElement.style;
+  st.setProperty('--tinta', `rgb(${t})`);
+  st.setProperty('--tinta-2', `rgba(${t},.72)`);
+  st.setProperty('--velo', `rgba(${v.slice(0, 3).map(Math.round)},${v[3].toFixed(3)})`);
+  st.setProperty('--acento', `rgb(${a})`);
+  st.setProperty('--fondo', `rgb(${f})`);
+}
+
+let shownHito = -1, popShown = null, popTarget = null, lastYearTxt = '', lastNote = '';
+function updateUI(dt, cssW, cssH) {
+  const t = S.t, near = Math.round(t), off = Math.abs(t - near);
+  if (near !== shownHito) { shownHito = near; renderHito(near); }
+  const op = (1 - sstep(.12, .42, off)) * (1 - .88 * SC.camW);
+  art.style.opacity = op.toFixed(3);
+  art.style.transform = reduced ? '' : `translateY(${((t - near) * -26).toFixed(1)}px)`;
+
+  const x = tx(t), y = curveY(t);
+  tir.style.transform = `translate(${x.toFixed(1)}px,${y.toFixed(1)}px)`;
+  tir.style.setProperty('--baja', `${Math.max(0, TL.base - y - 10).toFixed(0)}px`);
+  const r = $('#rAvance'); if (r) r.setAttribute('width', x.toFixed(1));
+  const yr = yearAt(t);
+  const ytxt = off < .02 ? HITOS[near].etiqueta : (yr === null ? 'antes de 1538' : String(Math.round(yr)));
+  if (ytxt !== lastYearTxt) { anioTir.textContent = ytxt; lastYearTxt = ytxt; }
+  pista.style.left = `${Math.max(x, pista.offsetWidth / 2 + 16)}px`;
+  pista.style.opacity = SC.camW > .1 ? '0' : '';
+
+  let best = null;
+  if (yr !== null && yr >= 1778 - .5) best = POP.reduce((a, p) => Math.abs(p[0] - yr) < Math.abs(a[0] - yr) ? p : a, POP[0]);
+  popTarget = best ? best[1] : null;
+  if (popTarget === null) { if (cifra.textContent !== '—') cifra.textContent = '—'; popShown = null; }
+  else {
+    popShown = popShown === null ? popTarget : popShown + (popTarget - popShown) * (1 - Math.exp(-dt * (reduced ? 30 : 5)));
+    if (Math.abs(popShown - popTarget) < 1) popShown = popTarget;
+    const txt = fmt(popShown); if (cifra.textContent !== txt) cifra.textContent = txt;
+  }
+  const nt = best ? `${best[0]} · ${best[2]}` : 'sin datos de población para esta época';
+  if (nt !== lastNote) { nota.textContent = nt; lastNote = nt; }
+
+  updatePalette();
+  for (const m of marks) {
+    const h0 = m.p.hito - 1;
+    const vis = sstep(h0 - .5, h0 - .05, t) * (S.intro > .8 ? 1 : 0);
+    const sp = vis > .01 ? project(m.p.x, m.y + fogY(m.p.x, m.p.z), m.p.z, cssW, cssH) : null;
+    const on = !!sp && sp[0] > -20 && sp[0] < cssW + 20 && sp[1] > -20 && sp[1] < cssH + 20;
+    if (on) {
+      m.b.style.transform = `translate(${sp[0].toFixed(1)}px,${sp[1].toFixed(1)}px)`;
+      m.b.style.opacity = vis.toFixed(2);
+      m.b.classList.toggle('destacado', Math.abs(t - h0) < .45);
+    }
+    if (on !== m.shown) {
+      m.shown = on;
+      m.b.style.visibility = on ? 'visible' : 'hidden';
+      m.b.tabIndex = on ? 0 : -1;
+      m.b.setAttribute('aria-hidden', on ? 'false' : 'true');
+    }
+  }
+  const mv = sstep(8.6, 8.95, t);
+  const mp = mv > .01 ? project(metroMid[0], height(metroMid[0], metroMid[1]) + .09, metroMid[1], cssW, cssH) : null;
+  metroLbl.style.opacity = mp ? mv.toFixed(2) : '0';
+  if (mp) metroLbl.style.transform = `translate(${(mp[0] + 10).toFixed(1)}px,${(mp[1] - 22).toFixed(1)}px)`;
+}
+
+/* ---------- Control de la línea de tiempo ---------- */
+const PLAY = { on: false, dwell: 0 };
+function stopPlay() {
+  if (!PLAY.on) return;
+  PLAY.on = false;
+  bPlay.setAttribute('aria-pressed', 'false');
+  bPlay.querySelector('span').textContent = 'Reproducir';
+}
+function startPlay() {
+  PLAY.on = true; PLAY.dwell = 0;
+  bPlay.setAttribute('aria-pressed', 'true');
+  bPlay.querySelector('span').textContent = 'Pausar';
+  if (S.target >= 8.99) { S.target = 0; S.vel = 0; }
+  else S.target = Math.min(9, Math.floor(S.target + 1e-3) + 1);
+}
+function interact() { stopPlay(); pista.classList.add('oculta'); }
+function goTo(k) { S.target = clamp(k, 0, 9); }
+function step(dir) {
+  interact();
+  goTo(dir > 0 ? Math.min(9, Math.floor(S.target + 1e-3) + 1) : Math.max(0, Math.ceil(S.target - 1e-3) - 1));
+}
+function fromPointer(clientX) {
+  const r = linea.getBoundingClientRect();
+  let raw = xt(clientX - r.left);
+  const k = Math.round(raw);
+  if (Math.abs(raw - k) < .16) raw = k;
+  S.target = raw;
+}
+linea.addEventListener('pointerdown', e => {
+  if (e.button !== 0) return;
+  interact(); S.dragging = true;
+  linea.setPointerCapture(e.pointerId);
+  if (e.target.dataset && e.target.dataset.k !== undefined) { S.dragging = false; goTo(+e.target.dataset.k); tir.focus({ preventScroll: true }); return; }
+  fromPointer(e.clientX);
+  tir.focus({ preventScroll: true });
+});
+linea.addEventListener('pointermove', e => { if (S.dragging) fromPointer(e.clientX); });
+const endDrag = () => { S.dragging = false; };
+linea.addEventListener('pointerup', endDrag);
+linea.addEventListener('pointercancel', endDrag);
+tir.addEventListener('keydown', e => {
+  const cur = S.target;
+  let k = null;
+  if (e.key === 'ArrowRight' || e.key === 'ArrowUp' || e.key === 'PageUp') k = e.shiftKey ? Math.min(9, cur + .25) : Math.min(9, Math.floor(cur + 1e-3) + 1);
+  else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown' || e.key === 'PageDown') k = e.shiftKey ? Math.max(0, cur - .25) : Math.max(0, Math.ceil(cur - 1e-3) - 1);
+  else if (e.key === 'Home') k = 0;
+  else if (e.key === 'End') k = 9;
+  if (k === null) return;
+  e.preventDefault(); e.stopPropagation();
+  interact(); goTo(k);
+});
+window.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && fuentes.classList.contains('abierto')) { cerrarFuentes(); return; }
+  const tag = document.activeElement && document.activeElement.tagName;
+  if (document.activeElement !== document.body && tag !== 'CANVAS') return;
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); step(1); }
+  else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); step(-1); }
+});
+let wheelAcc = 0, wheelLast = 0, wheelStep = 0;
+window.addEventListener('wheel', e => {
+  if (fuentes.contains(e.target) || art.contains(e.target) && art.scrollHeight > art.clientHeight) return;
+  const now = performance.now();
+  if (now - wheelLast > 220) wheelAcc = 0;
+  wheelLast = now;
+  wheelAcc += e.deltaY;
+  if (Math.abs(wheelAcc) > 40 && now - wheelStep > 700) { step(Math.sign(wheelAcc)); wheelAcc = 0; wheelStep = now; }
+}, { passive: true });
+
+let drag = null;
+canvas.addEventListener('pointerdown', e => {
+  drag = { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, touch: e.pointerType !== 'mouse', moved: false };
+  canvas.setPointerCapture(e.pointerId);
+});
+canvas.addEventListener('pointermove', e => {
+  const r = canvas.getBoundingClientRect();
+  S.mx = clamp((e.clientX - r.left) / r.width * 2 - 1, -1, 1);
+  S.my = clamp((e.clientY - r.top) / r.height * 2 - 1, -1, 1);
+  if (!drag) return;
+  const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+  drag.x = e.clientX; drag.y = e.clientY;
+  if (drag.touch && Math.abs(e.clientY - drag.sy) > Math.abs(e.clientX - drag.sx)) return;
+  S.orbAz = clamp(S.orbAz - dx * .18, -35, 35);
+  if (!drag.touch) S.orbEl = clamp(S.orbEl + dy * .12, -18, 25);
+  S.orbIdle = 0;
+});
+canvas.addEventListener('pointerup', e => {
+  if (drag && drag.touch) {
+    const dx = e.clientX - drag.sx, dy = e.clientY - drag.sy;
+    if (Math.abs(dy) > 50 && Math.abs(dy) > Math.abs(dx)) step(dy < 0 ? 1 : -1);
+  }
+  drag = null;
+});
+canvas.addEventListener('pointercancel', () => { drag = null; });
+
+bPlay.addEventListener('click', () => { pista.classList.add('oculta'); if (PLAY.on) stopPlay(); else startPlay(); });
+bSon.addEventListener('click', async () => {
+  const on = await Son.toggle();
+  bSon.setAttribute('aria-pressed', String(on));
+  bSon.querySelector('span').textContent = on ? 'Silenciar' : 'Activar sonido';
+});
+function abrirFuentes() { fuentes.classList.add('abierto'); bFuentes.setAttribute('aria-expanded', 'true'); fuentes.focus({ preventScroll: true }); }
+function cerrarFuentes() { fuentes.classList.remove('abierto'); bFuentes.setAttribute('aria-expanded', 'false'); bFuentes.focus({ preventScroll: true }); }
+bFuentes.addEventListener('click', () => (fuentes.classList.contains('abierto') ? cerrarFuentes() : abrirFuentes()));
+$('#bCerrar').addEventListener('click', cerrarFuentes);
+
+function hashHito() {
+  const m = /^#hito-(\d+)$/.exec(location.hash);
+  if (!m) return null;
+  const n = +m[1];
+  return n >= 1 && n <= 10 ? n - 1 : null;
+}
+window.addEventListener('hashchange', () => { const k = hashHito(); if (k !== null && Math.abs(k - S.target) > 1e-3) { interact(); goTo(k); } });
+let lastHash = '';
+function syncHash() {
+  const k = Math.round(S.t);
+  if (S.dragging || Math.abs(S.t - k) > .002 || Math.abs(S.target - k) > 1e-6 || Math.abs(S.vel) > .01) return;
+  const h = `#hito-${k + 1}`;
+  if (h !== lastHash && location.hash !== h) history.replaceState(null, '', h);
+  lastHash = h;
+}
+
+/* ---------- Tamaño y bucle ---------- */
+let cssW = 0, cssH = 0, dprScale = 1, slow = 0;
+function resize() {
+  const r = canvas.getBoundingClientRect();
+  cssW = Math.max(1, r.width); cssH = Math.max(1, r.height);
+  let dpr = Math.min(window.devicePixelRatio || 1, 2) * dprScale;
+  if (cssW * cssH * dpr * dpr > 2.6e6) dpr = Math.sqrt(2.6e6 / (cssW * cssH));
+  const w = Math.max(1, Math.round(cssW * dpr)), h = Math.max(1, Math.round(cssH * dpr));
+  if (w !== canvas.width || h !== canvas.height || !FB.msaa) { canvas.width = w; canvas.height = h; buildFB(w, h); }
+  buildTimeline();
+}
+motionQuery.addEventListener('change', e => { reduced = e.matches; });
+
+let introStart = 0, introLen = 5.2, last = 0;
+function frame(now) {
+  const dt = Math.min(.05, last ? (now - last) / 1000 : .016);
+  last = now;
+  S.time += dt;
+  S.intro = reduced ? 1 : clamp((now - introStart) / 1000 / introLen);
+
+  if (S.dragging) { S.t += (S.target - S.t) * (1 - Math.exp(-dt * 14)); S.vel = 0; }
+  else {
+    const k = reduced ? 7 : 2.6;
+    S.vel += (k * k * (S.target - S.t) - 2 * k * S.vel) * dt;
+    S.t += S.vel * dt;
+    if (Math.abs(S.target - S.t) < 1e-4 && Math.abs(S.vel) < 1e-3) { S.t = S.target; S.vel = 0; }
+  }
+  S.t = clamp(S.t, 0, 9);
+  if (!drag) { S.orbIdle += dt; if (S.orbIdle > 5) { const d = 1 - Math.exp(-dt * .5); S.orbAz -= S.orbAz * d; S.orbEl -= S.orbEl * d; } }
+
+  if (PLAY.on && Math.abs(S.t - S.target) < .003 && Math.abs(S.vel) < .01) {
+    PLAY.dwell += dt;
+    const k = Math.round(S.target);
+    const need = Math.max(4 + HITOS[k].texto.join(' ').length / 60, sceneNeed(k) + .5);
+    if (PLAY.dwell > need) { PLAY.dwell = 0; if (k >= 9) stopPlay(); else S.target = k + 1; }
+  }
+  if (S.t > .3) pista.classList.add('oculta');
+
+  sceneTick(dt);
+  const E = draw(cssW, cssH);
+  updateUI(dt, cssW, cssH);
+  syncHash();
+  const yr = yearAt(S.t);
+  const pop = yr !== null && yr >= 1778 ? popCurve(yearToT(yr)) : 0;
+  Son.update({ ash: E.ash, rain: rainLevel(S.time), popF: pop ? clamp((Math.log10(pop) - 4) / 2.86) : 0 }, dt);
+
+  if (dt > .028) slow += dt; else slow = Math.max(0, slow - dt * .5);
+  if (slow > 2 && dprScale > .6) { dprScale *= .8; slow = 0; resize(); }
+  requestAnimationFrame(frame);
+}
+
+function start() {
+  try { buildScene(); buildActors(); } catch (err) { sinGL('No se pudo preparar el mapa en esta tarjeta gráfica.'); console.warn(err); return; }
+  resize();
+  new ResizeObserver(resize).observe(document.querySelector('.escena'));
+  window.addEventListener('resize', buildTimeline);
+  const k = hashHito();
+  if (k !== null) { S.t = S.target = k; introLen = 2; }
+  renderHito(Math.round(S.t)); shownHito = Math.round(S.t);
+  introStart = performance.now();
+  const skip = () => { if (S.intro < 1) introStart = Math.min(introStart, performance.now() - introLen * 1000 * .85); };
+  window.addEventListener('pointerdown', skip, { once: true });
+  window.addEventListener('keydown', skip, { once: true });
+  const ms = reduced ? 300 : introLen * 1000;
+  setTimeout(() => $('#intro').classList.add('fuera'), ms * .62);
+  setTimeout(() => $('#intro').remove(), ms * .62 + 1700);
+  setTimeout(() => document.body.classList.add('listo'), ms * .7);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(() => setTimeout(start, 30));
+})();
+</script>
+</body>
+</html>
