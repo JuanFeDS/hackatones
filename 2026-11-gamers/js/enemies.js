@@ -8,20 +8,20 @@
     8: { name: 'Torre Ciega', weakTo: ['rook'] },
     10: { name: 'Reina Marchita', weakTo: ['queen'] }
   };
-  const SPAWN_EVERY_MS = 500;
+  const DIAGONALS = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
+  const SPAWN_EVERY_MS = 380;
+  const EARLY_SPAWN_EVERY_MS = 750;
+  const EARLY_WAVES = 2;
+  const EARLY_SLOW = 1.2;
   const BFS_EVERY_MS = 500;
   const MIN_SPAWN_DISTANCE = 7;
-  const GHOST_MOVE_MS = 700;
-  const GHOST_FAST_MOVE_MS = 400;
   const FAST_FROM_WAVE = 7;
-  const WRAITH_MOVE_MS = 900;
-  const WRAITH_FROM_WAVE = 4;
-  const WRAITH_RATE = 0.3;
-  const ERRATIC_RATE = 0.2;
+  const FAST_FACTOR = 0.82;
   const BOSS_MOVE_MS = 900;
   const BOSS_INVULN_MS = 1500;
   const BOSS_SUMMON_MS = 4000;
   const BOSS_SUMMON_COUNT = 2;
+  const HIT_INVULN_MS = 250;
   const MAX_ENEMIES = 40;
 
   const cache = { state: null, at: -Infinity, field: null };
@@ -74,27 +74,59 @@
     return !G.isWall(state.maze, x, y) && !G.enemyAt(state, x, y) && !playerAt(state, x, y);
   }
 
+  function statsOf(kind) {
+    const entry = G.bestiary.get(kind);
+    return entry ? entry.stats : { hp: 1, moveEvery: 700, erratic: 0.2 };
+  }
+
   function moveEveryFor(state, kind) {
-    if (kind === 'wraith') return WRAITH_MOVE_MS;
     if (kind === 'boss') return BOSS_MOVE_MS;
-    return state.wave && state.wave.n >= FAST_FROM_WAVE ? GHOST_FAST_MOVE_MS : GHOST_MOVE_MS;
+    const stats = statsOf(kind);
+    if (!state.wave || state.wave.n <= EARLY_WAVES) return Math.round(stats.moveEvery * EARLY_SLOW);
+    if (state.wave.n < FAST_FROM_WAVE) return stats.moveEvery;
+    return stats.fastMoveEvery || Math.round(stats.moveEvery * FAST_FACTOR);
+  }
+
+  function pickKind(state) {
+    const n = state.wave ? state.wave.n : 1;
+    const pool = G.bestiary.normals.filter((entry) => entry.stats.from <= n);
+    let total = 0;
+    for (const entry of pool) total += entry.stats.weight;
+    let roll = Math.random() * total;
+    for (const entry of pool) {
+      roll -= entry.stats.weight;
+      if (roll <= 0) return entry.id;
+    }
+    return pool.length ? pool[pool.length - 1].id : 'ghost';
+  }
+
+  function waveSize(n, boss) {
+    return boss ? 4 + n : 6 + 2 * n;
+  }
+
+  function spawnEvery(state) {
+    return state.wave.n <= EARLY_WAVES ? EARLY_SPAWN_EVERY_MS : SPAWN_EVERY_MS;
   }
 
   function createEnemy(state, kind, x, y, extra) {
     const moveEvery = moveEveryFor(state, kind);
+    const entry = kind === 'boss' ? null : G.bestiary.get(kind);
+    const hp = entry ? entry.stats.hp : 1;
     const enemy = {
       id: state.nextId++,
       kind,
-      name: kind,
+      name: entry ? entry.name : kind,
       x,
       y,
-      hp: 1,
-      maxHp: 1,
+      hp,
+      maxHp: hp,
       nextMoveAt: state.now + moveEvery,
       moveEvery,
       invulnUntil: 0,
       weakTo: null,
-      nextSummonAt: 0
+      nextSummonAt: 0,
+      bornAt: state.now,
+      awake: !(entry && entry.stats.ambush)
     };
     Object.assign(enemy, extra || {});
     state.enemies.push(enemy);
@@ -120,10 +152,14 @@
     }
     if (!best) return null;
     const maxHp = 3 + (n >= 6 ? 1 : 0) + (n >= 10 ? 1 : 0);
+    const art = G.bestiary.boss(info.name);
+    const moveEvery = art ? art.stats.moveEvery : BOSS_MOVE_MS;
     return createEnemy(state, 'boss', best.x, best.y, {
       name: info.name,
       hp: maxHp,
       maxHp,
+      moveEvery,
+      nextMoveAt: state.now + moveEvery,
       weakTo: info.weakTo.slice(),
       nextSummonAt: state.now + BOSS_SUMMON_MS
     });
@@ -147,9 +183,14 @@
     const pool = far.length ? far : farManhattan;
     if (!pool.length) return false;
     const spot = pool[Math.floor(Math.random() * pool.length)];
-    const wraith = state.wave.n >= WRAITH_FROM_WAVE && Math.random() < WRAITH_RATE;
-    createEnemy(state, wraith ? 'wraith' : 'ghost', spot.x, spot.y);
+    createEnemy(state, pickKind(state), spot.x, spot.y);
     return true;
+  }
+
+  function summonKind(boss) {
+    const art = G.bestiary.boss(boss.name);
+    const list = art && art.stats.summons && art.stats.summons.length ? art.stats.summons : ['ghost'];
+    return list[Math.floor(Math.random() * list.length)];
   }
 
   function summonGhosts(state, boss) {
@@ -162,7 +203,7 @@
     }
     for (let i = 0; i < BOSS_SUMMON_COUNT && spots.length && state.enemies.length < MAX_ENEMIES; i++) {
       const pick = spots.splice(Math.floor(Math.random() * spots.length), 1)[0];
-      createEnemy(state, 'ghost', pick.x, pick.y);
+      createEnemy(state, summonKind(boss), pick.x, pick.y);
     }
   }
 
@@ -192,7 +233,7 @@
     }
   }
 
-  function stepWalker(state, enemy, field) {
+  function stepWalker(state, enemy, field, stats) {
     const maze = state.maze;
     const open = [];
     for (const dir of CARDINALS) {
@@ -200,9 +241,17 @@
       const ny = enemy.y + dir[1];
       if (!G.isWall(maze, nx, ny) && !G.enemyAt(state, nx, ny)) open.push({ x: nx, y: ny, d: field[ny * maze.w + nx] });
     }
+    if (stats.diagonal) {
+      for (const dir of DIAGONALS) {
+        const nx = enemy.x + dir[0];
+        const ny = enemy.y + dir[1];
+        if (G.isWall(maze, nx, ny) || G.isWall(maze, enemy.x + dir[0], enemy.y) || G.isWall(maze, enemy.x, enemy.y + dir[1])) continue;
+        if (!G.enemyAt(state, nx, ny)) open.push({ x: nx, y: ny, d: field[ny * maze.w + nx] });
+      }
+    }
     if (!open.length) return;
     let choice = null;
-    if (enemy.kind === 'ghost' && Math.random() < ERRATIC_RATE) {
+    if (stats.erratic && Math.random() < stats.erratic) {
       choice = open[Math.floor(Math.random() * open.length)];
     } else {
       const here = field[enemy.y * maze.w + enemy.x];
@@ -247,9 +296,33 @@
 
   G.enemies = G.enemies || {};
 
+  function isAwake(enemy, stats, players, now) {
+    if (enemy.awake) return true;
+    const near = players.some((player) => Math.abs(player.x - enemy.x) + Math.abs(player.y - enemy.y) <= stats.ambush);
+    if (near || now - (enemy.bornAt || 0) >= (stats.wakeAfterMs || 0)) enemy.awake = true;
+    return enemy.awake;
+  }
+
+  function stepEnemy(state, enemy, players, field) {
+    if (enemy.kind === 'boss') {
+      stepWalker(state, enemy, field, {});
+      return;
+    }
+    const stats = statsOf(enemy.kind);
+    if (stats.phase) {
+      stepWraith(state, enemy, players);
+      return;
+    }
+    const steps = stats.lurch || 1;
+    for (let i = 0; i < steps; i++) {
+      if (playerAt(state, enemy.x, enemy.y)) return;
+      stepWalker(state, enemy, field, stats);
+    }
+  }
+
   G.enemies.startWave = function (state, n) {
     const boss = n % 2 === 0 && !!BOSSES[n];
-    state.wave = { n, boss, toSpawn: 2 + n, nextSpawnAt: state.now + SPAWN_EVERY_MS, phase: 'fighting', nextWaveAt: 0 };
+    state.wave = { n, boss, toSpawn: waveSize(n, boss), nextSpawnAt: state.now + SPAWN_EVERY_MS, phase: 'fighting', nextWaveAt: 0 };
     state.events.push({ type: 'wave', n, boss });
     if (boss) spawnBoss(state, n);
   };
@@ -259,7 +332,7 @@
     const wave = state.wave;
     if (wave && wave.phase === 'fighting' && wave.toSpawn > 0 && now >= wave.nextSpawnAt && state.enemies.length < MAX_ENEMIES) {
       if (alivePlayers(state).length && spawnOne(state)) wave.toSpawn--;
-      wave.nextSpawnAt = now + SPAWN_EVERY_MS;
+      wave.nextSpawnAt = now + spawnEvery(state);
     }
     const players = alivePlayers(state);
     if (!players.length) return;
@@ -271,8 +344,8 @@
       }
       if (now < enemy.nextMoveAt) continue;
       enemy.nextMoveAt = now + enemy.moveEvery;
-      if (enemy.kind === 'wraith') stepWraith(state, enemy, players);
-      else stepWalker(state, enemy, field);
+      if (enemy.kind !== 'boss' && !isAwake(enemy, statsOf(enemy.kind), players, now)) continue;
+      stepEnemy(state, enemy, players, field);
       for (const player of players) {
         if (player.alive && player.x === enemy.x && player.y === enemy.y) G.sim.hurtPlayer(state, player);
       }
@@ -281,6 +354,16 @@
 
   G.enemies.hit = function (state, enemy, player, piece) {
     if (enemy.kind !== 'boss') {
+      if (state.now < enemy.invulnUntil) {
+        state.events.push({ type: 'blocked', x: enemy.x, y: enemy.y });
+        return { killed: false, blocked: true };
+      }
+      enemy.hp--;
+      if (enemy.hp > 0) {
+        enemy.invulnUntil = state.now + HIT_INVULN_MS;
+        state.events.push({ type: 'hit', x: enemy.x, y: enemy.y, enemyId: enemy.id });
+        return { killed: false, blocked: true };
+      }
       removeEnemy(state, enemy);
       player.kills++;
       state.events.push({ type: 'kill', x: enemy.x, y: enemy.y, kind: enemy.kind, pid: player.id });

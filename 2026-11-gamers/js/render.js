@@ -234,27 +234,164 @@
     ctx.stroke();
   }
 
+  const TILE_VARIANTS = 6;
+  const tileCache = {};
+
+  function makeRng(seed) {
+    let state = seed >>> 0;
+    return function () {
+      state = (state + 0x6D2B79F5) >>> 0;
+      let t = state;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function shade(rgbArr, delta) {
+    return 'rgb(' + clamp(Math.round(rgbArr[0] + delta), 0, 255) + ',' + clamp(Math.round(rgbArr[1] + delta * 0.95), 0, 255) + ',' + clamp(Math.round(rgbArr[2] + delta * 1.1), 0, 255) + ')';
+  }
+
+  function makeTileTexture(size, light, boss, seed) {
+    const rand = makeRng(seed * 2654435761 + (light ? 17 : 91) + (boss ? 5 : 0));
+    const cv = document.createElement('canvas');
+    cv.width = size;
+    cv.height = size;
+    const c = cv.getContext('2d');
+    const grout = Math.max(1, Math.round(size * 0.035));
+    const inner = size - grout * 2;
+    let base;
+    if (boss) base = light ? [60, 33, 52] : [38, 19, 33];
+    else base = light ? [46, 39, 64] : [27, 22, 38];
+
+    c.fillStyle = boss ? '#0C0409' : '#07060B';
+    c.fillRect(0, 0, size, size);
+
+    const tone = (rand() - 0.5) * 12;
+    c.save();
+    c.translate(grout, grout);
+    c.beginPath();
+    c.rect(0, 0, inner, inner);
+    c.clip();
+
+    c.fillStyle = shade(base, tone);
+    c.fillRect(0, 0, inner, inner);
+    const wash = c.createLinearGradient(0, 0, inner, inner);
+    wash.addColorStop(0, 'rgba(255,255,255,' + (light ? 0.05 : 0.035) + ')');
+    wash.addColorStop(1, 'rgba(0,0,0,0.12)');
+    c.fillStyle = wash;
+    c.fillRect(0, 0, inner, inner);
+
+    const veins = 1 + Math.floor(rand() * 3);
+    for (let v = 0; v < veins; v++) {
+      c.beginPath();
+      let vx = rand() * inner * 0.4;
+      let vy = rand() * inner;
+      c.moveTo(vx, vy);
+      for (let s = 0; s < 3; s++) {
+        vx += inner * (0.2 + rand() * 0.25);
+        vy += (rand() - 0.5) * inner * 0.5;
+        c.quadraticCurveTo(vx - inner * 0.1, vy + (rand() - 0.5) * inner * 0.3, vx, vy);
+      }
+      c.strokeStyle = boss ? 'rgba(210,130,160,' + (0.06 + rand() * 0.06) + ')' : 'rgba(190,180,235,' + (0.05 + rand() * 0.07) + ')';
+      c.lineWidth = Math.max(0.6, size * (0.012 + rand() * 0.018));
+      c.stroke();
+    }
+
+    const stains = Math.floor(rand() * 3);
+    for (let s = 0; s < stains; s++) {
+      const sx = rand() * inner;
+      const sy = rand() * inner;
+      const sr = inner * (0.18 + rand() * 0.3);
+      const stain = c.createRadialGradient(sx, sy, 0, sx, sy, sr);
+      const damp = rand() < 0.5;
+      stain.addColorStop(0, damp ? 'rgba(10,20,26,0.3)' : 'rgba(0,0,0,0.26)');
+      stain.addColorStop(1, 'rgba(0,0,0,0)');
+      c.fillStyle = stain;
+      c.fillRect(0, 0, inner, inner);
+    }
+
+    if (rand() < 0.45) {
+      c.beginPath();
+      let kx = rand() * inner;
+      let ky = rand() * inner * 0.3;
+      const crackPoints = [[kx, ky]];
+      c.moveTo(kx, ky);
+      const steps = 3 + Math.floor(rand() * 3);
+      for (let s = 0; s < steps; s++) {
+        kx = clamp(kx + (rand() - 0.5) * inner * 0.35, 0, inner);
+        ky += inner * (0.14 + rand() * 0.12);
+        c.lineTo(kx, ky);
+        crackPoints.push([kx, ky]);
+      }
+      const branch = crackPoints[1 + Math.floor(rand() * (crackPoints.length - 1))];
+      c.moveTo(branch[0], branch[1]);
+      c.lineTo(branch[0] + (rand() - 0.5) * inner * 0.4, branch[1] + inner * 0.15);
+      c.strokeStyle = 'rgba(3,2,6,0.75)';
+      c.lineWidth = Math.max(0.7, size * 0.014);
+      c.stroke();
+      c.translate(Math.max(0.5, size * 0.01), Math.max(0.5, size * 0.01));
+      c.strokeStyle = 'rgba(230,222,255,0.08)';
+      c.lineWidth = 0.7;
+      c.stroke();
+      c.translate(-Math.max(0.5, size * 0.01), -Math.max(0.5, size * 0.01));
+    }
+
+    const bevel = Math.max(1, Math.round(size * 0.05));
+    c.fillStyle = 'rgba(255,255,255,' + (light ? 0.2 : 0.14) + ')';
+    c.fillRect(0, 0, inner, bevel);
+    c.fillRect(0, 0, bevel, inner);
+    c.fillStyle = 'rgba(0,0,0,0.42)';
+    c.fillRect(0, inner - bevel, inner, bevel);
+    c.fillRect(inner - bevel, 0, bevel, inner);
+
+    if (rand() < 0.4) {
+      const corner = Math.floor(rand() * 4);
+      const chip = inner * (0.1 + rand() * 0.12);
+      const cx = corner & 1 ? inner : 0;
+      const cy = corner & 2 ? inner : 0;
+      const dx = corner & 1 ? -1 : 1;
+      const dy = corner & 2 ? -1 : 1;
+      c.fillStyle = boss ? '#0C0409' : '#07060B';
+      c.beginPath();
+      c.moveTo(cx, cy);
+      c.lineTo(cx + dx * chip, cy);
+      c.lineTo(cx + dx * chip * 0.3, cy + dy * chip * 0.45);
+      c.lineTo(cx, cy + dy * chip);
+      c.closePath();
+      c.fill();
+      c.strokeStyle = 'rgba(255,255,255,0.14)';
+      c.lineWidth = 0.8;
+      c.beginPath();
+      c.moveTo(cx + dx * chip, cy);
+      c.lineTo(cx + dx * chip * 0.3, cy + dy * chip * 0.45);
+      c.lineTo(cx, cy + dy * chip);
+      c.stroke();
+    }
+    c.restore();
+    return cv;
+  }
+
+  function tileSet(sizePx) {
+    let set = tileCache[sizePx];
+    if (set) return set;
+    set = { dark: [], light: [], bossDark: [], bossLight: [] };
+    for (let i = 0; i < TILE_VARIANTS; i++) {
+      set.dark.push(makeTileTexture(sizePx, false, false, i + 1));
+      set.light.push(makeTileTexture(sizePx, true, false, i + 11));
+      set.bossDark.push(makeTileTexture(sizePx, false, true, i + 21));
+      set.bossLight.push(makeTileTexture(sizePx, true, true, i + 31));
+    }
+    tileCache[sizePx] = set;
+    return set;
+  }
+
   function drawFloor(px, py, x, y, maze) {
+    const set = tileSet(Math.max(8, Math.round(tile * dpr)));
     const boss = inRoom(maze.bossRoom, x, y);
-    if (boss) ctx.fillStyle = (x + y) & 1 ? '#190C15' : '#1E1019';
-    else ctx.fillStyle = (x + y) & 1 ? '#0F0D18' : '#141220';
-    ctx.fillRect(px, py, tile + 0.6, tile + 0.6);
-    const h = hash(x, y);
-    if (h % 5 === 0) {
-      ctx.strokeStyle = 'rgba(130,118,175,0.1)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      const ox = px + ((h >> 4) % 100) / 100 * tile;
-      const oy = py + ((h >> 11) % 100) / 100 * tile;
-      ctx.moveTo(ox, oy);
-      ctx.lineTo(ox + tile * 0.22, oy + tile * 0.1);
-      ctx.lineTo(ox + tile * 0.3, oy + tile * 0.26);
-      ctx.stroke();
-    }
-    if (boss && h % 3 === 0) {
-      ctx.fillStyle = 'rgba(179,18,58,0.14)';
-      ctx.fillRect(px + tile * 0.45, py + tile * 0.45, tile * 0.1, tile * 0.1);
-    }
+    const light = ((x + y) & 1) === 0;
+    const list = boss ? (light ? set.bossLight : set.bossDark) : (light ? set.light : set.dark);
+    ctx.drawImage(list[(hash(x, y) >> 3) % TILE_VARIANTS], px, py, tile + 0.6, tile + 0.6);
   }
 
   function drawCells(state) {
@@ -340,9 +477,9 @@
         ctx.lineTo(px + pad, py + tile - pad);
         ctx.stroke();
       } else {
-        ctx.fillStyle = rgba(blood, 0.13 + 0.13 * pulse);
+        ctx.fillStyle = rgba(blood, 0.2 + 0.14 * pulse);
         ctx.fillRect(px + inset, py + inset, tile - inset * 2, tile - inset * 2);
-        ctx.strokeStyle = rgba(blood, 0.3 + 0.2 * pulse);
+        ctx.strokeStyle = rgba('#FF3B6B', 0.45 + 0.25 * pulse);
         ctx.lineWidth = 1;
         ctx.strokeRect(px + inset + 0.5, py + inset + 0.5, tile - inset * 2 - 1, tile - inset * 2 - 1);
         ctx.fillStyle = rgba('#FF3B6B', 0.35 + 0.3 * pulse);
@@ -452,18 +589,24 @@
     const invulnerable = now < (enemy.invulnUntil || 0);
     const blink = invulnerable ? (Math.floor(now / 70) % 2 ? 0.35 : 0.8) : 1;
     const bodyColor = invulnerable ? '#F2B8C6' : '#D63A62';
-    const center = drawGhostBody(cx0, cy0, radius, bodyColor, alpha * blink, now, enemy.id * 1.7);
-
-    ctx.font = Math.round(radius * 1.05) + 'px ' + FONT_GLYPH;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = rgba('#07060B', 0.7 * alpha * blink);
-    ctx.fillText((G.PIECE_GLYPH[bossPiece(enemy)] || '♛') + '︎', center.cx, center.cy + radius * 0.5);
+    const entry = G.bestiary && G.bestiary.forEnemy(enemy);
+    let center = { cx: cx0, cy: cy0 };
+    let barLift = radius * 1.4;
+    if (drawMonster(enemy, cx0, cy0, alpha * blink, invulnerable ? '#F2B8C6' : null, now)) {
+      barLift = (tile * entry.scale) / 2;
+    } else {
+      center = drawGhostBody(cx0, cy0, radius, bodyColor, alpha * blink, now, enemy.id * 1.7);
+      ctx.font = Math.round(radius * 1.05) + 'px ' + FONT_GLYPH;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = rgba('#07060B', 0.7 * alpha * blink);
+      ctx.fillText((G.PIECE_GLYPH[bossPiece(enemy)] || '♛') + '︎', center.cx, center.cy + radius * 0.5);
+    }
 
     if (light > 0.25) {
       const width = tile * 1.9;
       const x = center.cx - width / 2;
-      const y = center.cy - radius * 1.4 - 14;
+      const y = center.cy - barLift - 14;
       const fraction = clamp(enemy.hp / (enemy.maxHp || 1), 0, 1);
       ctx.fillStyle = 'rgba(0,0,0,0.65)';
       ctx.fillRect(x - 2, y - 2, width + 4, 11);
@@ -480,6 +623,7 @@
       setSpacing(2);
       ctx.font = '600 ' + Math.round(tile * 0.24) + 'px ' + FONT_SERIF;
       ctx.fillStyle = rgba('#F6D2DA', 0.95 * light);
+      ctx.textAlign = 'center';
       ctx.textBaseline = 'alphabetic';
       ctx.fillText((enemy.name || 'JEFE').toUpperCase(), center.cx + 1, y - 7);
       setSpacing(0);
@@ -494,7 +638,30 @@
     let alpha = 0.15 + 0.85 * sstep((light - 0.15) / 0.6);
     const wraith = enemy.kind === 'wraith';
     if (wraith) alpha *= 0.78;
+    if (drawMonster(enemy, sx, sy, alpha, null, now)) return;
     drawGhostBody(sx, sy, tile * 0.34, wraith ? WRAITH_COLOR : colors().ghost, alpha, now, enemy.id * 2.3);
+  }
+
+  function drawMonster(enemy, sx, sy, alpha, tint, now) {
+    const entry = G.bestiary && G.bestiary.forEnemy(enemy);
+    if (!entry) return false;
+    const img = G.bestiary.image(entry.id, tint, G.bestiary.frameOf(entry, enemy, now));
+    if (!img) return false;
+    const size = tile * entry.scale;
+    const bob = entry.float ? Math.sin(now * 0.003 + enemy.id * 1.9) * tile * 0.05 : 0;
+    const glowR = size * 0.75;
+    const glow = ctx.createRadialGradient(sx, sy, glowR * 0.15, sx, sy, glowR);
+    glow.addColorStop(0, rgba(entry.glow, 0.32 * alpha));
+    glow.addColorStop(1, rgba(entry.glow, 0));
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = glow;
+    ctx.fillRect(sx - glowR, sy - glowR, glowR * 2, glowR * 2);
+    ctx.globalCompositeOperation = 'source-over';
+    const hurt = now < (enemy.invulnUntil || 0) && enemy.kind !== 'boss';
+    ctx.globalAlpha = alpha * (hurt && Math.floor(now / 60) % 2 ? 0.4 : 1);
+    ctx.drawImage(img, sx - size / 2, sy - size / 2 + bob, size, size);
+    ctx.globalAlpha = 1;
+    return true;
   }
 
   function drawEnemies(state, now, dt) {

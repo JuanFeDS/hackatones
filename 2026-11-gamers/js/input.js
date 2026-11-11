@@ -7,8 +7,8 @@ G.input = (function () {
   };
   const DIAGONAL_KEYS = { KeyQ: [-1, -1], KeyE: [1, -1], KeyZ: [-1, 1], KeyC: [1, 1] };
   const FIRST_PERSON_KEYS = {
-    ArrowUp: [0, 1], KeyW: [0, 1],
-    ArrowDown: [0, -1], KeyS: [0, -1],
+    KeyW: [0, 1],
+    KeyS: [0, -1],
     KeyA: [-1, 0], KeyD: [1, 0],
     KeyZ: [-1, -1], KeyC: [1, -1]
   };
@@ -87,6 +87,11 @@ G.input = (function () {
       if (event.code === 'KeyR') wantsRestart = true;
       const digit = /^Digit([1-6])$/.exec(event.code);
       if (digit) pendingSwitch = G.CFG.pieceOrder[Number(digit[1]) - 1];
+      if (firstPerson() && (event.code === 'ArrowUp' || event.code === 'ArrowDown')) {
+        event.preventDefault();
+        if (event.code === 'ArrowUp') attackAt = performance.now();
+        return;
+      }
       if (firstPerson() && TURN_KEYS[event.code]) {
         event.preventDefault();
         held.add(event.code);
@@ -162,9 +167,13 @@ G.input = (function () {
       commands.push({ playerId: player.id, type: 'switch', piece: pendingSwitch });
       pendingSwitch = null;
     }
+    let acted = false;
     if (now - attackAt < PENDING_MS) {
       commands.push({ playerId: player.id, type: 'attack' });
-      if (state.now >= player.cooldownUntil) attackAt = -Infinity;
+      if (now >= player.cooldownUntil) {
+        attackAt = -Infinity;
+        acted = true;
+      }
     }
     if (clickedCell) {
       const cell = G.activeRender.cellAt(clickedCell.x, clickedCell.y);
@@ -173,11 +182,11 @@ G.input = (function () {
     }
     let vector = heldVector();
     if (!vector && pendingDir && now - pendingAt < PENDING_MS) vector = pendingDir;
-    if (vector) {
+    if (vector && !acted) {
       const target = G.pieces.slide(state, player, vector.dx, vector.dy);
       if (target) {
         commands.push({ playerId: player.id, type: 'moveTo', x: target.x, y: target.y });
-        if (!heldVector()) pendingDir = null;
+        if (!heldVector() && now >= player.cooldownUntil) pendingDir = null;
       }
     }
     return commands;
