@@ -17,7 +17,7 @@ G.sim = (function () {
         y: maze.start.y,
         dir: { dx: 0, dy: -1 },
         piece: 'pawn',
-        unlocked: ['pawn'],
+        unlocked: [...G.CFG.pieceOrder],
         hp: G.CFG.playerHp,
         maxHp: G.CFG.playerHp,
         invulnUntil: 0,
