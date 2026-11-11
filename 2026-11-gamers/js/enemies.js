@@ -379,7 +379,7 @@
       state.events.push({ type: 'kill', x: enemy.x, y: enemy.y, kind: enemy.kind, pid: player.id });
       return { killed: true, blocked: false };
     }
-    if ((enemy.weakTo && !enemy.weakTo.includes(piece)) || state.now < enemy.invulnUntil) {
+    if (state.now < enemy.invulnUntil) {
       state.events.push({ type: 'blocked', x: enemy.x, y: enemy.y });
       return { killed: false, blocked: true };
     }
