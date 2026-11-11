@@ -1230,6 +1230,7 @@
     drawPlayers(state, now, dt);
     drawEnemies(state, now, dt);
     G.fx.draw(ctx, { x: camX, y: camY, tile: tile, w: cssW, h: cssH });
+    G.slash.draw2D(ctx, { x: camX, y: camY, tile: tile, w: cssW, h: cssH }, now);
     paintPlayers(state, now);
   }
 
@@ -1252,6 +1253,7 @@
       syncState(state, now);
       if (state.events && state.events.length) {
         G.fx.ingest(state.events);
+        G.slash.ingest(state.events, now);
         if (ready) handleEvents(state, now);
       }
     }
