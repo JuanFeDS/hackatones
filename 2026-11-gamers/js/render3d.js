@@ -360,7 +360,7 @@
     for (let row = rowFrom; row < floorH; row++) {
       const py = (row + 0.5) * scale - horizon;
       if (py < 0.6) continue;
-      const dist = (0.5 * f) / py;
+      const dist = (EYE_HEIGHT * f) / py;
       if (dist > FLOOR_FAR) continue;
       const vis = Math.exp(-dist * 0.42) * flick;
       const mixv = clamp(vis, 0, 1);
@@ -412,6 +412,7 @@
 
   const WALL_SCALE = 1.6;
   const CAMERA_BACK = 0.35;
+  const EYE_HEIGHT = 0.8;
 
   function drawWalls(maze, horizon, f, now) {
     const wallRgb = rgbOf(colors().wall);
@@ -462,7 +463,7 @@
       if (vis < 0.012) continue;
       const baseHeight = f / perp;
       const height = baseHeight * WALL_SCALE;
-      const top = horizon + baseHeight / 2 - height;
+      const top = horizon + baseHeight * EYE_HEIGHT - height;
       const u0 = side === 0 ? camY + perp * rayY : camX + perp * rayX;
       const u = u0 - Math.floor(u0);
       const face = side === 1 ? 1 : 0.66;
@@ -612,7 +613,7 @@
     const wraith = enemy.kind === 'wraith';
     const radius = (boss ? 0.62 : 0.3) * scale;
     const bob = Math.sin(now * 0.003 + enemy.id * 1.9) * 0.05;
-    const sy = horizon + (0.5 - (boss ? 0.62 : 0.5) - bob) * scale;
+    const sy = horizon + (EYE_HEIGHT - (boss ? 0.62 : 0.5) - bob) * scale;
     const reach = radius * 2.6;
     if (sx + reach < 0 || sx - reach > cssW) return null;
 
