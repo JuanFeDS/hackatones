@@ -15,8 +15,6 @@
       if (G.view.free) {
         const dir = state.players[0].dir;
         G.view.yaw = Math.atan2(dir.dy, dir.dx);
-      } else {
-        G.input.releasePointer();
       }
     }
   });

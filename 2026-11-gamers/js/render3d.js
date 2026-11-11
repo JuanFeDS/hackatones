@@ -273,7 +273,7 @@
     camX += (targetX - camX) * kPos;
     camY += (targetY - camY) * kPos;
     if (G.view.free) {
-      yaw = G.view.yaw;
+      yaw += (G.view.yaw - yaw) * (1 - Math.exp(-dt / G.view.turnSmoothMs));
       return;
     }
     let diff = targetYaw - yaw;

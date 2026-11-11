@@ -9,12 +9,10 @@ G.input = (function () {
   const FIRST_PERSON_KEYS = {
     ArrowUp: [0, 1], KeyW: [0, 1],
     ArrowDown: [0, -1], KeyS: [0, -1],
-    ArrowLeft: [-1, 0], KeyA: [-1, 0],
-    ArrowRight: [1, 0], KeyD: [1, 0],
-    KeyQ: [-1, 1], KeyE: [1, 1],
+    KeyA: [-1, 0], KeyD: [1, 0],
     KeyZ: [-1, -1], KeyC: [1, -1]
   };
-  const PENDING_MS = 250;
+  const TURN_KEYS = { ArrowLeft: -1, KeyQ: -1, ArrowRight: 1, KeyE: 1 };  const PENDING_MS = 250;
 
   const held = new Set();
   let pendingDir = null;
@@ -25,7 +23,8 @@ G.input = (function () {
   let clickedCell = null;
   let hoverPixel = null;
   let attackAt = -Infinity;
-  let canvasRef = null;
+  let pendingTurn = 0;
+  let lastTurnAt = -Infinity;
 
   function firstPerson() {
     return G.view.free && G.activeRender === G.render3d;
@@ -78,7 +77,6 @@ G.input = (function () {
   }
 
   function init(canvas) {
-    canvasRef = canvas;
     window.addEventListener('keydown', (event) => {
       if (event.code === 'Enter' || event.code === 'Space') wantsStart = true;
       if (event.code === 'Space') {
@@ -88,6 +86,12 @@ G.input = (function () {
       if (event.code === 'KeyR') wantsRestart = true;
       const digit = /^Digit([1-6])$/.exec(event.code);
       if (digit) pendingSwitch = G.CFG.pieceOrder[Number(digit[1]) - 1];
+      if (firstPerson() && TURN_KEYS[event.code]) {
+        event.preventDefault();
+        held.add(event.code);
+        if (!event.repeat) pendingTurn = TURN_KEYS[event.code];
+        return;
+      }
       if (HELD_AXES[event.code] || DIAGONAL_KEYS[event.code]) {
         event.preventDefault();
         held.add(event.code);
@@ -102,13 +106,6 @@ G.input = (function () {
     });
     window.addEventListener('keyup', (event) => held.delete(event.code));
     window.addEventListener('blur', () => held.clear());
-    document.addEventListener('mousemove', (event) => {
-      if (firstPerson() && G.view.free) {
-        G.view.yaw += event.movementX * G.view.sensitivity;
-        const limit = G.view.pitchLimit;
-        G.view.pitch = Math.max(-limit, Math.min(limit, G.view.pitch - event.movementY * G.view.sensitivity));
-      }
-    });
     canvas.addEventListener('mousemove', (event) => {
       hoverPixel = { x: event.clientX, y: event.clientY };
     });
@@ -119,11 +116,7 @@ G.input = (function () {
       wantsStart = true;
       wantsRestart = true;
       if (firstPerson()) {
-        if (document.pointerLockElement !== canvas) {
-          const lock = canvas.requestPointerLock();
-          if (lock && lock.catch) lock.catch(() => {});
-        }
-        else attackAt = performance.now();
+        attackAt = performance.now();
         return;
       }
       clickedCell = { x: event.clientX, y: event.clientY };
@@ -132,10 +125,6 @@ G.input = (function () {
 
   function hover() {
     return hoverPixel ? G.activeRender.cellAt(hoverPixel.x, hoverPixel.y) : null;
-  }
-
-  function releasePointer() {
-    if (document.pointerLockElement === canvasRef) document.exitPointerLock();
   }
 
   function drain(state, now) {
@@ -154,6 +143,15 @@ G.input = (function () {
     }
     const player = state.players[0];
     if (firstPerson()) {
+      let turn = pendingTurn;
+      pendingTurn = 0;
+      if (!turn && now - lastTurnAt > G.view.turnRepeatMs) {
+        turn = (held.has('ArrowRight') || held.has('KeyE') ? 1 : 0) - (held.has('ArrowLeft') || held.has('KeyQ') ? 1 : 0);
+      }
+      if (turn) {
+        G.view.yaw += turn * (Math.PI / 2);
+        lastTurnAt = now;
+      }
       const front = facing();
       if (front.dx !== player.dir.dx || front.dy !== player.dir.dy) {
         commands.push({ playerId: player.id, type: 'face', dx: front.dx, dy: front.dy });
@@ -184,5 +182,5 @@ G.input = (function () {
     return commands;
   }
 
-  return { init, drain, hover, releasePointer };
+  return { init, drain, hover };
 })();
