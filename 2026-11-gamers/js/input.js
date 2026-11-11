@@ -65,7 +65,7 @@ G.input = (function () {
   }
 
   function hover() {
-    return hoverPixel ? G.render.cellAt(hoverPixel.x, hoverPixel.y) : null;
+    return hoverPixel ? G.activeRender.cellAt(hoverPixel.x, hoverPixel.y) : null;
   }
 
   function drain(state, now) {
@@ -88,7 +88,7 @@ G.input = (function () {
       pendingSwitch = null;
     }
     if (clickedCell) {
-      const cell = G.render.cellAt(clickedCell.x, clickedCell.y);
+      const cell = G.activeRender.cellAt(clickedCell.x, clickedCell.y);
       clickedCell = null;
       if (cell) commands.push({ playerId: player.id, type: 'moveTo', x: cell.x, y: cell.y });
     }
