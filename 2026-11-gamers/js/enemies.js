@@ -2,11 +2,11 @@
   const G = (window.G = window.G || {});
   const CARDINALS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
   const BOSSES = {
-    2: { name: 'Obispo Hueco', weakTo: ['bishop', 'queen'] },
+    2: { name: 'Peón Hueco', weakTo: ['pawn'] },
     4: { name: 'El Muro', weakTo: ['knight'] },
-    6: { name: 'Torre Ciega', weakTo: ['rook', 'queen'] },
-    8: { name: 'Reina Marchita', weakTo: ['queen'] },
-    10: { name: 'Rey Sin Corona', weakTo: ['king', 'queen'] }
+    6: { name: 'Obispo Hueco', weakTo: ['bishop'] },
+    8: { name: 'Torre Ciega', weakTo: ['rook'] },
+    10: { name: 'Reina Marchita', weakTo: ['queen'] }
   };
   const SPAWN_EVERY_MS = 500;
   const BFS_EVERY_MS = 500;
