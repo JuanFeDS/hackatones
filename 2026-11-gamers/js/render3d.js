@@ -611,9 +611,21 @@
     const sx = cssW / 2 + side * scale;
     const boss = enemy.kind === 'boss';
     const wraith = enemy.kind === 'wraith';
-    const radius = (boss ? 0.62 : 0.3) * scale;
     const bob = Math.sin(now * 0.003 + enemy.id * 1.9) * 0.05;
-    const sy = horizon + (EYE_HEIGHT - (boss ? 0.62 : 0.5) - bob) * scale;
+    const invulnerable = now < (enemy.invulnUntil || 0);
+    const entry = G.bestiary && G.bestiary.forEnemy(enemy);
+    const img = entry ? G.bestiary.image(entry.id, boss && invulnerable ? '#F2B8C6' : null, G.bestiary.frameOf(entry, enemy, now)) : null;
+    let radius = (boss ? 0.62 : 0.3) * scale;
+    let sy = horizon + (EYE_HEIGHT - (boss ? 0.62 : 0.5) - bob) * scale;
+    let spriteSize = 0;
+    let spriteTop = 0;
+    if (img) {
+      spriteSize = entry.size3d * scale;
+      const bottom = horizon + (EYE_HEIGHT - entry.lift - (entry.float ? bob : 0)) * scale;
+      spriteTop = bottom - spriteSize;
+      sy = bottom - spriteSize / 2;
+      radius = spriteSize * 0.42;
+    }
     const reach = radius * 2.6;
     if (sx + reach < 0 || sx - reach > cssW) return null;
 
@@ -653,14 +665,32 @@
       ctx.arc(sx, sy, radius * 3.4, 0, TAU);
       ctx.fill();
       ctx.globalCompositeOperation = 'source-over';
-      const invulnerable = now < (enemy.invulnUntil || 0);
       const blink = invulnerable ? (Math.floor(now / 70) % 2 ? 0.35 : 0.8) : 1;
+      if (img) {
+        ctx.globalAlpha = vis * blink;
+        ctx.drawImage(img, sx - spriteSize / 2, spriteTop, spriteSize, spriteSize);
+        ctx.globalAlpha = 1;
+        ctx.restore();
+        return { sx: sx, top: spriteTop + spriteSize * 0.04, radius: radius, vis: vis, boss: boss };
+      }
       drawGhostBody(sx, sy, radius, invulnerable ? '#F2B8C6' : '#D63A62', vis * blink, now, enemy.id * 1.7, 1.12);
       ctx.font = Math.round(radius * 1.05) + 'px ' + FONT_GLYPH;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillStyle = rgba('#07060B', 0.7 * vis * blink);
       ctx.fillText((G.PIECE_GLYPH[bossPiece(enemy)] || '♛') + '︎', sx, sy + radius * 0.55);
+    } else if (img) {
+      const glowR = spriteSize * 0.7;
+      const halo = ctx.createRadialGradient(sx, sy, glowR * 0.15, sx, sy, glowR);
+      halo.addColorStop(0, rgba(entry.glow, 0.3 * vis));
+      halo.addColorStop(1, rgba(entry.glow, 0));
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.fillStyle = halo;
+      ctx.fillRect(sx - glowR, sy - glowR, glowR * 2, glowR * 2);
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = vis * (wraith ? 0.85 : 1) * (invulnerable && Math.floor(now / 60) % 2 ? 0.4 : 1);
+      ctx.drawImage(img, sx - spriteSize / 2, spriteTop, spriteSize, spriteSize);
+      ctx.globalAlpha = 1;
     } else {
       drawGhostBody(sx, sy, radius, wraith ? WRAITH_COLOR : colors().ghost, vis * (wraith ? 0.78 : 1), now, enemy.id * 2.3, wraith ? 1.3 : 1);
     }
@@ -846,7 +876,8 @@
       const px = x0 + (visual.x + 0.5 - left) * cell;
       const py = y0 + (visual.y + 0.5 - top) * cell;
       const boss = enemy.kind === 'boss';
-      const color = boss ? '#FF3B6B' : enemy.kind === 'wraith' ? WRAITH_COLOR : colors().ghost;
+      const entry = !boss && G.bestiary ? G.bestiary.get(enemy.kind) : null;
+      const color = boss ? '#FF3B6B' : entry ? entry.glow : colors().ghost;
       ctx.fillStyle = color;
       ctx.shadowColor = color;
       ctx.shadowBlur = 6;
