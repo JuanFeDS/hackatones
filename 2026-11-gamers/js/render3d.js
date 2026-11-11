@@ -258,8 +258,8 @@
   }
 
   function updateCamera(player, dt) {
-    const targetX = player.x + 0.5;
-    const targetY = player.y + 0.5;
+    const targetX = player.x + 0.5 - Math.cos(yaw) * CAMERA_BACK;
+    const targetY = player.y + 0.5 - Math.sin(yaw) * CAMERA_BACK;
     const dir = player.dir && (player.dir.dx || player.dir.dy) ? player.dir : { dx: 0, dy: -1 };
     const targetYaw = Math.atan2(dir.dy, dir.dx);
     if (!camReady || Math.abs(targetX - camX) > 5 || Math.abs(targetY - camY) > 5) {
@@ -410,7 +410,8 @@
     ctx.drawImage(floorCanvas, 0, 0, floorW * scale, floorH * scale);
   }
 
-  const WALL_SCALE = 2.2;
+  const WALL_SCALE = 1.6;
+  const CAMERA_BACK = 0.35;
 
   function drawWalls(maze, horizon, f, now) {
     const wallRgb = rgbOf(colors().wall);
