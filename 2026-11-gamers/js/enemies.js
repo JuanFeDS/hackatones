@@ -19,8 +19,8 @@
   const FAST_FACTOR = 0.82;
   const BOSS_MOVE_MS = 900;
   const BOSS_INVULN_MS = 1500;
-  const BOSS_SUMMON_MS = 4000;
-  const BOSS_SUMMON_COUNT = 2;
+  const BOSS_SUMMON_MS = 6000;
+  const BOSS_SUMMON_COUNT = 1;
   const HIT_INVULN_MS = 250;
   const MAX_ENEMIES = 40;
 
@@ -111,7 +111,7 @@
   }
 
   function waveSize(n, boss) {
-    return boss ? 4 + n : 6 + 2 * n;
+    return boss ? 2 + Math.floor(n / 2) : 3 + n;
   }
 
   function spawnEvery(state) {

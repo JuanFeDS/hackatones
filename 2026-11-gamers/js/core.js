@@ -8,7 +8,7 @@ G.CFG = {
   playerHp: 3,
   invulnMs: 1500,
   switchCooldownMs: 1000,
-  intermissionMs: 3000,
+  intermissionMs: 1500,
   pieceOrder: ['pawn', 'knight', 'bishop', 'rook', 'queen', 'king'],
   cooldowns: { pawn: 300, knight: 400, bishop: 330, rook: 330, queen: 330, king: 250 },
   colors: {
