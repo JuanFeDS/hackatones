@@ -12,6 +12,7 @@ G.input = (function () {
   let pendingDir = null;
   let pendingAt = 0;
   let pendingSwitch = null;
+  let attackAt = -Infinity;
   let wantsStart = false;
   let wantsRestart = false;
   let clickedCell = null;
@@ -36,6 +37,10 @@ G.input = (function () {
   function init(canvas) {
     window.addEventListener('keydown', (event) => {
       if (event.code === 'Enter' || event.code === 'Space') wantsStart = true;
+      if (event.code === 'Space') {
+        event.preventDefault();
+        attackAt = performance.now();
+      }
       if (event.code === 'KeyR') wantsRestart = true;
       const digit = /^Digit([1-6])$/.exec(event.code);
       if (digit) pendingSwitch = G.CFG.pieceOrder[Number(digit[1]) - 1];
@@ -86,6 +91,10 @@ G.input = (function () {
     if (pendingSwitch) {
       commands.push({ playerId: player.id, type: 'switch', piece: pendingSwitch });
       pendingSwitch = null;
+    }
+    if (now - attackAt < PENDING_MS) {
+      commands.push({ playerId: player.id, type: 'attack' });
+      if (state.now >= player.cooldownUntil) attackAt = -Infinity;
     }
     if (clickedCell) {
       const cell = G.activeRender.cellAt(clickedCell.x, clickedCell.y);
