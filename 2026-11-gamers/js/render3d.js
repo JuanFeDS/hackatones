@@ -37,6 +37,17 @@
   const visEnemies = new Map();
   const banners = [];
   const noisePatterns = [];
+  const TILE_SIZE = 32;
+  const TILE_VARIANTS = 16;
+  const FLOOR_FAR = 16;
+  const tileTex = [[], []];
+  let floorCanvas = null;
+  let floorCtx = null;
+  let floorImage = null;
+  let floorBuf = null;
+  let floorScale = 3;
+  let floorW = 0;
+  let floorH = 0;
   const rgbCache = {};
 
   function clamp(value, lo, hi) {
@@ -87,6 +98,86 @@
     canvas.height = Math.floor(cssH * dpr);
     colW = Math.max(2, Math.round(cssW / 640));
     zbuf = new Float32Array(Math.ceil(cssW / colW));
+    floorScale = cssW > 900 ? 3 : 2;
+    floorW = Math.ceil(cssW / floorScale);
+    floorH = Math.ceil(cssH / floorScale);
+    floorCanvas = document.createElement('canvas');
+    floorCanvas.width = floorW;
+    floorCanvas.height = floorH;
+    floorCtx = floorCanvas.getContext('2d');
+    floorImage = floorCtx.createImageData(floorW, floorH);
+    floorBuf = new Uint32Array(floorImage.data.buffer);
+  }
+
+  function seeded(seed) {
+    let state = seed >>> 0;
+    return function () {
+      state = (state + 0x6d2b79f5) >>> 0;
+      let t = state;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function buildTileTextures() {
+    const size = TILE_SIZE;
+    const bases = [rgbOf('#1b1626'), rgbOf('#2e2740')];
+    for (let parity = 0; parity < 2; parity++) {
+      for (let variant = 0; variant < TILE_VARIANTS; variant++) {
+        const rand = seeded(parity * 1000 + variant * 7919 + 13);
+        const tex = new Uint8Array(size * size * 3);
+        const tone = 0.84 + rand() * 0.34;
+        const hue = (rand() - 0.5) * 0.12;
+        const veinAngle = rand() * TAU;
+        const veinFreq = 0.16 + rand() * 0.18;
+        const veinPhase = rand() * TAU;
+        const veinAmp = 0.05 + rand() * 0.09;
+        const stains = [];
+        const stainCount = rand() < 0.55 ? 1 + ((rand() * 2) | 0) : 0;
+        for (let k = 0; k < stainCount; k++) stains.push({ x: rand() * size, y: rand() * size, r: 5 + rand() * 9 });
+        const mask = new Float32Array(size * size);
+        if (rand() < 0.4) {
+          let cx = rand() * size;
+          let cy = rand() * size;
+          let ang = rand() * TAU;
+          const len = 10 + ((rand() * 18) | 0);
+          for (let n = 0; n < len; n++) {
+            mask[((cy | 0) & (size - 1)) * size + ((cx | 0) & (size - 1))] = 1;
+            ang += (rand() - 0.5) * 1.1;
+            cx += Math.cos(ang);
+            cy += Math.sin(ang);
+            if (cx < 1 || cy < 1 || cx > size - 2 || cy > size - 2) break;
+          }
+        }
+        for (let y = 0; y < size; y++) {
+          for (let x = 0; x < size; x++) {
+            let gain = tone;
+            const wave = Math.sin((x * Math.cos(veinAngle) + y * Math.sin(veinAngle)) * veinFreq * TAU + veinPhase + Math.sin(y * 0.35 + variant) * 1.3);
+            gain += Math.pow(Math.max(0, wave), 14) * veinAmp * 3;
+            gain += (rand() - 0.5) * 0.09;
+            let damp = 0;
+            for (let k = 0; k < stains.length; k++) {
+              const dist = Math.hypot(x - stains[k].x, y - stains[k].y) / stains[k].r;
+              if (dist < 1) damp = Math.max(damp, 1 - dist * dist);
+            }
+            gain *= 1 - damp * 0.38;
+            const crack = mask[y * size + x];
+            if (crack) gain *= 0.35;
+            const edge = Math.min(x, y, size - 1 - x, size - 1 - y);
+            let joint = 1;
+            if (edge === 0) joint = 0.12;
+            else if (edge === 1) joint = 0.55;
+            else if (edge === 2) joint = 1.12;
+            const idx = (y * size + x) * 3;
+            tex[idx] = clamp(bases[parity][0] * (gain + hue) * joint * (1 - damp * 0.1), 0, 255);
+            tex[idx + 1] = clamp(bases[parity][1] * gain * joint * (1 + damp * 0.12), 0, 255);
+            tex[idx + 2] = clamp(bases[parity][2] * (gain - hue) * joint * (1 + damp * 0.18), 0, 255);
+          }
+        }
+        tileTex[parity].push(tex);
+      }
+    }
   }
 
   function buildNoise() {
@@ -119,6 +210,7 @@
       listening = true;
     }
     if (!noisePatterns.length) buildNoise();
+    if (!tileTex[0].length) buildTileTextures();
   };
 
   render3d.cellAt = function () {
@@ -224,7 +316,7 @@
     if (p >= 0 && p < 1) offset = Math.sin(p * TAU) * (1 - p) * f * 0.011;
     const k = (now - hurtAt) / 500;
     if (k >= 0 && k < 1) offset += Math.sin(k * 18) * (1 - k) * f * 0.012;
-    return cssH / 2 + offset;
+    return cssH / 2 + offset + (G.view.free ? G.view.pitch * f : 0);
   }
 
   function drawBackdrop(horizon, f) {
@@ -252,6 +344,70 @@
       ctx.fillStyle = 'rgba(150,132,240,' + (0.05 * fog).toFixed(3) + ')';
       ctx.fillRect(0, horizon - offset, cssW, 1);
     }
+  }
+
+  function drawFloor(horizon, f) {
+    if (!floorBuf || !tileTex[0].length) return;
+    const scale = floorScale;
+    const voidRgb = rgbOf(colors().void);
+    const dirX = Math.cos(yaw);
+    const dirY = Math.sin(yaw);
+    const planeX = -dirY * TAN_HALF;
+    const planeY = dirX * TAN_HALF;
+    const lastIdx = TILE_SIZE - 1;
+    floorBuf.fill(0);
+    const rowFrom = Math.max(0, Math.floor(horizon / scale));
+    for (let row = rowFrom; row < floorH; row++) {
+      const py = (row + 0.5) * scale - horizon;
+      if (py < 0.6) continue;
+      const dist = (0.5 * f) / py;
+      if (dist > FLOOR_FAR) continue;
+      const vis = Math.exp(-dist * 0.42) * flick;
+      const mixv = clamp(vis, 0, 1);
+      const shade = vis * 2.5;
+      const warm = 0.1 * vis * vis * vis;
+      const addR = voidRgb[0] * (1 - mixv) + 201 * warm;
+      const addG = voidRgb[1] * (1 - mixv) + 179 * warm;
+      const addB = voidRgb[2] * (1 - mixv) + 126 * warm;
+      const camL = -1 + scale / cssW;
+      let fx = camX + dist * (dirX + planeX * camL);
+      let fy = camY + dist * (dirY + planeY * camL);
+      const stepX = (dist * planeX * 2 * scale) / cssW;
+      const stepY = (dist * planeY * 2 * scale) / cssW;
+      let lastCx = 1e9;
+      let lastCy = 1e9;
+      let tex = tileTex[0][0];
+      let flip = 0;
+      const base = row * floorW;
+      for (let col = 0; col < floorW; col++, fx += stepX, fy += stepY) {
+        const tileX = Math.floor(fx);
+        const tileY = Math.floor(fy);
+        if (tileX !== lastCx || tileY !== lastCy) {
+          lastCx = tileX;
+          lastCy = tileY;
+          const code = hash(tileX, tileY, 7);
+          tex = tileTex[(tileX + tileY) & 1][code % TILE_VARIANTS];
+          flip = (code >>> 8) & 7;
+        }
+        let tu = ((fx - tileX) * TILE_SIZE) | 0;
+        let tv = ((fy - tileY) * TILE_SIZE) | 0;
+        if (flip & 1) tu = lastIdx - tu;
+        if (flip & 2) tv = lastIdx - tv;
+        if (flip & 4) { const swap = tu; tu = tv; tv = swap; }
+        const idx = (tv * TILE_SIZE + tu) * 3;
+        let red = tex[idx] * shade + addR;
+        let green = tex[idx + 1] * shade + addG;
+        let blue = tex[idx + 2] * shade + addB;
+        if (red > 255) red = 255;
+        if (green > 255) green = 255;
+        if (blue > 255) blue = 255;
+        floorBuf[base + col] = 0xff000000 | ((blue | 0) << 16) | ((green | 0) << 8) | (red | 0);
+      }
+    }
+    floorCtx.putImageData(floorImage, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'low';
+    ctx.drawImage(floorCanvas, 0, 0, floorW * scale, floorH * scale);
   }
 
   function drawWalls(maze, horizon, f, now) {
@@ -999,6 +1155,7 @@
     if (hurtK > 0) ctx.translate((Math.random() - 0.5) * 12 * hurtK, (Math.random() - 0.5) * 8 * hurtK);
     const horizon = horizonOf(now, f);
     drawBackdrop(horizon, f);
+    drawFloor(horizon, f);
     drawWalls(state.maze, horizon, f, now);
     drawEnemies(state, horizon, f, now, dt);
     ctx.restore();
