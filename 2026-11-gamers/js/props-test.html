@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Props test</title>
+<style>
+  body { margin: 0; padding: 16px; background: #07060B; color: #C9B37E; font: 13px/1.4 system-ui, sans-serif; }
+  h2 { margin: 18px 0 8px; font-size: 15px; color: #7FE0D0; }
+  #status { font: 14px monospace; padding: 8px 12px; background: #1E1B2E; display: inline-block; }
+  .grid { display: flex; flex-wrap: wrap; gap: 10px; }
+  .cell { width: 112px; text-align: center; font-size: 11px; color: #B9A988; }
+  .cell canvas { background: #1E1B2E; display: block; margin: 0 auto 4px; }
+  #map { background: #07060B; display: block; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div id="status">validando…</div>
+<h2>Catálogo</h2>
+<div class="grid" id="catalog"></div>
+<h2>Mapa (seed 7)</h2>
+<canvas id="map"></canvas>
+<script src="core.js"></script>
+<script src="maze.js"></script>
+<script src="props.js"></script>
+<script>
+(function () {
+  const DIRS = G.props.faceDirs;
+  let fails = 0;
+  let total = 0;
+  for (let seed = 1; seed <= 100; seed++) {
+    const maze = G.maze.generate(seed);
+    const props = G.props.generate(maze, seed);
+    total += props.length;
+    if (props.length < 60 || props.length > 90) fails++;
+    for (const prop of props) {
+      if (G.isWall(maze, prop.x, prop.y)) fails++;
+      if (prop.x === maze.start.x && prop.y === maze.start.y) fails++;
+      if (prop.family === 'wall' && !G.isWall(maze, prop.x + DIRS[prop.face][0], prop.y + DIRS[prop.face][1])) fails++;
+    }
+  }
+  document.getElementById('status').textContent =
+    (fails ? 'FAIL ' + fails : 'PASS') + ' · 100 semillas · media ' + (total / 100).toFixed(1) + ' props · catálogo ' + G.props.catalog.length;
+
+  G.props.preload();
+  const cells = [];
+  const catalogEl = document.getElementById('catalog');
+  G.props.catalog.forEach(function (entry) {
+    entry.variants.forEach(function (svg, variant) {
+      const box = document.createElement('div');
+      box.className = 'cell';
+      const canvas = document.createElement('canvas');
+      canvas.width = 104;
+      canvas.height = 104;
+      box.appendChild(canvas);
+      box.appendChild(document.createTextNode(entry.id + ' v' + variant + ' · ' + entry.family + (entry.light ? ' · luz' : '')));
+      catalogEl.appendChild(box);
+      cells.push({ canvas: canvas, entry: entry, variant: variant });
+    });
+  });
+
+  const seed = 7;
+  const maze = G.maze.generate(seed);
+  const props = G.props.generate(maze, seed);
+  const tile = 26;
+  const map = document.getElementById('map');
+  map.width = maze.w * tile;
+  map.height = maze.h * tile;
+  const mapCtx = map.getContext('2d');
+
+  function frame(now) {
+    cells.forEach(function (cell) {
+      const ctx = cell.canvas.getContext('2d');
+      ctx.clearRect(0, 0, 104, 104);
+      const img = G.props.image(cell.entry.id, cell.variant);
+      if (!img) return;
+      const height = 96;
+      const width = height * img.width / img.height;
+      ctx.drawImage(img, (104 - width) / 2, 4, width, height);
+    });
+
+    mapCtx.fillStyle = '#07060B';
+    mapCtx.fillRect(0, 0, map.width, map.height);
+    for (let y = 0; y < maze.h; y++) {
+      for (let x = 0; x < maze.w; x++) {
+        mapCtx.fillStyle = G.isWall(maze, x, y) ? '#1E1B2E' : ((x + y) & 1 ? '#15121F' : '#191526');
+        mapCtx.fillRect(x * tile, y * tile, tile, tile);
+      }
+    }
+    mapCtx.strokeStyle = '#C9B37E';
+    mapCtx.strokeRect(maze.start.x * tile + 2, maze.start.y * tile + 2, tile - 4, tile - 4);
+    ['floor', 'wall', 'room'].forEach(function (family) {
+      props.forEach(function (prop) {
+        if (prop.family === family) G.props.draw2D(mapCtx, prop, prop.x * tile, prop.y * tile, tile, now);
+      });
+    });
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
