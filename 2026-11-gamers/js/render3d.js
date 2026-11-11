@@ -412,7 +412,7 @@
 
   const WALL_SCALE = 1.6;
   const CAMERA_BACK = 0.35;
-  const EYE_HEIGHT = 0.8;
+  const EYE_HEIGHT = 0.6;
 
   function drawWalls(maze, horizon, f, now) {
     const wallRgb = rgbOf(colors().wall);
@@ -696,6 +696,104 @@
     }
     ctx.restore();
     return { sx: sx, top: sy - radius * (boss ? 1.5 : 1.2), radius: radius, vis: vis, boss: boss };
+  }
+
+  const PROP_RADIUS = 7;
+  const propList = [];
+
+  function drawProp(item, horizon, f, now) {
+    const sprite = item.sprite;
+    const forward = item.forward;
+    const scale = f / forward;
+    const sx = cssW / 2 + item.side * scale;
+    let width;
+    let height;
+    let bottom;
+    if (sprite.flat) {
+      const entry = G.props.byKind[item.prop.kind];
+      width = entry.size * scale;
+      height = Math.max(2, width * EYE_HEIGHT / forward);
+      bottom = horizon + EYE_HEIGHT * scale + height * 0.5;
+    } else {
+      height = sprite.scale * scale;
+      width = height * sprite.aspect;
+      if (sprite.wallFace !== null) width *= Math.max(0.2, item.facing);
+      bottom = horizon + (EYE_HEIGHT - sprite.yOffset) * scale;
+    }
+    const top = bottom - height;
+    const reach = Math.max(width, height) * (sprite.light ? 1.3 : 0.6);
+    if (sx + reach < 0 || sx - reach > cssW || bottom < 0 || top > cssH) return;
+
+    const testDepth = sprite.wallFace !== null ? forward - 0.06 : forward;
+    const c0 = clamp(Math.floor((sx - reach) / colW), 0, zbuf.length - 1);
+    const c1 = clamp(Math.floor((sx + reach) / colW), 0, zbuf.length - 1);
+    let runStart = -1;
+    let any = false;
+    ctx.save();
+    ctx.beginPath();
+    for (let c = c0; c <= c1 + 1; c++) {
+      const visible = c <= c1 && zbuf[c] > testDepth;
+      if (visible && runStart < 0) runStart = c;
+      if (!visible && runStart >= 0) {
+        ctx.rect(runStart * colW, 0, (c - runStart) * colW, cssH);
+        runStart = -1;
+        any = true;
+      }
+    }
+    if (!any) {
+      ctx.restore();
+      return;
+    }
+    ctx.clip();
+    const fog = Math.exp(-forward * 0.42) * flick;
+    const vis = sprite.light ? Math.max(fog, 0.55 * Math.exp(-forward * 0.12)) : fog;
+    if (sprite.light) {
+      const cy = top + height * 0.5;
+      const haloR = Math.max(width, height) * (0.9 + sprite.light.radius * 0.35);
+      const grad = ctx.createRadialGradient(sx, cy, 0, sx, cy, haloR);
+      const color = sprite.light.color;
+      const alpha = Math.min(0.5, 0.34 * sprite.flicker * Math.min(1, vis + 0.2));
+      grad.addColorStop(0, rgba(color, alpha));
+      grad.addColorStop(0.45, rgba(color, alpha * 0.35));
+      grad.addColorStop(1, rgba(color, 0));
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.fillStyle = grad;
+      ctx.fillRect(sx - haloR, cy - haloR, haloR * 2, haloR * 2);
+      ctx.globalCompositeOperation = 'source-over';
+    }
+    ctx.globalAlpha = clamp(vis, 0, 1);
+    ctx.drawImage(sprite.image, sx - width / 2, top, width, height);
+    ctx.restore();
+  }
+
+  function drawProps(state, horizon, f, now) {
+    const props = state.props;
+    if (!props || !G.props) return;
+    const cosY = Math.cos(yaw);
+    const sinY = Math.sin(yaw);
+    propList.length = 0;
+    for (let i = 0; i < props.length; i++) {
+      const prop = props[i];
+      const dx = prop.x + 0.5 - camX;
+      const dy = prop.y + 0.5 - camY;
+      if (dx * dx + dy * dy > PROP_RADIUS * PROP_RADIUS) continue;
+      const sprite = G.props.sprite3D(prop, now);
+      if (!sprite || !sprite.image) continue;
+      const relX = sprite.wx - camX;
+      const relY = sprite.wy - camY;
+      const forward = relX * cosY + relY * sinY;
+      if (forward < 0.25) continue;
+      let facing = 1;
+      if (sprite.wallFace !== null) {
+        const dir = G.props.faceDirs[sprite.wallFace];
+        if ((camX - (prop.x + 0.5)) * dir[0] + (camY - (prop.y + 0.5)) * dir[1] >= 0.45) continue;
+        const dist = Math.hypot(relX, relY) || 1;
+        facing = Math.abs((relX * dir[0] + relY * dir[1]) / dist);
+      }
+      propList.push({ prop: prop, sprite: sprite, forward: forward, side: -relX * sinY + relY * cosY, facing: facing });
+    }
+    propList.sort(function (a, b) { return b.forward - a.forward; });
+    for (let i = 0; i < propList.length; i++) drawProp(propList[i], horizon, f, now);
   }
 
   function drawEnemies(state, horizon, f, now, dt) {
@@ -1194,6 +1292,7 @@
     drawBackdrop(horizon, f);
     drawFloor(horizon, f);
     drawWalls(state.maze, horizon, f, now);
+    drawProps(state, horizon, f, now);
     drawEnemies(state, horizon, f, now, dt);
     ctx.restore();
 
