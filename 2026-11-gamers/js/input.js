@@ -12,7 +12,9 @@ G.input = (function () {
     KeyA: [-1, 0], KeyD: [1, 0],
     KeyZ: [-1, -1], KeyC: [1, -1]
   };
-  const TURN_KEYS = { ArrowLeft: -1, KeyQ: -1, ArrowRight: 1, KeyE: 1 };  const PENDING_MS = 250;
+  const TURN_KEYS = { KeyQ: -1, KeyE: 1 };
+  const STEP_TURN_KEYS = { ArrowLeft: -1, ArrowRight: 1 };
+  const PENDING_MS = 250;
 
   const held = new Set();
   let pendingDir = null;
@@ -44,6 +46,7 @@ G.input = (function () {
         forward += FIRST_PERSON_KEYS[code][1];
       }
     }
+    if (held.has('ArrowLeft') || held.has('ArrowRight')) forward = 1;
     right = Math.sign(right);
     forward = Math.sign(forward);
     if (!right && !forward) return null;
@@ -86,6 +89,16 @@ G.input = (function () {
       if (event.code === 'KeyR') wantsRestart = true;
       const digit = /^Digit([1-6])$/.exec(event.code);
       if (digit) pendingSwitch = G.CFG.pieceOrder[Number(digit[1]) - 1];
+      if (firstPerson() && STEP_TURN_KEYS[event.code]) {
+        event.preventDefault();
+        held.add(event.code);
+        if (!event.repeat) {
+          G.view.yaw += STEP_TURN_KEYS[event.code] * (Math.PI / 2);
+          pendingDir = facing();
+          pendingAt = performance.now();
+        }
+        return;
+      }
       if (firstPerson() && TURN_KEYS[event.code]) {
         event.preventDefault();
         held.add(event.code);
@@ -146,7 +159,7 @@ G.input = (function () {
       let turn = pendingTurn;
       pendingTurn = 0;
       if (!turn && now - lastTurnAt > G.view.turnRepeatMs) {
-        turn = (held.has('ArrowRight') || held.has('KeyE') ? 1 : 0) - (held.has('ArrowLeft') || held.has('KeyQ') ? 1 : 0);
+        turn = (held.has('KeyE') ? 1 : 0) - (held.has('KeyQ') ? 1 : 0);
       }
       if (turn) {
         G.view.yaw += turn * (Math.PI / 2);
