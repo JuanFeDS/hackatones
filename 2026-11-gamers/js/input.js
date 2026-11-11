@@ -1,0 +1,206 @@
+G.input = (function () {
+  const HELD_AXES = {
+    ArrowUp: [0, -1], KeyW: [0, -1],
+    ArrowDown: [0, 1], KeyS: [0, 1],
+    ArrowLeft: [-1, 0], KeyA: [-1, 0],
+    ArrowRight: [1, 0], KeyD: [1, 0]
+  };
+  const DIAGONAL_KEYS = { KeyQ: [-1, -1], KeyE: [1, -1], KeyZ: [-1, 1], KeyC: [1, 1] };
+  const FIRST_PERSON_KEYS = {
+    KeyW: [0, 1],
+    KeyS: [0, -1],
+    KeyA: [-1, 0], KeyD: [1, 0],
+    KeyZ: [-1, -1], KeyC: [1, -1]
+  };
+  const TURN_KEYS = { ArrowLeft: -1, KeyQ: -1, ArrowRight: 1, KeyE: 1 };
+  const PENDING_MS = 600;
+
+  const held = new Set();
+  let pendingDir = null;
+  let pendingAt = 0;
+  let pendingSwitch = null;
+  let wantsStart = false;
+  let wantsRestart = false;
+  let clickedCell = null;
+  let hoverPixel = null;
+  let attackAt = -Infinity;
+  let shiftDown = false;
+  let pendingTurn = 0;
+  let lastTurnAt = -Infinity;
+
+  function firstPerson() {
+    return G.view.free && G.activeRender === G.render3d;
+  }
+
+  function facing() {
+    const quarter = ((Math.round(G.view.yaw / (Math.PI / 2)) % 4) + 4) % 4;
+    return [{ dx: 1, dy: 0 }, { dx: 0, dy: 1 }, { dx: -1, dy: 0 }, { dx: 0, dy: -1 }][quarter];
+  }
+
+  function relativeVector() {
+    let right = 0;
+    let forward = 0;
+    for (const code of held) {
+      if (FIRST_PERSON_KEYS[code]) {
+        right += FIRST_PERSON_KEYS[code][0];
+        forward += FIRST_PERSON_KEYS[code][1];
+      }
+    }
+    right = Math.sign(right);
+    forward = Math.sign(forward);
+    if (!right && !forward) return null;
+    const front = facing();
+    const side = { dx: -front.dy, dy: front.dx };
+    return {
+      dx: Math.sign(front.dx * forward + side.dx * right),
+      dy: Math.sign(front.dy * forward + side.dy * right)
+    };
+  }
+
+  function heldVector() {
+    if (firstPerson()) return relativeVector();
+    let dx = 0;
+    let dy = 0;
+    for (const code of held) {
+      if (HELD_AXES[code]) {
+        dx += HELD_AXES[code][0];
+        dy += HELD_AXES[code][1];
+      } else if (DIAGONAL_KEYS[code]) {
+        return { dx: DIAGONAL_KEYS[code][0], dy: DIAGONAL_KEYS[code][1] };
+      }
+    }
+    dx = Math.sign(dx);
+    dy = Math.sign(dy);
+    return dx || dy ? { dx, dy } : null;
+  }
+
+  function isMoveKey(code) {
+    return firstPerson() ? !!FIRST_PERSON_KEYS[code] : !!(HELD_AXES[code] || DIAGONAL_KEYS[code]);
+  }
+
+  function init(canvas) {
+    window.addEventListener('keydown', (event) => {
+      if (event.code === 'Enter' || event.code === 'Space') wantsStart = true;
+      if (event.code === 'Space') {
+        event.preventDefault();
+        attackAt = performance.now();
+      }
+      if (event.code === 'KeyR') wantsRestart = true;
+      const digit = /^Digit([1-6])$/.exec(event.code);
+      if (digit) pendingSwitch = G.CFG.pieceOrder[Number(digit[1]) - 1];
+      if (firstPerson() && (event.code === 'ArrowUp' || event.code === 'ArrowDown')) {
+        event.preventDefault();
+        if (event.code === 'ArrowUp') attackAt = performance.now();
+        return;
+      }
+      if (firstPerson() && TURN_KEYS[event.code]) {
+        event.preventDefault();
+        held.add(event.code);
+        if (!event.repeat) pendingTurn = TURN_KEYS[event.code];
+        return;
+      }
+      if (HELD_AXES[event.code] || DIAGONAL_KEYS[event.code]) {
+        event.preventDefault();
+        held.add(event.code);
+        if (isMoveKey(event.code)) {
+          const vector = heldVector();
+          if (vector) {
+            pendingDir = vector;
+            pendingAt = performance.now();
+          }
+        }
+      }
+    });
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Shift') shiftDown = true;
+    });
+    window.addEventListener('keyup', (event) => {
+      held.delete(event.code);
+      if (event.key === 'Shift') shiftDown = false;
+    });
+    window.addEventListener('blur', () => {
+      held.clear();
+      shiftDown = false;
+    });
+    canvas.addEventListener('mousemove', (event) => {
+      hoverPixel = { x: event.clientX, y: event.clientY };
+    });
+    canvas.addEventListener('mouseleave', () => {
+      hoverPixel = null;
+    });
+    canvas.addEventListener('mousedown', (event) => {
+      wantsStart = true;
+      wantsRestart = true;
+      if (firstPerson()) {
+        attackAt = performance.now();
+        return;
+      }
+      clickedCell = { x: event.clientX, y: event.clientY };
+    });
+  }
+
+  function hover() {
+    return hoverPixel ? G.activeRender.cellAt(hoverPixel.x, hoverPixel.y) : null;
+  }
+
+  function drain(state, now) {
+    const commands = [];
+    const consumedStart = wantsStart;
+    const consumedRestart = wantsRestart;
+    wantsStart = false;
+    wantsRestart = false;
+    if (state.phase === 'title' && consumedStart) commands.push({ type: 'start' });
+    if ((state.phase === 'dead' || state.phase === 'won') && consumedRestart) commands.push({ type: 'restart' });
+    if (state.phase !== 'playing') {
+      clickedCell = null;
+      pendingDir = null;
+      pendingSwitch = null;
+      return commands;
+    }
+    const player = state.players[0];
+    if (firstPerson()) {
+      let turn = pendingTurn;
+      pendingTurn = 0;
+      if (!turn && now - lastTurnAt > G.view.turnRepeatMs) {
+        turn = (held.has('ArrowRight') || held.has('KeyE') ? 1 : 0) - (held.has('ArrowLeft') || held.has('KeyQ') ? 1 : 0);
+      }
+      if (turn) {
+        G.view.yaw += turn * (Math.PI / 2);
+        lastTurnAt = now;
+      }
+      const front = facing();
+      if (front.dx !== player.dir.dx || front.dy !== player.dir.dy) {
+        commands.push({ playerId: player.id, type: 'face', dx: front.dx, dy: front.dy });
+      }
+    }
+    if (pendingSwitch) {
+      commands.push({ playerId: player.id, type: 'switch', piece: pendingSwitch });
+      pendingSwitch = null;
+    }
+    let acted = false;
+    if (now - attackAt < PENDING_MS) {
+      commands.push({ playerId: player.id, type: 'attack' });
+      if (now >= player.cooldownUntil) {
+        attackAt = -Infinity;
+        acted = true;
+      }
+    }
+    if (clickedCell) {
+      const cell = G.activeRender.cellAt(clickedCell.x, clickedCell.y);
+      clickedCell = null;
+      if (cell) commands.push({ playerId: player.id, type: 'moveTo', x: cell.x, y: cell.y });
+    }
+    let vector = heldVector();
+    if (!vector && pendingDir && now - pendingAt < PENDING_MS) vector = pendingDir;
+    if (vector && !acted) {
+      const target = G.pieces.slide(state, player, vector.dx, vector.dy, shiftDown);
+      if (target) {
+        commands.push({ playerId: player.id, type: 'moveTo', x: target.x, y: target.y });
+        if (now >= player.cooldownUntil) pendingDir = null;
+      }
+    }
+    return commands;
+  }
+
+  return { init, drain, hover };
+})();

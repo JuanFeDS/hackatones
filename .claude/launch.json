@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "gamers",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [".claude/devserver.py", "8765", "2026-11-gamers"],
+      "port": 8765
+    }
+  ]
+}
