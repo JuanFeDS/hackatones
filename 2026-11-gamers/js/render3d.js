@@ -8,7 +8,7 @@
   const FONT_GLYPH = '"Times New Roman", "Segoe UI Symbol", "Noto Sans Symbols 2", "DejaVu Sans", serif';
   const PIECE_NAME = { pawn: 'PEÓN', knight: 'CABALLO', bishop: 'ALFIL', rook: 'TORRE', queen: 'DAMA', king: 'REY' };
   const WRAITH_COLOR = '#B49CFF';
-  const FOV = (70 * Math.PI) / 180;
+  const FOV = (80 * Math.PI) / 180;
   const TAN_HALF = Math.tan(FOV / 2);
   const MAX_DIST = 11;
   const MAP_RADIUS = 7.5;
@@ -269,7 +269,7 @@
       camReady = true;
       return;
     }
-    const kPos = 1 - Math.exp(-dt / 45);
+    const kPos = 1 - Math.exp(-dt / ((G.CFG.cooldowns[player.piece] || 300) * 0.28));
     camX += (targetX - camX) * kPos;
     camY += (targetY - camY) * kPos;
     if (G.view.free) {
