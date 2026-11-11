@@ -9,7 +9,8 @@ G.input = (function () {
   const FIRST_PERSON_KEYS = {
     ArrowUp: [0, 1], KeyW: [0, 1],
     ArrowDown: [0, -1], KeyS: [0, -1],
-    KeyA: [-1, 0], KeyD: [1, 0],
+    ArrowLeft: [-1, 0], KeyA: [-1, 0],
+    ArrowRight: [1, 0], KeyD: [1, 0],
     KeyQ: [-1, 1], KeyE: [1, 1],
     KeyZ: [-1, -1], KeyC: [1, -1]
   };
@@ -24,7 +25,6 @@ G.input = (function () {
   let clickedCell = null;
   let hoverPixel = null;
   let attackAt = -Infinity;
-  let lastDrain = 0;
   let canvasRef = null;
 
   function firstPerson() {
@@ -103,7 +103,7 @@ G.input = (function () {
     window.addEventListener('keyup', (event) => held.delete(event.code));
     window.addEventListener('blur', () => held.clear());
     document.addEventListener('mousemove', (event) => {
-      if (firstPerson() && document.pointerLockElement === canvas) {
+      if (firstPerson() && G.view.free) {
         G.view.yaw += event.movementX * G.view.sensitivity;
       }
     });
@@ -135,8 +135,6 @@ G.input = (function () {
 
   function drain(state, now) {
     const commands = [];
-    const dt = Math.min(now - lastDrain, 100) / 1000;
-    lastDrain = now;
     const consumedStart = wantsStart;
     const consumedRestart = wantsRestart;
     wantsStart = false;
@@ -151,8 +149,6 @@ G.input = (function () {
     }
     const player = state.players[0];
     if (firstPerson()) {
-      const turn = (held.has('ArrowRight') ? 1 : 0) - (held.has('ArrowLeft') ? 1 : 0);
-      G.view.yaw += turn * G.view.turnRate * dt;
       const front = facing();
       if (front.dx !== player.dir.dx || front.dy !== player.dir.dy) {
         commands.push({ playerId: player.id, type: 'face', dx: front.dx, dy: front.dy });
