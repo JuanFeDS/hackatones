@@ -105,6 +105,8 @@ G.input = (function () {
     document.addEventListener('mousemove', (event) => {
       if (firstPerson() && G.view.free) {
         G.view.yaw += event.movementX * G.view.sensitivity;
+        const limit = G.view.pitchLimit;
+        G.view.pitch = Math.max(-limit, Math.min(limit, G.view.pitch - event.movementY * G.view.sensitivity));
       }
     });
     canvas.addEventListener('mousemove', (event) => {
