@@ -25,7 +25,20 @@
     wood: '#3B2618',
     woodLight: '#5A3A22',
     flame: '#FFB24A',
-    flameCore: '#FFF1C1'
+    flameCore: '#FFF1C1',
+    root: '#3F2A1C',
+    rootLight: '#6A4A30',
+    water: '#0E2A2E',
+    waterLight: '#2C5A5C',
+    ossuary: '#5E5240',
+    ossuaryDark: '#2E271D',
+    page: '#D8CCAA',
+    pageDark: '#A8987A',
+    obsidian: '#0B0910',
+    obsidianLight: '#3A3450',
+    ember: '#FF4060',
+    marble: '#8A8696',
+    marbleDark: '#16141E'
   };
 
   const DIRS4 = [[1, 0], [0, 1], [-1, 0], [0, -1]];
@@ -599,6 +612,241 @@
       '<path d="M14 30c0 4 1 6 0 9M50 30c0 3 1 5 0 7" stroke="' + C.wax + '" stroke-width="1.6" stroke-linecap="round"/>');
   }
 
+  // ---------- Exclusivos de tema ----------
+
+  function svgRootsWall() {
+    const roots = [
+      ['M28 10 C26 22 30 30 24 42 C20 50 22 56 18 63', 4.2],
+      ['M37 11 C41 24 36 34 42 44 C46 52 44 58 48 63', 3.4],
+      ['M32 13 C32 26 29 36 33 52', 2.4],
+      ['M24 9 C16 14 12 22 6 26', 2.6]
+    ];
+    let body = '<path d="M18 8 L26 2 L40 3 L47 9 L43 16 L30 18 L21 14Z" fill="' + C.void + '"/>' +
+      '<path d="M18 8 L26 2 L40 3 L47 9" stroke="' + C.stoneLight + '" stroke-width="1" fill="none" opacity=".5"/>' +
+      '<path d="M47 9 L54 6 M21 14 L14 18 L10 16" stroke="' + C.void + '" stroke-width="1.4" fill="none"/>';
+    roots.forEach(function (root) {
+      body += '<path d="' + root[0] + '" stroke="' + C.root + '" stroke-width="' + root[1] + '" fill="none" stroke-linecap="round"/>';
+      body += '<path d="' + root[0] + '" stroke="' + C.rootLight + '" stroke-width="' + fmt(root[1] * 0.3) +
+        '" fill="none" stroke-linecap="round" transform="translate(-.8 0)" opacity=".8"/>';
+    });
+    body += '<path d="M26 30 l-6 4 l-3 -1 M24 42 l-7 -1 M38 32 l6 2 l2 4 M42 44 l5 5 M31 36 l-4 6 M10 24 l-2 5" stroke="' + C.root +
+      '" stroke-width="1" fill="none" stroke-linecap="round"/>' +
+      '<path d="M24 12c3-2 7-1 7 2s-4 3-7 1zM40 12c2-2 6-1 5 2s-4 2-5 0z" fill="' + C.moss + '"/>' +
+      '<path d="M18 63 q0 -2 1 -3 M33 52 q1 3 0 5" stroke="' + C.waterLight + '" stroke-width="1.2" fill="none"/>' +
+      '<circle cx="33" cy="59" r="1.3" fill="' + C.spectral + '" opacity=".7"/><circle cx="48" cy="63" r="1" fill="' + C.spectral + '" opacity=".6"/>';
+    return svgDoc(64, 64, body);
+  }
+
+  function svgDripPuddle(variant) {
+    const shape = variant === 0
+      ? 'M10 34c2-10 14-14 24-12 10 1 20 6 20 14 0 8-10 12-20 12-12 0-26-4-24-14z'
+      : 'M8 40c4-8 12-6 18-12 6-6 16-8 24-4 8 4 8 12 2 16-6 5-16 4-24 6-8 2-18 2-20-6z';
+    return svgDoc(64, 64,
+      '<path d="' + shape + '" fill="' + C.void + '" opacity=".6" transform="translate(1 2)"/>' +
+      '<path d="' + shape + '" fill="' + C.water + '"/>' +
+      '<path d="' + shape + '" fill="none" stroke="' + C.waterLight + '" stroke-width="1.2" opacity=".7"/>' +
+      '<ellipse cx="32" cy="34" rx="8" ry="3.4" fill="none" stroke="' + C.spectral + '" stroke-width=".9" opacity=".55"/>' +
+      '<ellipse cx="32" cy="34" rx="14" ry="6" fill="none" stroke="' + C.spectral + '" stroke-width=".6" opacity=".3"/>' +
+      '<circle cx="32" cy="34" r="1.2" fill="' + C.spectral + '" opacity=".8"/>' +
+      '<ellipse cx="24" cy="28" rx="5" ry="1.4" fill="#C8FFF6" opacity=".25"/>' +
+      '<path d="M8 36c2-3 6-2 5 1s-4 4-6 2zM48 26c3-2 7 0 6 3-1 3-5 3-7 1zM40 48c2-2 6-1 5 2s-4 2-6 0zM16 46c2-1 4 0 3 2s-3 2-4 0z" fill="' + C.moss + '"/>' +
+      '<path d="M9 36c1-1 2-1 3 0M49 27c1-1 3-1 3 0" stroke="' + C.mossLight + '" stroke-width="1.2" fill="none"/>' +
+      '<path d="M54 12 c0 2 1.6 3.6 0 5 c-1.6 -1.4 0 -3 0 -5z" fill="' + C.spectral + '" opacity=".75"/>');
+  }
+
+  function svgLeaningTomb() {
+    return svgDoc(64, 96,
+      '<ellipse cx="32" cy="90" rx="27" ry="5" fill="' + C.void + '" opacity=".6"/>' +
+      '<path d="M4 90 C10 80 22 78 32 79 C44 78 56 82 60 90Z" fill="#2A2018"/>' +
+      '<path d="M8 88 C14 82 24 81 32 82" stroke="#3E3024" stroke-width="1.4" fill="none"/>' +
+      '<g transform="rotate(-13 30 84)">' +
+      '<path d="M16 86 L16 34 C16 18 46 18 46 34 L46 86Z" fill="' + C.stoneLight + '" stroke="' + C.stoneDark + '" stroke-width="1.4"/>' +
+      '<path d="M20 86 L20 35 C20 23 42 23 42 35 L42 86" stroke="' + C.stone + '" stroke-width="1.2" fill="none"/>' +
+      '<path d="M29 32 h4 v6 h6 v4 h-6 v14 h-4 v-14 h-6 v-4 h6z" fill="' + C.stoneDark + '"/>' +
+      '<path d="M23 62 h16 M24 67 h14 M25 72 h10" stroke="' + C.stoneDark + '" stroke-width="1.4"/>' +
+      '<path d="M40 24 L36 36 L41 44 L37 56" stroke="' + C.void + '" stroke-width="1.4" fill="none"/>' +
+      '<path d="M16 78c4-3 8-1 8 3s-5 5-8 4zM38 82c3-3 8-2 8 1s-4 3-8 2zM18 40c2-2 5-1 4 2s-3 3-4 1z" fill="' + C.moss + '"/>' +
+      '</g>' +
+      '<path d="M50 84 l3 -6 l2 6 M12 86 l2 -5 l2 5" stroke="' + C.mossLight + '" stroke-width="1.2" fill="none"/>');
+  }
+
+  function svgSkullNiche() {
+    return svgDoc(64, 64,
+      '<path d="M6 62 L6 22 C6 4 58 4 58 22 L58 62Z" fill="' + C.ossuary + '" stroke="' + C.ossuaryDark + '" stroke-width="1.4"/>' +
+      '<path d="M12 58 L12 24 C12 12 52 12 52 24 L52 58Z" fill="' + C.void + '"/>' +
+      skull(32, 23, 11) + skull(25, 34, 11) + skull(39, 34, 11) +
+      skull(18, 47, 11.5) + skull(32, 47, 11.5) + skull(46, 47, 11.5) +
+      bone(13, 56, 51, 56, 3, C.boneDark, C.boneDark) +
+      '<rect x="4" y="57" width="56" height="5" rx="1" fill="' + C.ossuary + '" stroke="' + C.ossuaryDark + '" stroke-width="1"/>' +
+      '<path d="M10 20 C14 10 50 10 54 20" stroke="' + C.bone + '" stroke-width="1" fill="none" opacity=".35"/>' +
+      '<path d="M30 6 l-2 4 l3 2" stroke="' + C.ossuaryDark + '" stroke-width="1" fill="none"/>');
+  }
+
+  function svgBoneHeap(variant) {
+    const skulls = variant === 0
+      ? skull(24, 30, 15) + skull(40, 38, 13)
+      : skull(32, 28, 16) + skull(18, 42, 11) + skull(46, 44, 11);
+    return svgDoc(64, 64,
+      '<ellipse cx="32" cy="42" rx="28" ry="14" fill="' + C.void + '" opacity=".5"/>' +
+      '<path d="M6 46 C10 32 22 26 32 26 C44 26 56 34 58 46 C50 54 14 54 6 46Z" fill="' + C.boneDark + '" opacity=".55"/>' +
+      bone(8, 48, 40, 38, 3.4, C.boneDark, C.boneDark) + bone(22, 54, 58, 42, 3.6, C.bone, C.bone) +
+      bone(10, 36, 30, 54, 3.2, C.bone, C.bone) + bone(36, 52, 54, 30, 3, C.boneDark, C.boneDark) +
+      bone(18, 24, 46, 26, 3, C.bone, C.bone) + skulls +
+      '<path d="M50 54l3-2 2 2-3 2zM8 30l3-1 1 2-3 1zM56 36l2-3 2 2z" fill="' + C.bone + '"/>');
+  }
+
+  function svgBonePillar() {
+    let rows = '';
+    for (let level = 0; level < 4; level++) {
+      const base = 80 - level * 16;
+      rows += bone(19, base, 45, base, 3.4, C.boneDark, C.bone);
+      rows += skull(23, base - 7, 8.5) + skull(32, base - 7.5, 9) + skull(41, base - 7, 8.5);
+    }
+    return svgDoc(64, 96,
+      '<ellipse cx="32" cy="91" rx="24" ry="4" fill="' + C.void + '" opacity=".6"/>' +
+      '<rect x="12" y="82" width="40" height="8" rx="1" fill="' + C.ossuary + '" stroke="' + C.ossuaryDark + '" stroke-width="1"/>' +
+      '<rect x="17" y="14" width="30" height="68" fill="' + C.ossuaryDark + '"/>' + rows +
+      bone(16, 16, 48, 16, 4, C.bone, C.bone) +
+      '<rect x="12" y="6" width="40" height="8" rx="1" fill="' + C.ossuary + '" stroke="' + C.ossuaryDark + '" stroke-width="1"/>' +
+      '<path d="M14 10 h36" stroke="' + C.bone + '" stroke-width=".8" opacity=".4"/>' +
+      '<path d="M50 88 l4 -3 l3 3z M8 89 l3 -2 l2 2z" fill="' + C.bone + '"/>');
+  }
+
+  const BOOK_COLORS = ['#4A2A2A', '#2E3A2A', '#2A2E44', '#5A4630', '#3A2438', '#433A30', '#5E2A24', '#2C3638'];
+
+  function svgBookshelf(variant) {
+    let books = '';
+    const shelves = [8, 26, 44];
+    shelves.forEach(function (shelfTop, shelf) {
+      let x = 9;
+      let index = shelf * 3 + variant * 5;
+      while (x < 53) {
+        const width = 3 + ((index * 7) % 4);
+        if (x + width > 55) break;
+        const height = 12 + ((index * 5) % 5);
+        const color = BOOK_COLORS[index % BOOK_COLORS.length];
+        const top = shelfTop + 17 - height;
+        if ((index + variant) % 9 === 4) {
+          books += '<rect x="' + x + '" y="' + (top + 1) + '" width="' + width + '" height="' + height + '" fill="' + color +
+            '" transform="rotate(14 ' + (x + width) + ' ' + (shelfTop + 17) + ')"/>';
+          x += width + 4;
+        } else {
+          books += '<rect x="' + x + '" y="' + top + '" width="' + width + '" height="' + height + '" fill="' + color + '"/>';
+          books += '<path d="M' + x + ' ' + (top + 2.5) + ' h' + width + ' M' + x + ' ' + (top + height - 2.5) + ' h' + width +
+            '" stroke="' + C.gold + '" stroke-width=".8" opacity=".7"/>';
+          x += width + 0.6;
+        }
+        index++;
+      }
+    });
+    return svgDoc(64, 64,
+      '<rect x="4" y="2" width="56" height="62" fill="' + C.wood + '" stroke="#1A1009" stroke-width="1.4"/>' +
+      '<rect x="8" y="6" width="48" height="56" fill="' + C.void + '"/>' + books +
+      '<rect x="6" y="24" width="52" height="3" fill="' + C.woodLight + '"/>' +
+      '<rect x="6" y="42" width="52" height="3" fill="' + C.woodLight + '"/>' +
+      '<rect x="6" y="60" width="52" height="3" fill="' + C.woodLight + '"/>' +
+      '<rect x="2" y="0" width="60" height="4" rx="1" fill="' + C.woodLight + '" stroke="#1A1009" stroke-width="1"/>' +
+      '<path d="M8 6 Q14 8 16 14 M8 6 Q12 12 8 16 M8 6 L14 12" stroke="#D8D2E6" stroke-width=".5" fill="none" opacity=".5"/>' +
+      '<circle cx="' + (variant === 0 ? 30 : 44) + '" cy="5" r="1.2" fill="' + C.gold + '"/>');
+  }
+
+  function svgBleedingBook(variant) {
+    let lines = '';
+    for (let i = 0; i < 6; i++) {
+      const y = 22 + i * 4;
+      lines += 'M14 ' + (y + 1) + ' L28 ' + y + ' M36 ' + y + ' L50 ' + (y + 1) + ' ';
+    }
+    const spill = variant === 0
+      ? 'M30 44 C26 50 18 52 14 58 C24 60 40 60 48 56 C42 52 36 50 34 44Z'
+      : 'M30 44 C30 52 40 54 52 52 C58 56 54 60 44 60 C30 61 22 56 28 50Z';
+    return svgDoc(64, 64,
+      '<ellipse cx="32" cy="40" rx="28" ry="12" fill="' + C.void + '" opacity=".5"/>' +
+      '<path d="' + spill + '" fill="' + C.bloodDark + '"/>' +
+      '<path d="M8 18 C18 14 26 16 32 20 L32 46 C26 42 18 40 8 44Z" fill="' + C.pageDark + '"/>' +
+      '<path d="M56 18 C46 14 38 16 32 20 L32 46 C38 42 46 40 56 44Z" fill="' + C.pageDark + '"/>' +
+      '<path d="M10 16 C19 13 26 15 32 19 L32 44 C26 40 19 39 10 42Z" fill="' + C.page + '"/>' +
+      '<path d="M54 16 C45 13 38 15 32 19 L32 44 C38 40 45 39 54 42Z" fill="' + C.page + '"/>' +
+      '<path d="' + lines + '" stroke="' + C.boneDark + '" stroke-width=".9" opacity=".7"/>' +
+      '<path d="M32 19 L32 44" stroke="' + C.waxDark + '" stroke-width="1.2"/>' +
+      '<path d="M22 30 c-1 5 1 9 0 14 M42 26 c1 6 -1 10 0 16 M32 34 c0 4 0 8 -1 10" stroke="' + C.blood + '" stroke-width="2" fill="none" stroke-linecap="round"/>' +
+      '<path d="M18 22 h6 M40 34 h6" stroke="' + C.blood + '" stroke-width="1.4" opacity=".8"/>' +
+      '<circle cx="54" cy="52" r="1.6" fill="' + C.bloodMid + '"/><circle cx="10" cy="54" r="1.2" fill="' + C.bloodMid + '"/>');
+  }
+
+  function svgReadingDesk() {
+    return svgDoc(64, 96, CANDLE_DEFS +
+      '<ellipse cx="32" cy="91" rx="22" ry="4" fill="' + C.void + '" opacity=".6"/>' +
+      '<path d="M16 90 L22 84 L42 84 L48 90Z" fill="' + C.wood + '" stroke="#1A1009" stroke-width="1.2"/>' +
+      '<path d="M27 84 L28 54 L36 54 L37 84Z" fill="' + C.woodLight + '" stroke="#1A1009" stroke-width="1.2"/>' +
+      '<path d="M29 60 h6 M29 72 h6" stroke="' + C.wood + '" stroke-width="1.6"/>' +
+      '<path d="M8 50 L56 42 L56 48 L8 56Z" fill="' + C.wood + '" stroke="#1A1009" stroke-width="1.2"/>' +
+      '<path d="M12 48 C18 44 26 44 32 46 L32 40 C26 38 18 38 12 42Z" fill="' + C.page + '" stroke="' + C.pageDark + '" stroke-width=".8"/>' +
+      '<path d="M52 41 C46 38 38 38 32 40 L32 46 C38 44 46 44 52 46Z" fill="' + C.page + '" stroke="' + C.pageDark + '" stroke-width=".8"/>' +
+      '<path d="M15 42 h12 M15 44 h10 M36 42 h12 M36 44 h9" stroke="' + C.boneDark + '" stroke-width=".7"/>' +
+      '<path d="M22 48 c0 4 1 7 0 10" stroke="' + C.blood + '" stroke-width="1.4" fill="none"/>' +
+      '<rect x="46" y="38" width="8" height="3" rx="1" fill="' + C.iron + '"/>' +
+      candle(50, 38, 14, 4.4, 0.5) +
+      '<path d="M50 38 c0 3 1 5 0 7" stroke="' + C.wax + '" stroke-width="1.6" stroke-linecap="round"/>');
+  }
+
+  function svgObsidianPiece() {
+    const silhouette = 'M30 22 V14 H26 V10 H30 V5 H34 V10 H38 V14 H34 V22 C41 23 44 29 40 36 L42 36 L42 40 L38 40 ' +
+      'C39 50 40 62 43 74 L48 74 L48 80 L52 80 L52 88 L12 88 L12 80 L16 80 L16 74 L21 74 C24 62 25 50 26 40 L22 40 L22 36 L24 36 C20 29 23 23 30 22Z';
+    return svgDoc(64, 96,
+      '<defs><linearGradient id="obs" x1="0" x2="1"><stop offset="0" stop-color="' + C.obsidian + '"/>' +
+      '<stop offset=".35" stop-color="' + C.obsidianLight + '"/><stop offset=".6" stop-color="' + C.obsidian + '"/>' +
+      '<stop offset="1" stop-color="#050408"/></linearGradient></defs>' +
+      '<ellipse cx="32" cy="91" rx="26" ry="4.4" fill="' + C.void + '" opacity=".7"/>' +
+      '<ellipse cx="32" cy="90" rx="22" ry="3" fill="' + C.ember + '" opacity=".18"/>' +
+      '<path d="' + silhouette + '" fill="url(#obs)" stroke="#000" stroke-width="1.2"/>' +
+      '<path d="M26 40 C25 52 24 62 21 74 M24 36 C21 30 24 24 30 22.5 M16 80 h32" stroke="#B8B0D8" stroke-width=".8" fill="none" opacity=".35"/>' +
+      '<path d="M22 37 h20 M17 76 h30 M13 82 h38" stroke="' + C.obsidianLight + '" stroke-width="1" opacity=".6"/>' +
+      '<path d="M34 25 L31 33 L35 44 L30 58 L34 72 L31 86" stroke="' + C.ember + '" stroke-width="3.2" fill="none" opacity=".3"/>' +
+      '<path d="M34 25 L31 33 L35 44 L30 58 L34 72 L31 86" stroke="' + C.ember + '" stroke-width="1" fill="none"/>' +
+      '<path d="M35 44 L40 50 M30 58 L25 62" stroke="' + C.ember + '" stroke-width=".7" fill="none" opacity=".8"/>' +
+      '<path d="M31 7 h2 v3" stroke="#D8D2E6" stroke-width=".6" fill="none" opacity=".5"/>');
+  }
+
+  function svgCrackedTile(variant) {
+    const crack = variant === 0
+      ? 'M6 12 L18 20 L24 18 L32 30 L40 32 L46 44 L58 50 M32 30 L28 40 L30 50'
+      : 'M50 4 L44 16 L46 24 L34 32 L36 40 L24 46 L14 58 M46 24 L56 30';
+    return svgDoc(64, 64,
+      '<rect x="2" y="2" width="30" height="30" fill="' + C.marbleDark + '"/><rect x="32" y="32" width="30" height="30" fill="' + C.marbleDark + '"/>' +
+      '<rect x="32" y="2" width="30" height="30" fill="' + C.marble + '"/><rect x="2" y="32" width="30" height="30" fill="' + C.marble + '"/>' +
+      '<path d="M36 8 C44 12 50 6 58 14 M6 40 C14 44 18 38 28 48" stroke="#B8B4C4" stroke-width=".7" fill="none" opacity=".6"/>' +
+      '<rect x="2" y="2" width="60" height="60" fill="none" stroke="' + C.void + '" stroke-width="2.4"/>' +
+      '<rect x="6" y="6" width="52" height="52" fill="none" stroke="' + C.gold + '" stroke-width=".8" opacity=".45"/>' +
+      '<path d="M32 2 V62 M2 32 H62" stroke="' + C.void + '" stroke-width="1.4"/>' +
+      '<path d="' + crack + '" stroke="' + C.ember + '" stroke-width="5" fill="none" opacity=".25" stroke-linejoin="round"/>' +
+      '<path d="' + crack + '" stroke="' + C.void + '" stroke-width="2.4" fill="none" stroke-linejoin="round"/>' +
+      '<path d="' + crack + '" stroke="' + C.ember + '" stroke-width="1.1" fill="none" stroke-linejoin="round"/>' +
+      '<path d="' + crack + '" stroke="#FFD0D8" stroke-width=".4" fill="none" stroke-linejoin="round"/>');
+  }
+
+  function svgChessBanner(variant) {
+    const emblem = variant === 0
+      ? '<path d="M24 16 h4 v4 h2 v-4 h4 v4 h2 v-4 h4 v8 l-3 3 v10 l3 3 v3 h-16 v-3 l3 -3 v-10 l-3 -3Z" fill="' + C.gold + '" stroke="' + C.goldDark + '" stroke-width=".8"/>'
+      : '<circle cx="32" cy="13.5" r="1.8" fill="' + C.gold + '"/>' +
+        '<path d="M32 15 C26 21 25 29 28 34 L36 34 C39 29 38 21 32 15Z" fill="' + C.gold + '" stroke="' + C.goldDark + '" stroke-width=".8"/>' +
+        '<path d="M33.5 20 L29.5 27" stroke="#3A0814" stroke-width="1.4"/>' +
+        '<rect x="26" y="34" width="12" height="3" fill="' + C.goldDark + '"/>' +
+        '<path d="M28 37 L36 37 L38 42 L26 42Z" fill="' + C.gold + '"/><rect x="24" y="42" width="16" height="3" fill="' + C.goldDark + '"/>';
+    let checks = '';
+    for (let i = 0; i < 8; i++) {
+      checks += '<rect x="' + (16 + i * 4) + '" y="9" width="4" height="3" fill="' + (i % 2 ? '#1A0A10' : C.wax) + '" opacity=".75"/>';
+    }
+    return svgDoc(64, 64,
+      '<path d="M16 8 L48 8 L48 50 L32 60 L16 50Z" fill="#3A0814"/>' +
+      '<path d="M18 8 L18 49 L32 57.6 L46 49 L46 8" stroke="#6E1426" stroke-width="2" fill="none"/>' +
+      '<path d="M20 14 L20 48 L32 55 L44 48 L44 14" stroke="' + C.gold + '" stroke-width=".8" fill="none" opacity=".55"/>' +
+      checks + emblem +
+      '<path d="M36 44 L40 52 L37 54Z" fill="' + C.void + '" opacity=".7"/>' +
+      '<rect x="10" y="5" width="44" height="3.4" rx="1.6" fill="' + C.iron + '"/>' +
+      '<circle cx="10" cy="6.7" r="2.6" fill="' + C.gold + '"/><circle cx="54" cy="6.7" r="2.6" fill="' + C.gold + '"/>' +
+      '<path d="M32 60 l0 3" stroke="' + C.gold + '" stroke-width="1.2"/>');
+  }
+
   // ---------- Catálogo ----------
 
   const LIGHT_CANDLE = '#FFC46B';
@@ -632,18 +880,55 @@
     { id: 'urn', family: 'room', variants: [svgUrn(0), svgUrn(1)], size: 0.75, w: 64, h: 96, light: null },
     { id: 'candelabra', family: 'room', variants: [svgCandelabra()], size: 1.0, w: 64, h: 96, light: { color: LIGHT_CANDLE, radius: 2 } },
     { id: 'altar', family: 'room', variants: [svgAltar()], size: 1.1, w: 64, h: 96, light: { color: '#B3123A', radius: 3 }, bossOnly: true },
-    { id: 'giant_board', family: 'room', variants: [svgGiantBoard()], size: 1.0, w: 64, h: 64, flat: true, light: null }
+    { id: 'giant_board', family: 'room', variants: [svgGiantBoard()], size: 1.0, w: 64, h: 64, flat: true, light: null },
+
+    { id: 'drip_puddle', family: 'floor', variants: [svgDripPuddle(0), svgDripPuddle(1)], size: 0.9, w: 64, h: 64, rotate: true, light: null, where: 'any' },
+    { id: 'bone_heap', family: 'floor', variants: [svgBoneHeap(0), svgBoneHeap(1)], size: 0.95, w: 64, h: 64, rotate: true, light: null, where: 'any' },
+    { id: 'bleeding_book', family: 'floor', variants: [svgBleedingBook(0), svgBleedingBook(1)], size: 0.75, w: 64, h: 64, rotate: true, light: null, where: 'any' },
+    { id: 'cracked_tile', family: 'floor', variants: [svgCrackedTile(0), svgCrackedTile(1)], size: 0.95, w: 64, h: 64, rotate: true, light: { color: '#FF4060', radius: 0.7 }, where: 'any' },
+    { id: 'roots_wall', family: 'wall', variants: [svgRootsWall()], size: 0.85, w: 64, h: 64, light: null, height3D: 0.95, lift3D: 0.45 },
+    { id: 'skull_niche', family: 'wall', variants: [svgSkullNiche()], size: 0.8, w: 64, h: 64, light: null, height3D: 0.65, lift3D: 0.3 },
+    { id: 'bookshelf', family: 'wall', variants: [svgBookshelf(0), svgBookshelf(1)], size: 0.95, w: 64, h: 64, light: null, height3D: 0.98, lift3D: 0.49 },
+    { id: 'chess_banner', family: 'wall', variants: [svgChessBanner(0), svgChessBanner(1)], size: 0.85, w: 64, h: 64, light: null, height3D: 0.85, lift3D: 0.6 },
+    { id: 'leaning_tomb', family: 'room', variants: [svgLeaningTomb()], size: 0.95, w: 64, h: 96, light: null },
+    { id: 'bone_pillar', family: 'room', variants: [svgBonePillar()], size: 1.15, w: 64, h: 96, light: null },
+    { id: 'reading_desk', family: 'room', variants: [svgReadingDesk()], size: 1.0, w: 64, h: 96, light: { color: LIGHT_CANDLE, radius: 1.6 } },
+    { id: 'obsidian_piece', family: 'room', variants: [svgObsidianPiece()], size: 1.2, w: 64, h: 96, light: { color: '#FF4060', radius: 0.9 } }
   ];
 
   const BY_KIND = {};
   CATALOG.forEach(function (entry) { BY_KIND[entry.id] = entry; });
 
-  const ROOM_FLOOR_POOL = { blood_pool: 2, bones: 3, offering: 2, rune_circle: 1, moss_crack: 2, floor_chains: 1, feathers: 2, ectoplasm: 1, broken_piece: 2 };
-  const CORRIDOR_FLOOR_POOL = { bones: 2, blood_pool: 2, moss_crack: 3, feathers: 2, ectoplasm: 2, floor_chains: 2, broken_piece: 1 };
-  const WALL_POOL = { torch: 4, torn_banner: 2, wall_hands: 2, hanging_chains: 2, blood_runes: 2, painted_eye: 1, candle_niche: 2, cage: 1 };
-  const ROOM_TALL_POOL = { broken_column: 3, statue: 3, coffin: 2, clock: 1, urn: 2, candelabra: 2 };
+  const ROOM_FLOOR_POOL = {
+    blood_pool: 2, bones: 3, offering: 2, rune_circle: 1, moss_crack: 2, floor_chains: 1, feathers: 2, ectoplasm: 1, broken_piece: 2,
+    drip_puddle: 2, bone_heap: 2, bleeding_book: 2, cracked_tile: 2
+  };
+  const CORRIDOR_FLOOR_POOL = {
+    bones: 2, blood_pool: 2, moss_crack: 3, feathers: 2, ectoplasm: 2, floor_chains: 2, broken_piece: 1,
+    drip_puddle: 2, bone_heap: 2, bleeding_book: 1, cracked_tile: 2
+  };
+  const WALL_POOL = {
+    torch: 4, torn_banner: 2, wall_hands: 2, hanging_chains: 2, blood_runes: 2, painted_eye: 1, candle_niche: 2, cage: 1,
+    roots_wall: 2, skull_niche: 2, bookshelf: 3, chess_banner: 2
+  };
+  const ROOM_TALL_POOL = {
+    broken_column: 3, statue: 3, coffin: 2, clock: 1, urn: 2, candelabra: 2,
+    leaning_tomb: 2, bone_pillar: 2, reading_desk: 2, obsidian_piece: 2
+  };
   const BOSS_KINDS = ['altar', 'candelabra', 'rune_circle', 'blood_pool', 'bones', 'blood_runes', 'painted_eye'];
   const LIGHT_WALL_SPACING = 4;
+
+  // Multiplicadores extra por tema; los kinds que aparecen aquí son exclusivos (peso 0 en los demás temas).
+  const THEME_BOOST = {
+    criptas: { roots_wall: 2, drip_puddle: 2, leaning_tomb: 2 },
+    osario: { skull_niche: 2, bone_heap: 2, bone_pillar: 2 },
+    biblioteca: { bookshelf: 2, bleeding_book: 2, reading_desk: 2 },
+    salon: { obsidian_piece: 2, cracked_tile: 2, chess_banner: 2 }
+  };
+  const EXCLUSIVE_THEME = {};
+  Object.keys(THEME_BOOST).forEach(function (themeId) {
+    Object.keys(THEME_BOOST[themeId]).forEach(function (kind) { EXCLUSIVE_THEME[kind] = themeId; });
+  });
 
   // ---------- Generación ----------
 
@@ -829,20 +1114,58 @@
     }
   }
 
-  function placeRoom(maze, placer, rand, room) {
+  function themeMultiplier(theme) {
+    const weights = theme.propWeights || {};
+    const boost = THEME_BOOST[theme.id] || {};
+    return function (kind) {
+      if (EXCLUSIVE_THEME[kind]) return boost[kind] || 0;
+      return (weights[kind] === undefined ? 1 : weights[kind]) * (boost[kind] === undefined ? 1 : boost[kind]);
+    };
+  }
+
+  function themedPool(pool, mult) {
+    const out = {};
+    Object.keys(pool).forEach(function (kind) {
+      const weight = pool[kind] * mult(kind);
+      if (weight > 0) out[kind] = weight;
+    });
+    return out;
+  }
+
+  function themedPools(theme) {
+    const mult = themeMultiplier(theme);
+    return {
+      mult: mult,
+      roomFloor: themedPool(ROOM_FLOOR_POOL, mult),
+      corridorFloor: themedPool(CORRIDOR_FLOOR_POOL, mult),
+      wall: themedPool(WALL_POOL, mult),
+      roomTall: themedPool(ROOM_TALL_POOL, mult),
+      roomCobweb: Math.min(0.75, 0.3 * mult('cobweb')),
+      corridorCobweb: Math.min(0.8, 0.4 * mult('cobweb')),
+      board: Math.min(0.75, 0.35 * mult('giant_board'))
+    };
+  }
+
+  function hashText(text) {
+    let hash = 2166136261;
+    for (let i = 0; i < text.length; i++) hash = Math.imul(hash ^ text.charCodeAt(i), 16777619);
+    return hash >>> 0;
+  }
+
+  function placeRoom(maze, placer, rand, room, pools) {
     const area = room.w * room.h;
     const used = {};
     const sealed = sealedEdgeCells(maze, room);
     const tallSpots = shuffle(sealed.corners, rand).concat(shuffle(sealed.edges, rand));
     let tallWanted = area >= 16 ? 2 : 1;
-    if (room.w >= 4 && room.h >= 4 && rand() < 0.35) {
+    if (room.w >= 4 && room.h >= 4 && rand() < pools.board) {
       const boardX = room.x + Math.floor(room.w / 2);
       const boardY = room.y + Math.floor(room.h / 2);
       if (placer.tryRoom('giant_board', boardX, boardY)) tallWanted--;
     }
     for (const cell of tallSpots) {
       if (tallWanted <= 0) break;
-      const kind = weightedPick(ROOM_TALL_POOL, rand, used);
+      const kind = weightedPick(pools.roomTall, rand, used);
       if (placer.tryRoom(kind, cell[0], cell[1])) {
         used[kind] = true;
         tallWanted--;
@@ -853,8 +1176,8 @@
     let floorWanted = area >= 16 ? 2 : 1;
     for (const cell of cells) {
       if (floorWanted <= 0) break;
-      const corner = cornerRot(maze, cell[0], cell[1]) >= 0 && rand() < 0.3;
-      const kind = corner ? 'cobweb' : weightedPick(ROOM_FLOOR_POOL, rand, used);
+      const corner = cornerRot(maze, cell[0], cell[1]) >= 0 && rand() < pools.roomCobweb;
+      const kind = corner ? 'cobweb' : weightedPick(pools.roomFloor, rand, used);
       if (placer.tryFloor(kind, cell[0], cell[1])) {
         used[kind] = true;
         floorWanted--;
@@ -865,7 +1188,7 @@
     let wallWanted = 1;
     for (const cell of walls) {
       if (wallWanted <= 0) break;
-      const kind = weightedPick(WALL_POOL, rand, used);
+      const kind = weightedPick(pools.wall, rand, used);
       if (placer.tryWall(kind, cell[0], cell[1])) {
         used[kind] = true;
         wallWanted--;
@@ -886,7 +1209,7 @@
     return cells;
   }
 
-  function placeCorridors(maze, placer, rand, wanted) {
+  function placeCorridors(maze, placer, rand, wanted, pools) {
     const cells = shuffle(corridorCells(maze), rand);
     const taken = [];
     let floorWanted = Math.ceil(wanted * 0.55);
@@ -898,10 +1221,10 @@
       if (taken.some(function (other) { return Math.abs(other[0] - x) + Math.abs(other[1] - y) < 2; })) continue;
       let placed = null;
       const preferWall = wallWanted > 0 && (floorWanted <= 0 || rand() < 0.45);
-      if (preferWall) placed = placer.tryWall(weightedPick(WALL_POOL, rand, null), x, y);
+      if (preferWall) placed = placer.tryWall(weightedPick(pools.wall, rand, null), x, y);
       if (!placed && floorWanted > 0) {
-        const corner = cornerRot(maze, x, y) >= 0 && rand() < 0.4;
-        placed = placer.tryFloor(corner ? 'cobweb' : weightedPick(CORRIDOR_FLOOR_POOL, rand, null), x, y);
+        const corner = cornerRot(maze, x, y) >= 0 && rand() < pools.corridorCobweb;
+        placed = placer.tryFloor(corner ? 'cobweb' : weightedPick(pools.corridorFloor, rand, null), x, y);
         if (placed) floorWanted--;
       } else if (placed) {
         wallWanted--;
@@ -910,14 +1233,16 @@
     }
   }
 
-  function generate(maze, seed) {
-    const rand = G.rng(((seed >>> 0) ^ 0x9e3779b9) >>> 0);
+  function generate(maze, seed, theme) {
+    const activeTheme = theme || G.THEMES[0];
+    const pools = themedPools(activeTheme);
+    const rand = G.rng(((seed >>> 0) ^ 0x9e3779b9 ^ hashText(activeTheme.id)) >>> 0);
     const placer = createPlacer(maze, rand);
     placeBoss(maze, placer, rand);
-    maze.rooms.forEach(function (room) { placeRoom(maze, placer, rand, room); });
+    maze.rooms.forEach(function (room) { placeRoom(maze, placer, rand, room, pools); });
     const target = 66 + Math.floor(rand() * 18);
     const corridorWanted = Math.max(16, target - placer.props.length);
-    placeCorridors(maze, placer, rand, Math.min(corridorWanted, 90 - placer.props.length));
+    placeCorridors(maze, placer, rand, Math.min(corridorWanted, 90 - placer.props.length), pools);
     return placer.props;
   }
 
@@ -1085,6 +1410,9 @@
     catalog: CATALOG,
     byKind: BY_KIND,
     bossKinds: BOSS_KINDS,
+    themeBoost: THEME_BOOST,
+    exclusiveTheme: EXCLUSIVE_THEME,
+    themeMultiplier: function (theme) { return themeMultiplier(theme || G.THEMES[0]); },
     faceDirs: DIRS4,
     generate: generate,
     image: image,

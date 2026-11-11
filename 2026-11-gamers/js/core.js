@@ -1,8 +1,8 @@
 window.G = window.G || {};
 
 G.CFG = {
-  mazeW: 31,
-  mazeH: 31,
+  mazeW: 21,
+  mazeH: 21,
   lightRadius: 3,
   maxWaves: 10,
   playerHp: 3,
@@ -46,7 +46,7 @@ G.THEMES = [
   },
   {
     id: 'salon', name: 'EL SALÓN DEL TABLERO', sub: 'La última partida',
-    texture: 'marble', wall: '#0F0F16', wallEdge: '#B3123A', floorDark: '#0A0A10', floorLight: '#8A8696',
+    texture: 'marble', wall: '#0F0F16', wallEdge: '#B3123A', floorDark: '#0A0A10', floorLight: '#5F5B70',
     glow: '#FF4060', fog: '#050308',
     propWeights: { statue: 3, giant_board: 3, blood_runes: 3, rune_circle: 2, blood_pool: 2, broken_column: 2 }
   }

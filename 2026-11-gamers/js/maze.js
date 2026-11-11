@@ -1,7 +1,7 @@
 (function () {
   const G = (window.G = window.G || {});
   const DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
-  const BOSS_ROOM = { x: 12, y: 12, w: 7, h: 7 };
+  const REFERENCE_AREA = 31 * 31;
   const BRAID_RATE = 1;
   const EXTRA_WALL_RATE = 0.3;
 
@@ -99,8 +99,8 @@
     return a.x - margin < b.x + b.w && a.x + a.w + margin > b.x && a.y - margin < b.y + b.h && a.y + a.h + margin > b.y;
   }
 
-  function placeRooms(w, h, rand) {
-    const wanted = 9 + Math.floor(rand() * 4);
+  function placeRooms(w, h, rand, bossRoom) {
+    const wanted = Math.max(4, Math.round((9 + Math.floor(rand() * 4)) * ((w * h) / REFERENCE_AREA)));
     const rooms = [];
     for (let attempt = 0; attempt < 1500 && rooms.length < wanted; attempt++) {
       const roomW = 3 + Math.floor(rand() * 4);
@@ -111,7 +111,7 @@
         w: roomW,
         h: roomH
       };
-      if (overlaps(room, BOSS_ROOM, 1)) continue;
+      if (overlaps(room, bossRoom, 1)) continue;
       if (rooms.some((other) => overlaps(room, other, 1))) continue;
       rooms.push(room);
     }
@@ -149,9 +149,10 @@
     carveMaze(grid, w, h, rand);
     braid(grid, w, h, rand);
     addExtraWalls(grid, w, h, rand);
-    const rooms = placeRooms(w, h, rand);
+    const bossSize = w >= 27 ? 7 : 5;
+    const bossRoom = { x: Math.floor((w - bossSize) / 2), y: Math.floor((h - bossSize) / 2), w: bossSize, h: bossSize };
+    const rooms = placeRooms(w, h, rand, bossRoom);
     for (const room of rooms) carveRoom(grid, w, room);
-    const bossRoom = { x: BOSS_ROOM.x, y: BOSS_ROOM.y, w: BOSS_ROOM.w, h: BOSS_ROOM.h };
     carveRoom(grid, w, bossRoom);
     const startRoom = farthestRoomFromCenter(rooms, w, h);
     const start = { x: startRoom.x + Math.floor(startRoom.w / 2), y: startRoom.y + Math.floor(startRoom.h / 2) };

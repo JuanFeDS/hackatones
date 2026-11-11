@@ -32,6 +32,7 @@
   let frameId = 0;
   let bannerEnd = 0;
   let wisps = null;
+  let theme = null;
   const visPlayers = new Map();
   const visEnemies = new Map();
   const banners = [];
@@ -75,6 +76,8 @@
     canvas.width = Math.floor(cssW * dpr);
     canvas.height = Math.floor(cssH * dpr);
     tile = Math.round(BASE_TILE * clamp(Math.min(cssW, cssH) / 760, 0.72, 1.15));
+    floorSets = {};
+    wallSets = {};
   }
 
   function buildNoise() {
@@ -205,37 +208,31 @@
     return room && x >= room.x && y >= room.y && x < room.x + room.w && y < room.y + room.h;
   }
 
-  function drawWall(px, py, x, y, maze) {
-    ctx.fillStyle = colors().wall;
-    ctx.fillRect(px, py, tile + 0.6, tile + 0.6);
-    ctx.fillStyle = 'rgba(255,255,255,0.045)';
-    ctx.fillRect(px, py, tile, tile * 0.14);
-    ctx.fillStyle = 'rgba(0,0,0,0.28)';
-    ctx.fillRect(px, py + tile * 0.86, tile, tile * 0.14);
+  const hexCache = {};
 
-    const open = [
-      !G.isWall(maze, x, y - 1),
-      !G.isWall(maze, x + 1, y),
-      !G.isWall(maze, x, y + 1),
-      !G.isWall(maze, x - 1, y)
-    ];
-    if (!open[0] && !open[1] && !open[2] && !open[3]) return;
-    const inset = 1;
-    ctx.beginPath();
-    if (open[0]) { ctx.moveTo(px, py + inset); ctx.lineTo(px + tile, py + inset); }
-    if (open[1]) { ctx.moveTo(px + tile - inset, py); ctx.lineTo(px + tile - inset, py + tile); }
-    if (open[2]) { ctx.moveTo(px, py + tile - inset); ctx.lineTo(px + tile, py + tile - inset); }
-    if (open[3]) { ctx.moveTo(px + inset, py); ctx.lineTo(px + inset, py + tile); }
-    ctx.strokeStyle = 'rgba(138,120,235,0.14)';
-    ctx.lineWidth = 5;
-    ctx.stroke();
-    ctx.strokeStyle = 'rgba(150,132,240,0.5)';
-    ctx.lineWidth = 1.4;
-    ctx.stroke();
+  function hexRgb(hex) {
+    let value = hexCache[hex];
+    if (!value) {
+      const n = parseInt(hex.slice(1), 16);
+      value = [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+      hexCache[hex] = value;
+    }
+    return value;
+  }
+
+  function mixRgb(from, to, amount) {
+    return [from[0] + (to[0] - from[0]) * amount, from[1] + (to[1] - from[1]) * amount, from[2] + (to[2] - from[2]) * amount];
+  }
+
+  function activeTheme() {
+    return theme || G.THEMES[0];
   }
 
   const TILE_VARIANTS = 6;
-  const tileCache = {};
+  const WALL_VARIANTS = 4;
+  const BOOK_COLORS = ['#7A1F2B', '#2C4A6B', '#3B5A2F', '#8A6A2A', '#5A2D5E', '#A0522D', '#1F4F4F', '#B89A5A'];
+  let floorSets = {};
+  let wallSets = {};
 
   function makeRng(seed) {
     let state = seed >>> 0;
@@ -252,36 +249,123 @@
     return 'rgb(' + clamp(Math.round(rgbArr[0] + delta), 0, 255) + ',' + clamp(Math.round(rgbArr[1] + delta * 0.95), 0, 255) + ',' + clamp(Math.round(rgbArr[2] + delta * 1.1), 0, 255) + ')';
   }
 
-  function makeTileTexture(size, light, boss, seed) {
-    const rand = makeRng(seed * 2654435761 + (light ? 17 : 91) + (boss ? 5 : 0));
+  function newCanvas(size) {
     const cv = document.createElement('canvas');
     cv.width = size;
     cv.height = size;
-    const c = cv.getContext('2d');
-    const grout = Math.max(1, Math.round(size * 0.035));
-    const inner = size - grout * 2;
-    let base;
-    if (boss) base = light ? [60, 33, 52] : [38, 19, 33];
-    else base = light ? [46, 39, 64] : [27, 22, 38];
+    return cv;
+  }
 
-    c.fillStyle = boss ? '#0C0409' : '#07060B';
-    c.fillRect(0, 0, size, size);
-
-    const tone = (rand() - 0.5) * 12;
+  function boneShape(c, x, y, len, angle, thick, color) {
     c.save();
-    c.translate(grout, grout);
+    c.translate(x, y);
+    c.rotate(angle);
+    c.lineCap = 'round';
+    c.strokeStyle = 'rgba(0,0,0,0.42)';
+    c.lineWidth = thick;
     c.beginPath();
-    c.rect(0, 0, inner, inner);
-    c.clip();
+    c.moveTo(-len / 2, thick * 0.4);
+    c.lineTo(len / 2, thick * 0.4);
+    c.stroke();
+    c.strokeStyle = color;
+    c.beginPath();
+    c.moveTo(-len / 2, 0);
+    c.lineTo(len / 2, 0);
+    c.stroke();
+    c.fillStyle = color;
+    for (let end = -1; end <= 1; end += 2) {
+      for (let side = -1; side <= 1; side += 2) {
+        c.beginPath();
+        c.arc(end * len / 2, side * thick * 0.45, thick * 0.62, 0, TAU);
+        c.fill();
+      }
+    }
+    c.restore();
+  }
 
-    c.fillStyle = shade(base, tone);
-    c.fillRect(0, 0, inner, inner);
-    const wash = c.createLinearGradient(0, 0, inner, inner);
-    wash.addColorStop(0, 'rgba(255,255,255,' + (light ? 0.05 : 0.035) + ')');
-    wash.addColorStop(1, 'rgba(0,0,0,0.12)');
-    c.fillStyle = wash;
-    c.fillRect(0, 0, inner, inner);
+  function skullShape(c, x, y, r, color) {
+    c.fillStyle = 'rgba(0,0,0,0.4)';
+    c.beginPath();
+    c.arc(x + r * 0.08, y + r * 0.12, r, 0, TAU);
+    c.fill();
+    c.fillStyle = color;
+    c.beginPath();
+    c.arc(x, y, r, 0, TAU);
+    c.fill();
+    c.fillRect(x - r * 0.52, y + r * 0.5, r * 1.04, r * 0.62);
+    c.fillStyle = 'rgba(12,7,3,0.9)';
+    c.beginPath();
+    c.arc(x - r * 0.4, y + r * 0.05, r * 0.27, 0, TAU);
+    c.arc(x + r * 0.4, y + r * 0.05, r * 0.27, 0, TAU);
+    c.fill();
+    c.beginPath();
+    c.moveTo(x, y + r * 0.28);
+    c.lineTo(x - r * 0.11, y + r * 0.55);
+    c.lineTo(x + r * 0.11, y + r * 0.55);
+    c.closePath();
+    c.fill();
+    c.strokeStyle = 'rgba(12,7,3,0.55)';
+    c.lineWidth = Math.max(0.6, r * 0.07);
+    c.beginPath();
+    for (let t = -1; t <= 1; t++) {
+      c.moveTo(x + t * r * 0.26, y + r * 0.78);
+      c.lineTo(x + t * r * 0.26, y + r * 1.1);
+    }
+    c.stroke();
+  }
 
+  function crack(c, inner, rand, size) {
+    c.beginPath();
+    let kx = rand() * inner;
+    let ky = rand() * inner * 0.3;
+    const points = [[kx, ky]];
+    c.moveTo(kx, ky);
+    const steps = 3 + Math.floor(rand() * 3);
+    for (let s = 0; s < steps; s++) {
+      kx = clamp(kx + (rand() - 0.5) * inner * 0.35, 0, inner);
+      ky += inner * (0.14 + rand() * 0.12);
+      c.lineTo(kx, ky);
+      points.push([kx, ky]);
+    }
+    const branch = points[1 + Math.floor(rand() * (points.length - 1))];
+    c.moveTo(branch[0], branch[1]);
+    c.lineTo(branch[0] + (rand() - 0.5) * inner * 0.4, branch[1] + inner * 0.15);
+    c.strokeStyle = 'rgba(3,2,6,0.75)';
+    c.lineWidth = Math.max(0.7, size * 0.014);
+    c.stroke();
+    const off = Math.max(0.5, size * 0.01);
+    c.translate(off, off);
+    c.strokeStyle = 'rgba(230,222,255,0.08)';
+    c.lineWidth = 0.7;
+    c.stroke();
+    c.translate(-off, -off);
+  }
+
+  function chip(c, inner, rand, fill) {
+    const corner = Math.floor(rand() * 4);
+    const size = inner * (0.1 + rand() * 0.12);
+    const cx = corner & 1 ? inner : 0;
+    const cy = corner & 2 ? inner : 0;
+    const dx = corner & 1 ? -1 : 1;
+    const dy = corner & 2 ? -1 : 1;
+    c.fillStyle = fill;
+    c.beginPath();
+    c.moveTo(cx, cy);
+    c.lineTo(cx + dx * size, cy);
+    c.lineTo(cx + dx * size * 0.3, cy + dy * size * 0.45);
+    c.lineTo(cx, cy + dy * size);
+    c.closePath();
+    c.fill();
+    c.strokeStyle = 'rgba(255,255,255,0.14)';
+    c.lineWidth = 0.8;
+    c.beginPath();
+    c.moveTo(cx + dx * size, cy);
+    c.lineTo(cx + dx * size * 0.3, cy + dy * size * 0.45);
+    c.lineTo(cx, cy + dy * size);
+    c.stroke();
+  }
+
+  function floorBrick(c, inner, rand, light, boss, size) {
     const veins = 1 + Math.floor(rand() * 3);
     for (let v = 0; v < veins; v++) {
       c.beginPath();
@@ -297,93 +381,438 @@
       c.lineWidth = Math.max(0.6, size * (0.012 + rand() * 0.018));
       c.stroke();
     }
-
     const stains = Math.floor(rand() * 3);
     for (let s = 0; s < stains; s++) {
       const sx = rand() * inner;
       const sy = rand() * inner;
       const sr = inner * (0.18 + rand() * 0.3);
       const stain = c.createRadialGradient(sx, sy, 0, sx, sy, sr);
-      const damp = rand() < 0.5;
-      stain.addColorStop(0, damp ? 'rgba(10,20,26,0.3)' : 'rgba(0,0,0,0.26)');
+      stain.addColorStop(0, rand() < 0.5 ? 'rgba(10,20,26,0.3)' : 'rgba(0,0,0,0.26)');
       stain.addColorStop(1, 'rgba(0,0,0,0)');
       c.fillStyle = stain;
       c.fillRect(0, 0, inner, inner);
     }
+    if (rand() < 0.45) crack(c, inner, rand, size);
+  }
 
-    if (rand() < 0.45) {
-      c.beginPath();
-      let kx = rand() * inner;
-      let ky = rand() * inner * 0.3;
-      const crackPoints = [[kx, ky]];
-      c.moveTo(kx, ky);
-      const steps = 3 + Math.floor(rand() * 3);
-      for (let s = 0; s < steps; s++) {
-        kx = clamp(kx + (rand() - 0.5) * inner * 0.35, 0, inner);
-        ky += inner * (0.14 + rand() * 0.12);
-        c.lineTo(kx, ky);
-        crackPoints.push([kx, ky]);
-      }
-      const branch = crackPoints[1 + Math.floor(rand() * (crackPoints.length - 1))];
-      c.moveTo(branch[0], branch[1]);
-      c.lineTo(branch[0] + (rand() - 0.5) * inner * 0.4, branch[1] + inner * 0.15);
-      c.strokeStyle = 'rgba(3,2,6,0.75)';
-      c.lineWidth = Math.max(0.7, size * 0.014);
-      c.stroke();
-      c.translate(Math.max(0.5, size * 0.01), Math.max(0.5, size * 0.01));
-      c.strokeStyle = 'rgba(230,222,255,0.08)';
-      c.lineWidth = 0.7;
-      c.stroke();
-      c.translate(-Math.max(0.5, size * 0.01), -Math.max(0.5, size * 0.01));
+  function floorMoss(c, inner, rand, light, boss, size) {
+    const patches = 2 + Math.floor(rand() * 3);
+    for (let p = 0; p < patches; p++) {
+      const px = rand() * inner;
+      const py = rand() * inner;
+      const pr = inner * (0.22 + rand() * 0.34);
+      const patch = c.createRadialGradient(px, py, 0, px, py, pr);
+      patch.addColorStop(0, 'rgba(70,150,95,' + (0.26 + rand() * 0.14) + ')');
+      patch.addColorStop(1, 'rgba(40,100,70,0)');
+      c.fillStyle = patch;
+      c.fillRect(0, 0, inner, inner);
     }
-
-    const bevel = Math.max(1, Math.round(size * 0.05));
-    c.fillStyle = 'rgba(255,255,255,' + (light ? 0.2 : 0.14) + ')';
-    c.fillRect(0, 0, inner, bevel);
-    c.fillRect(0, 0, bevel, inner);
-    c.fillStyle = 'rgba(0,0,0,0.42)';
-    c.fillRect(0, inner - bevel, inner, bevel);
-    c.fillRect(inner - bevel, 0, bevel, inner);
-
-    if (rand() < 0.4) {
-      const corner = Math.floor(rand() * 4);
-      const chip = inner * (0.1 + rand() * 0.12);
-      const cx = corner & 1 ? inner : 0;
-      const cy = corner & 2 ? inner : 0;
-      const dx = corner & 1 ? -1 : 1;
-      const dy = corner & 2 ? -1 : 1;
-      c.fillStyle = boss ? '#0C0409' : '#07060B';
+    if (rand() < 0.5) {
+      const wx = inner * (0.25 + rand() * 0.5);
+      const wy = inner * (0.25 + rand() * 0.5);
+      c.fillStyle = 'rgba(3,22,24,0.42)';
       c.beginPath();
-      c.moveTo(cx, cy);
-      c.lineTo(cx + dx * chip, cy);
-      c.lineTo(cx + dx * chip * 0.3, cy + dy * chip * 0.45);
-      c.lineTo(cx, cy + dy * chip);
-      c.closePath();
+      c.ellipse(wx, wy, inner * (0.18 + rand() * 0.16), inner * (0.1 + rand() * 0.1), rand() * Math.PI, 0, TAU);
       c.fill();
-      c.strokeStyle = 'rgba(255,255,255,0.14)';
-      c.lineWidth = 0.8;
-      c.beginPath();
-      c.moveTo(cx + dx * chip, cy);
-      c.lineTo(cx + dx * chip * 0.3, cy + dy * chip * 0.45);
-      c.lineTo(cx, cy + dy * chip);
+      c.strokeStyle = 'rgba(127,224,208,0.2)';
+      c.lineWidth = Math.max(0.6, size * 0.012);
       c.stroke();
     }
+    const tufts = 6 + Math.floor(rand() * 10);
+    for (let t = 0; t < tufts; t++) {
+      c.fillStyle = rand() < 0.6 ? 'rgba(95,175,105,0.5)' : 'rgba(30,85,58,0.55)';
+      c.beginPath();
+      c.arc(rand() * inner, rand() * inner, Math.max(0.7, size * (0.01 + rand() * 0.024)), 0, TAU);
+      c.fill();
+    }
+    if (rand() < 0.4) crack(c, inner, rand, size);
+  }
+
+  function floorBone(c, inner, rand, light, boss, size) {
+    const dust = c.createRadialGradient(inner * rand(), inner * rand(), 0, inner / 2, inner / 2, inner * 0.8);
+    dust.addColorStop(0, 'rgba(216,201,160,0.13)');
+    dust.addColorStop(1, 'rgba(216,201,160,0)');
+    c.fillStyle = dust;
+    c.fillRect(0, 0, inner, inner);
+    const specks = Math.floor((inner * inner) / 38);
+    for (let s = 0; s < specks; s++) {
+      c.fillStyle = rand() < 0.5 ? 'rgba(0,0,0,0.24)' : 'rgba(205,175,115,0.17)';
+      c.fillRect(rand() * inner, rand() * inner, 1, 1);
+    }
+    const pebbles = 2 + Math.floor(rand() * 3);
+    for (let p = 0; p < pebbles; p++) {
+      c.fillStyle = 'rgba(0,0,0,0.3)';
+      c.beginPath();
+      c.arc(rand() * inner, rand() * inner, Math.max(0.8, size * (0.012 + rand() * 0.018)), 0, TAU);
+      c.fill();
+    }
+    const bones = 1 + (rand() < 0.5 ? 1 : 0);
+    for (let b = 0; b < bones; b++) {
+      boneShape(c, inner * (0.25 + rand() * 0.5), inner * (0.2 + rand() * 0.6), inner * (0.4 + rand() * 0.25), rand() * Math.PI, Math.max(1.4, size * 0.045), 'rgba(222,210,175,0.72)');
+    }
+    if (rand() < 0.16) skullShape(c, inner * (0.3 + rand() * 0.4), inner * (0.3 + rand() * 0.35), inner * 0.14, 'rgba(226,214,182,0.78)');
+  }
+
+  function floorParquet(c, inner, rand, light, boss, size, seed) {
+    const vertical = (seed & 1) === 1;
+    const planks = 3;
+    c.save();
+    if (vertical) {
+      c.translate(inner, 0);
+      c.rotate(Math.PI / 2);
+    }
+    const h = inner / planks;
+    for (let p = 0; p < planks; p++) {
+      const y = p * h;
+      c.fillStyle = rand() < 0.5 ? 'rgba(255,190,120,' + 0.02 * (1 + rand() * 3) + ')' : 'rgba(0,0,0,' + 0.04 * (1 + rand() * 3) + ')';
+      c.fillRect(0, y, inner, h);
+      const grains = 3 + Math.floor(rand() * 3);
+      for (let g = 0; g < grains; g++) {
+        const gy = y + h * (0.12 + rand() * 0.76);
+        c.strokeStyle = rand() < 0.65 ? 'rgba(0,0,0,0.2)' : 'rgba(255,200,140,0.07)';
+        c.lineWidth = 0.7;
+        c.beginPath();
+        c.moveTo(0, gy);
+        c.bezierCurveTo(inner * 0.3, gy + (rand() - 0.5) * h * 0.4, inner * 0.65, gy + (rand() - 0.5) * h * 0.4, inner, gy + (rand() - 0.5) * h * 0.2);
+        c.stroke();
+      }
+      c.fillStyle = 'rgba(0,0,0,0.55)';
+      c.fillRect(0, y + h - Math.max(1, size * 0.016), inner, Math.max(1, size * 0.016));
+      c.fillStyle = 'rgba(255,210,160,0.06)';
+      c.fillRect(0, y, inner, 1);
+      c.fillStyle = 'rgba(0,0,0,0.5)';
+      c.fillRect(size * 0.04, y + h / 2, 1.4, 1.4);
+      c.fillRect(inner - size * 0.05, y + h / 2, 1.4, 1.4);
+    }
+    c.restore();
+    const scratches = 2 + Math.floor(rand() * 3);
+    c.lineWidth = 0.7;
+    for (let s = 0; s < scratches; s++) {
+      const sx = rand() * inner;
+      const sy = rand() * inner;
+      c.strokeStyle = 'rgba(255,225,180,' + (0.1 + rand() * 0.12) + ')';
+      c.beginPath();
+      c.moveTo(sx, sy);
+      c.lineTo(sx + (rand() - 0.5) * inner * 0.7, sy + (rand() - 0.5) * inner * 0.5);
+      c.stroke();
+    }
+  }
+
+  function marbleVein(c, inner, rand, color, width) {
+    c.save();
+    c.translate(inner / 2, inner / 2);
+    c.rotate(rand() * TAU);
+    c.beginPath();
+    let vx = -inner * 0.75;
+    let vy = (rand() - 0.5) * inner * 0.7;
+    c.moveTo(vx, vy);
+    while (vx < inner * 0.75) {
+      vx += inner * (0.22 + rand() * 0.25);
+      vy += (rand() - 0.5) * inner * 0.45;
+      c.quadraticCurveTo(vx - inner * 0.12, vy + (rand() - 0.5) * inner * 0.3, vx, vy);
+    }
+    c.strokeStyle = color;
+    c.lineWidth = width;
+    c.stroke();
+    c.restore();
+  }
+
+  function floorMarble(c, inner, rand, light, boss, size) {
+    const cloud = c.createRadialGradient(inner * rand(), inner * rand(), 0, inner / 2, inner / 2, inner * 0.9);
+    cloud.addColorStop(0, light ? 'rgba(255,255,255,0.1)' : 'rgba(150,150,190,0.07)');
+    cloud.addColorStop(1, 'rgba(0,0,0,0)');
+    c.fillStyle = cloud;
+    c.fillRect(0, 0, inner, inner);
+    const veins = 2 + Math.floor(rand() * 2);
+    for (let v = 0; v < veins; v++) {
+      const strong = v === 0;
+      if (light) marbleVein(c, inner, rand, 'rgba(35,32,50,' + (strong ? 0.4 : 0.2) + ')', Math.max(0.6, size * (strong ? 0.02 : 0.01)));
+      else marbleVein(c, inner, rand, 'rgba(205,205,230,' + (strong ? 0.2 : 0.09) + ')', Math.max(0.6, size * (strong ? 0.018 : 0.009)));
+    }
+    const gloss = c.createLinearGradient(0, 0, inner, inner);
+    gloss.addColorStop(0, 'rgba(255,255,255,' + (light ? 0.2 : 0.11) + ')');
+    gloss.addColorStop(0.45, 'rgba(255,255,255,0)');
+    gloss.addColorStop(1, 'rgba(255,255,255,' + (light ? 0.05 : 0.025) + ')');
+    c.fillStyle = gloss;
+    c.fillRect(0, 0, inner, inner);
+    c.fillStyle = 'rgba(255,255,255,' + (light ? 0.1 : 0.05) + ')';
+    c.beginPath();
+    c.moveTo(inner * 0.5, 0);
+    c.lineTo(inner * 0.68, 0);
+    c.lineTo(inner * 0.18, inner);
+    c.lineTo(0, inner);
+    c.lineTo(0, inner * 0.82);
+    c.closePath();
+    c.fill();
+  }
+
+  const FLOOR_DECOR = { brick: floorBrick, moss: floorMoss, bone: floorBone, shelves: floorParquet, marble: floorMarble };
+  const FLOOR_BEVEL = { brick: 0.05, moss: 0.04, bone: 0.025, shelves: 0.02, marble: 0 };
+
+  function makeTileTexture(size, light, boss, seed, th) {
+    const rand = makeRng(seed * 2654435761 + (light ? 17 : 91) + (boss ? 5 : 0));
+    const tex = FLOOR_DECOR[th.texture] ? th.texture : 'brick';
+    const marble = tex === 'marble';
+    const cv = newCanvas(size);
+    const c = cv.getContext('2d');
+    const grout = Math.max(1, Math.round(size * (marble ? 0.03 : 0.035)));
+    const inner = size - grout * 2;
+    let base = hexRgb(light ? th.floorLight : th.floorDark);
+    if (boss) base = mixRgb(base, light ? [60, 33, 52] : [38, 19, 33], tex === 'brick' ? 1 : 0.55);
+    let groutColor = boss ? '#0C0409' : th.fog;
+    if (marble) groutColor = boss ? '#6A2A3A' : '#8A7236';
+
+    c.fillStyle = groutColor;
+    c.fillRect(0, 0, size, size);
+
+    const tone = (rand() - 0.5) * 12;
+    c.save();
+    c.translate(grout, grout);
+    c.beginPath();
+    c.rect(0, 0, inner, inner);
+    c.clip();
+    c.fillStyle = shade(base, tone);
+    c.fillRect(0, 0, inner, inner);
+    const wash = c.createLinearGradient(0, 0, inner, inner);
+    wash.addColorStop(0, 'rgba(255,255,255,' + (light ? 0.05 : 0.035) + ')');
+    wash.addColorStop(1, 'rgba(0,0,0,0.12)');
+    c.fillStyle = wash;
+    c.fillRect(0, 0, inner, inner);
+
+    FLOOR_DECOR[tex](c, inner, rand, light, boss, size, seed);
+    if (boss && tex !== 'brick') {
+      c.fillStyle = 'rgba(179,18,58,0.1)';
+      c.fillRect(0, 0, inner, inner);
+    }
+
+    const bevel = Math.max(1, Math.round(size * FLOOR_BEVEL[tex]));
+    if (FLOOR_BEVEL[tex] > 0) {
+      const soft = tex === 'brick' || tex === 'moss' ? 1 : 0.6;
+      c.fillStyle = 'rgba(255,255,255,' + (light ? 0.2 : 0.14) * soft + ')';
+      c.fillRect(0, 0, inner, bevel);
+      c.fillRect(0, 0, bevel, inner);
+      c.fillStyle = 'rgba(0,0,0,' + 0.42 * soft + ')';
+      c.fillRect(0, inner - bevel, inner, bevel);
+      c.fillRect(inner - bevel, 0, bevel, inner);
+    }
+    if ((tex === 'brick' || tex === 'moss') && rand() < 0.4) chip(c, inner, rand, groutColor);
     c.restore();
     return cv;
   }
 
   function tileSet(sizePx) {
-    let set = tileCache[sizePx];
+    const th = activeTheme();
+    const key = th.id + '|' + sizePx;
+    let set = floorSets[key];
     if (set) return set;
     set = { dark: [], light: [], bossDark: [], bossLight: [] };
     for (let i = 0; i < TILE_VARIANTS; i++) {
-      set.dark.push(makeTileTexture(sizePx, false, false, i + 1));
-      set.light.push(makeTileTexture(sizePx, true, false, i + 11));
-      set.bossDark.push(makeTileTexture(sizePx, false, true, i + 21));
-      set.bossLight.push(makeTileTexture(sizePx, true, true, i + 31));
+      set.dark.push(makeTileTexture(sizePx, false, false, i + 1, th));
+      set.light.push(makeTileTexture(sizePx, true, false, i + 11, th));
+      set.bossDark.push(makeTileTexture(sizePx, false, true, i + 21, th));
+      set.bossLight.push(makeTileTexture(sizePx, true, true, i + 31, th));
     }
-    tileCache[sizePx] = set;
+    floorSets[key] = set;
     return set;
+  }
+
+  function wallBricks(c, size, rand, th) {
+    const base = hexRgb(th.wall);
+    const rows = 4;
+    const rowH = size / rows;
+    for (let row = 0; row < rows; row++) {
+      const offset = row & 1 ? size / 4 : -size / 4;
+      for (let col = 0; col < 3; col++) {
+        const x = col * (size / 2) + offset;
+        c.fillStyle = shade(base, (rand() - 0.5) * 14);
+        c.fillRect(x, row * rowH, size / 2, rowH);
+        c.strokeStyle = 'rgba(0,0,0,0.5)';
+        c.lineWidth = Math.max(1, size * 0.025);
+        c.strokeRect(x, row * rowH, size / 2, rowH);
+        c.fillStyle = 'rgba(255,255,255,0.04)';
+        c.fillRect(x + 1, row * rowH + 1, size / 2 - 2, 1);
+      }
+    }
+  }
+
+  function wallMoss(c, size, rand, th) {
+    const base = hexRgb(th.wall);
+    const rows = 3;
+    const rowH = size / rows;
+    for (let row = 0; row < rows; row++) {
+      let x = -rand() * size * 0.3;
+      while (x < size) {
+        const w = size * (0.35 + rand() * 0.3);
+        c.fillStyle = shade(base, (rand() - 0.5) * 12);
+        c.fillRect(x, row * rowH, w, rowH);
+        c.strokeStyle = 'rgba(0,0,0,0.5)';
+        c.lineWidth = Math.max(1, size * 0.03);
+        c.strokeRect(x, row * rowH, w, rowH);
+        x += w;
+      }
+    }
+    const top = c.createLinearGradient(0, 0, 0, size * 0.5);
+    top.addColorStop(0, 'rgba(70,150,95,0.5)');
+    top.addColorStop(1, 'rgba(70,150,95,0)');
+    c.fillStyle = top;
+    c.fillRect(0, 0, size, size * 0.5);
+    const drips = 3 + Math.floor(rand() * 3);
+    for (let d = 0; d < drips; d++) {
+      const x = rand() * size;
+      const len = size * (0.25 + rand() * 0.55);
+      const w = Math.max(1.2, size * (0.03 + rand() * 0.04));
+      c.fillStyle = rand() < 0.7 ? 'rgba(78,165,105,0.62)' : 'rgba(35,95,65,0.7)';
+      c.fillRect(x - w / 2, 0, w, len);
+      c.beginPath();
+      c.arc(x, len, w * 0.85, 0, TAU);
+      c.fill();
+      c.fillStyle = 'rgba(160,240,200,0.14)';
+      c.fillRect(x - w * 0.15, 0, Math.max(0.6, w * 0.25), len);
+    }
+    for (let b = 0; b < 7; b++) {
+      c.fillStyle = 'rgba(60,140,90,0.28)';
+      c.beginPath();
+      c.arc(rand() * size, rand() * size, size * (0.03 + rand() * 0.05), 0, TAU);
+      c.fill();
+    }
+  }
+
+  function wallBone(c, size, rand) {
+    c.fillStyle = 'rgba(0,0,0,0.38)';
+    c.fillRect(0, 0, size, size);
+    const rows = 4;
+    for (let row = 0; row < rows; row++) {
+      const y = (row + 0.5) * (size / rows) + (rand() - 0.5) * size * 0.05;
+      boneShape(c, size * (0.5 + (rand() - 0.5) * 0.1), y, size * 0.92, (rand() - 0.5) * 0.12, Math.max(1.8, size * 0.07), 'rgba(222,208,168,' + (0.55 + rand() * 0.2) + ')');
+    }
+    const skulls = 1 + Math.floor(rand() * 2);
+    for (let s = 0; s < skulls; s++) {
+      skullShape(c, size * (0.28 + rand() * 0.44), size * (0.22 + rand() * 0.4), size * (0.15 + rand() * 0.03), 'rgba(232,220,186,0.85)');
+    }
+  }
+
+  function wallShelves(c, size, rand) {
+    const rows = 3;
+    const rowH = size / rows;
+    for (let row = 0; row < rows; row++) {
+      const y0 = row * rowH;
+      c.fillStyle = 'rgba(0,0,0,0.42)';
+      c.fillRect(0, y0, size, rowH);
+      const floorY = y0 + rowH - size * 0.055;
+      let x = size * 0.04;
+      while (x < size - size * 0.08) {
+        const w = size * (0.06 + rand() * 0.07);
+        const h = (rowH - size * 0.08) * (0.62 + rand() * 0.34);
+        const color = BOOK_COLORS[Math.floor(rand() * BOOK_COLORS.length)];
+        const lean = rand() < 0.1 ? (rand() - 0.5) * 0.35 : 0;
+        c.save();
+        c.translate(x + w / 2, floorY);
+        c.rotate(lean);
+        c.globalAlpha = 0.88;
+        c.fillStyle = color;
+        c.fillRect(-w / 2, -h, w, h);
+        c.fillStyle = 'rgba(0,0,0,0.3)';
+        c.fillRect(w * 0.2, -h, w * 0.3, h);
+        c.fillStyle = 'rgba(235,205,130,0.55)';
+        c.fillRect(-w / 2, -h + h * 0.14, w, Math.max(1, size * 0.015));
+        c.fillRect(-w / 2, -h + h * 0.8, w, Math.max(1, size * 0.015));
+        c.globalAlpha = 1;
+        c.restore();
+        x += w + (lean ? size * 0.07 : size * 0.004);
+      }
+      c.fillStyle = '#0E0703';
+      c.fillRect(0, floorY, size, size * 0.055);
+      c.fillStyle = rgba('#C9863A', 0.35);
+      c.fillRect(0, floorY, size, 1);
+    }
+  }
+
+  function wallObsidian(c, size, rand, th) {
+    const sheen = c.createLinearGradient(0, 0, size, size);
+    sheen.addColorStop(0, 'rgba(255,255,255,0.1)');
+    sheen.addColorStop(0.4, 'rgba(255,255,255,0)');
+    sheen.addColorStop(1, 'rgba(255,255,255,0.04)');
+    c.fillStyle = sheen;
+    c.fillRect(0, 0, size, size);
+    c.strokeStyle = 'rgba(255,255,255,0.05)';
+    c.lineWidth = 1;
+    for (let f = 0; f < 3; f++) {
+      c.beginPath();
+      c.moveTo(rand() * size, 0);
+      c.lineTo(rand() * size, size);
+      c.stroke();
+    }
+    const veins = 2 + Math.floor(rand() * 2);
+    for (let v = 0; v < veins; v++) {
+      let vx = rand() * size;
+      let vy = 0;
+      const pts = [[vx, vy]];
+      while (vy < size) {
+        vy += size * (0.12 + rand() * 0.15);
+        vx = clamp(vx + (rand() - 0.5) * size * 0.35, 0, size);
+        pts.push([vx, vy]);
+      }
+      for (let pass = 0; pass < 2; pass++) {
+        c.beginPath();
+        c.moveTo(pts[0][0], pts[0][1]);
+        for (let p = 1; p < pts.length; p++) c.lineTo(pts[p][0], pts[p][1]);
+        c.strokeStyle = rgba(th.wallEdge, pass === 0 ? 0.16 : 0.6);
+        c.lineWidth = pass === 0 ? Math.max(3, size * 0.07) : Math.max(0.8, size * 0.02);
+        c.stroke();
+      }
+    }
+  }
+
+  const WALL_DECOR = { brick: wallBricks, moss: wallMoss, bone: wallBone, shelves: wallShelves, marble: wallObsidian };
+
+  function makeWallTexture(size, seed, th) {
+    const rand = makeRng(seed * 40503 + 7);
+    const cv = newCanvas(size);
+    const c = cv.getContext('2d');
+    c.fillStyle = th.wall;
+    c.fillRect(0, 0, size, size);
+    (WALL_DECOR[th.texture] || wallBricks)(c, size, rand, th);
+    c.fillStyle = 'rgba(255,255,255,0.045)';
+    c.fillRect(0, 0, size, size * 0.14);
+    c.fillStyle = 'rgba(0,0,0,0.28)';
+    c.fillRect(0, size * 0.86, size, size * 0.14);
+    return cv;
+  }
+
+  function wallSet(sizePx) {
+    const th = activeTheme();
+    const key = th.id + '|' + sizePx;
+    let set = wallSets[key];
+    if (set) return set;
+    set = [];
+    for (let i = 0; i < WALL_VARIANTS; i++) set.push(makeWallTexture(sizePx, i + 1, th));
+    wallSets[key] = set;
+    return set;
+  }
+
+  function drawWall(px, py, x, y, maze) {
+    const set = wallSet(Math.max(8, Math.round(tile * dpr)));
+    ctx.drawImage(set[(hash(x, y) >> 3) % WALL_VARIANTS], px, py, tile + 0.6, tile + 0.6);
+
+    const open = [
+      !G.isWall(maze, x, y - 1),
+      !G.isWall(maze, x + 1, y),
+      !G.isWall(maze, x, y + 1),
+      !G.isWall(maze, x - 1, y)
+    ];
+    if (!open[0] && !open[1] && !open[2] && !open[3]) return;
+    const inset = 1;
+    ctx.beginPath();
+    if (open[0]) { ctx.moveTo(px, py + inset); ctx.lineTo(px + tile, py + inset); }
+    if (open[1]) { ctx.moveTo(px + tile - inset, py); ctx.lineTo(px + tile - inset, py + tile); }
+    if (open[2]) { ctx.moveTo(px, py + tile - inset); ctx.lineTo(px + tile, py + tile - inset); }
+    if (open[3]) { ctx.moveTo(px + inset, py); ctx.lineTo(px + inset, py + tile); }
+    ctx.strokeStyle = rgba(activeTheme().wallEdge, 0.14);
+    ctx.lineWidth = 5;
+    ctx.stroke();
+    ctx.strokeStyle = rgba(activeTheme().wallEdge, 0.5);
+    ctx.lineWidth = 1.4;
+    ctx.stroke();
   }
 
   function drawFloor(px, py, x, y, maze) {
@@ -431,6 +860,31 @@
     ctx.globalAlpha = 1;
   }
 
+  const PROP_LIGHT_EXTRA = 2.2;
+
+  function drawProps(state, now) {
+    const props = state.props;
+    if (!props || !G.props) return;
+    const maze = state.maze;
+    const halfX = cssW / 2 / tile + 1;
+    const halfY = cssH / 2 / tile + 1;
+    const families = ['floor', 'wall', 'room'];
+    for (let f = 0; f < families.length; f++) {
+      for (let i = 0; i < props.length; i++) {
+        const prop = props[i];
+        if (prop.family !== families[f]) continue;
+        if (Math.abs(prop.x + 0.5 - camX) > halfX || Math.abs(prop.y + 0.5 - camY) > halfY) continue;
+        const light = lightAt(prop.x + 0.5, prop.y + 0.5);
+        const emits = prop.light ? sstep((G.CFG.lightRadius + PROP_LIGHT_EXTRA - Math.hypot(prop.x + 0.5 - lightX, prop.y + 0.5 - lightY)) / 1.8) * flick : 0;
+        const alpha = Math.max(explored[prop.y * maze.w + prop.x] ? EXPLORED_ALPHA * 0.8 : 0, light, emits);
+        if (alpha < 0.01) continue;
+        ctx.globalAlpha = Math.min(1, alpha);
+        G.props.draw2D(ctx, prop, sxOf(prop.x), syOf(prop.y), tile, now);
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
   function drawLightOverlay(now) {
     const lx = sxOf(lightX);
     const ly = syOf(lightY);
@@ -438,17 +892,18 @@
 
     ctx.globalCompositeOperation = 'lighter';
     const warm = ctx.createRadialGradient(lx, ly, 0, lx, ly, radius * 1.35);
-    warm.addColorStop(0, rgba(colors().player, 0.2 * flick));
-    warm.addColorStop(0.5, rgba('#8A5A2B', 0.07 * flick));
+    const th = activeTheme();
+    warm.addColorStop(0, rgba(th.glow, 0.2 * flick));
+    warm.addColorStop(0.5, rgba(th.glow, 0.06 * flick));
     warm.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = warm;
     ctx.fillRect(lx - radius * 1.4, ly - radius * 1.4, radius * 2.8, radius * 2.8);
     ctx.globalCompositeOperation = 'source-over';
 
     const dark = ctx.createRadialGradient(lx, ly, radius * 0.5, lx, ly, radius * 1.9);
-    dark.addColorStop(0, 'rgba(7,6,11,0)');
-    dark.addColorStop(0.45, 'rgba(7,6,11,0.3)');
-    dark.addColorStop(1, 'rgba(7,6,11,0.55)');
+    dark.addColorStop(0, rgba(th.fog, 0));
+    dark.addColorStop(0.45, rgba(th.fog, 0.3));
+    dark.addColorStop(1, rgba(th.fog, 0.55));
     ctx.fillStyle = dark;
     ctx.fillRect(0, 0, cssW, cssH);
   }
@@ -768,11 +1223,11 @@
     }
   }
 
-  function drawVignette() {
+  function drawVignette(fog) {
     const gradient = ctx.createRadialGradient(cssW / 2, cssH / 2, Math.min(cssW, cssH) * 0.32, cssW / 2, cssH / 2, Math.hypot(cssW, cssH) * 0.58);
     gradient.addColorStop(0, 'rgba(0,0,0,0)');
-    gradient.addColorStop(0.6, 'rgba(3,2,6,0.45)');
-    gradient.addColorStop(1, 'rgba(2,1,4,0.92)');
+    gradient.addColorStop(0.6, fog ? rgba(fog, 0.45) : 'rgba(3,2,6,0.45)');
+    gradient.addColorStop(1, fog ? rgba(fog, 0.92) : 'rgba(2,1,4,0.92)');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, cssW, cssH);
   }
@@ -1206,6 +1661,58 @@
     setSpacing(0);
   }
 
+  function drawLevelTransition(state, now) {
+    const tr = state.transition;
+    if (!tr) return;
+    const t = typeof state.now === 'number' ? state.now : now;
+    const hold = tr.swapAt + 400;
+    let cover;
+    if (t < tr.start) return;
+    if (t < tr.swapAt) cover = sstep((t - tr.start) / Math.max(1, tr.swapAt - tr.start));
+    else if (t < hold) cover = 1;
+    else cover = 1 - sstep((t - hold) / Math.max(1, tr.end - hold));
+    if (cover <= 0.001) return;
+    ctx.save();
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = 'rgba(0,0,0,' + cover + ')';
+    ctx.fillRect(0, 0, cssW, cssH);
+
+    const th = activeTheme();
+    const textAlpha = t < tr.swapAt ? 0 : Math.min(sstep((t - tr.swapAt) / 500), 1 - sstep((t - (tr.end - 800)) / 800));
+    if (textAlpha > 0.001) {
+      const cx = cssW / 2;
+      const cy = cssH / 2;
+      ctx.globalAlpha = textAlpha;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const small = Math.round(clamp(cssW * 0.0165, 13, 20));
+      setSpacing(small * 0.5);
+      ctx.font = '600 ' + small + 'px ' + FONT_SERIF;
+      ctx.fillStyle = rgba('#CFC6EE', 0.8);
+      ctx.fillText('NIVEL ' + (state.level || 1), cx + small * 0.25, cy - Math.min(cssW * 0.075, 90) * 0.95);
+
+      let size = Math.min(cssW * 0.06, 84);
+      setSpacing(size * 0.1);
+      size = Math.min(size, fitSize(th.name, size, cssW * 0.9));
+      setSpacing(size * 0.1);
+      const gold = ctx.createLinearGradient(0, cy - size / 2, 0, cy + size / 2);
+      gold.addColorStop(0, '#F6E9C0');
+      gold.addColorStop(0.55, colors().player);
+      gold.addColorStop(1, '#8A7448');
+      glitchText(th.name, cx + size * 0.05, cy, size, gold, 'rgba(201,179,126,0.65)', 0.15);
+
+      ornament(cx, cy + size * 0.78, Math.min(cssW * 0.28, 320), colors().player, 0.7);
+      const subSize = Math.round(clamp(cssW * 0.0195, 14, 24));
+      setSpacing(subSize * 0.12);
+      ctx.font = 'italic 500 ' + subSize + 'px ' + FONT_SERIF;
+      ctx.fillStyle = rgba('#E2D9F5', 0.85);
+      ctx.fillText(th.sub, cx, cy + size * 0.78 + subSize * 2);
+      setSpacing(0);
+    }
+    ctx.restore();
+  }
+
   function drawWorld(state, now, ui, dt) {
     const player = state.players[0];
     const visual = visualOf(visPlayers, player.id, player.x, player.y, dt, 55);
@@ -1225,6 +1732,7 @@
     flick = 0.93 + 0.045 * Math.sin(now * 0.011) + 0.03 * Math.sin(now * 0.027 + 1.7) + 0.02 * Math.sin(now * 0.071 + 4.2);
 
     drawCells(state);
+    drawProps(state, now);
     drawLightOverlay(now);
     drawTargets(ui, now);
     drawPlayers(state, now, dt);
@@ -1250,6 +1758,13 @@
 
     const ready = state && state.maze && state.players && state.players[0] && state.phase !== 'title';
     if (state) {
+      if (state.theme && state.theme !== theme) {
+        if (!theme || state.theme.id !== theme.id) {
+          floorSets = {};
+          wallSets = {};
+        }
+        theme = state.theme;
+      }
       syncState(state, now);
       if (state.events && state.events.length) {
         G.fx.ingest(state.events);
@@ -1272,7 +1787,7 @@
     drawWorld(state, now, ui, dt);
     ctx.restore();
 
-    drawVignette();
+    drawVignette(activeTheme().fog);
     drawGrain();
     G.fx.drawScreen(ctx, canvas);
 
@@ -1285,5 +1800,6 @@
     drawPieceBar(player, now);
     drawBanners(now);
     if (state.phase === 'dead' || state.phase === 'won') drawEndScreen(state, now);
+    drawLevelTransition(state, now);
   };
 })();
