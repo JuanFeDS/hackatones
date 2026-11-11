@@ -19,6 +19,85 @@
     }
   });
 
+  const helpPanel = document.getElementById('help');
+  const HELP_TOP_DOWN = [
+    [['W', 'A', 'S', 'D'], 'Mover'],
+    [['Q', 'E', 'Z', 'C'], 'Diagonales'],
+    [['Espacio'], 'Atacar'],
+    [['1', '–', '6'], 'Cambiar de ficha'],
+    [['Shift'], 'Deslizar completo'],
+    [['Clic'], 'Ir a casilla roja'],
+    [['V'], 'Vista 1ª persona'],
+    [['H'], 'Ocultar guía']
+  ];
+  const HELP_FIRST_PERSON = [
+    [['W', 'S'], 'Avanzar / retroceder'],
+    [['A', 'D'], 'Paso lateral'],
+    [['←', '→'], 'Girar la cámara'],
+    [['↑'], 'Atacar'],
+    [['Z', 'C'], 'Diagonales atrás'],
+    [['1', '–', '6'], 'Cambiar de ficha'],
+    [['Shift'], 'Deslizar completo'],
+    [['V'], 'Vista cenital'],
+    [['H'], 'Ocultar guía']
+  ];
+  const HELP_AUTO_COLLAPSE_MS = 12000;
+  let helpCollapsed = window.innerHeight < 520;
+  let helpMode = null;
+  let helpShownAt = null;
+
+  function buildHelp(rows, title) {
+    helpPanel.replaceChildren();
+    const heading = document.createElement('h2');
+    heading.textContent = title;
+    helpPanel.append(heading);
+    for (const [keys, label] of rows) {
+      const row = document.createElement('div');
+      row.className = 'row';
+      const keyBox = document.createElement('span');
+      keyBox.className = 'keys';
+      for (const key of keys) {
+        const cap = document.createElement('kbd');
+        cap.textContent = key;
+        keyBox.append(cap);
+      }
+      const text = document.createElement('span');
+      text.className = 'label';
+      text.textContent = label;
+      row.append(keyBox, text);
+      helpPanel.append(row);
+    }
+    const chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.textContent = 'H · controles';
+    helpPanel.append(chip);
+  }
+
+  function updateHelp(now) {
+    const show = state.phase === 'playing';
+    if (helpPanel.hidden === show) helpPanel.hidden = !show;
+    if (!show) return;
+    if (helpShownAt === null) helpShownAt = now;
+    else if (helpShownAt >= 0 && now - helpShownAt > HELP_AUTO_COLLAPSE_MS) {
+      helpCollapsed = true;
+      helpShownAt = -1;
+    }
+    const mode = G.activeRender === G.render3d ? 'pov' : 'top';
+    if (mode !== helpMode) {
+      helpMode = mode;
+      if (mode === 'pov') buildHelp(HELP_FIRST_PERSON, 'Controles · 1ª persona');
+      else buildHelp(HELP_TOP_DOWN, 'Controles · vista cenital');
+    }
+    helpPanel.classList.toggle('collapsed', helpCollapsed);
+  }
+
+  window.addEventListener('keydown', (event) => {
+    if (event.code === 'KeyH' && !event.repeat) {
+      helpCollapsed = !helpCollapsed;
+      helpShownAt = -1;
+    }
+  });
+
   function startAudio() {
     if (audioStarted) return;
     audioStarted = true;
@@ -37,6 +116,7 @@
     };
     G.activeRender.draw(state, now, ui);
     G.audio.update(state, now);
+    updateHelp(now);
     state.events.length = 0;
     requestAnimationFrame(frame);
   }
