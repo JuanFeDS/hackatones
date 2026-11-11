@@ -186,7 +186,7 @@ G.input = (function () {
       const target = G.pieces.slide(state, player, vector.dx, vector.dy);
       if (target) {
         commands.push({ playerId: player.id, type: 'moveTo', x: target.x, y: target.y });
-        if (!heldVector() && now >= player.cooldownUntil) pendingDir = null;
+        if (now >= player.cooldownUntil) pendingDir = null;
       }
     }
     return commands;
