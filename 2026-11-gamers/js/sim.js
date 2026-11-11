@@ -10,6 +10,7 @@ G.sim = (function () {
       nextId: 1,
       events: [],
       maze,
+      props: G.props.generate(maze, seed),
       players: [{
         id: 0,
         x: maze.start.x,
