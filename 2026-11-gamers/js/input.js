@@ -117,7 +117,10 @@ G.input = (function () {
       wantsStart = true;
       wantsRestart = true;
       if (firstPerson()) {
-        if (document.pointerLockElement !== canvas) canvas.requestPointerLock();
+        if (document.pointerLockElement !== canvas) {
+          const lock = canvas.requestPointerLock();
+          if (lock && lock.catch) lock.catch(() => {});
+        }
         else attackAt = performance.now();
         return;
       }
