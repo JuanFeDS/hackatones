@@ -6,18 +6,27 @@
 <style>
   body { margin: 0; padding: 16px; background: #07060B; color: #C9B37E; font: 13px/1.4 system-ui, sans-serif; }
   h2 { margin: 18px 0 8px; font-size: 15px; color: #7FE0D0; }
-  #status { font: 14px monospace; padding: 8px 12px; background: #1E1B2E; display: inline-block; }
+  #status, #images { font: 14px monospace; padding: 8px 12px; background: #1E1B2E; display: inline-block; margin: 0 8px 6px 0; }
+  table { border-collapse: collapse; font: 12px monospace; }
+  td, th { padding: 2px 8px; border-bottom: 1px solid #1E1B2E; text-align: right; }
+  th:first-child, td:first-child { text-align: left; }
   .grid { display: flex; flex-wrap: wrap; gap: 10px; }
   .cell { width: 112px; text-align: center; font-size: 11px; color: #B9A988; }
+  .cell.themed { color: #7FE0D0; }
   .cell canvas { background: #1E1B2E; display: block; margin: 0 auto 4px; }
+  #themes button { background: #1E1B2E; color: #C9B37E; border: 1px solid #3A3150; padding: 4px 10px; margin-right: 4px; cursor: pointer; }
+  #themes button.on { border-color: #7FE0D0; color: #7FE0D0; }
   #map { background: #07060B; display: block; margin-top: 8px; }
 </style>
 </head>
 <body>
-<div id="status">validando…</div>
-<h2>Catálogo</h2>
+<div id="status">validando…</div><div id="images">cargando imágenes…</div>
+<h2>Invariantes por tema (100 semillas)</h2>
+<table id="themeTable"></table>
+<h2>Catálogo (en verde: exclusivos de tema)</h2>
 <div class="grid" id="catalog"></div>
 <h2>Mapa (seed 7)</h2>
+<div id="themes"></div>
 <canvas id="map"></canvas>
 <script src="core.js"></script>
 <script src="maze.js"></script>
@@ -25,21 +34,41 @@
 <script>
 (function () {
   const DIRS = G.props.faceDirs;
+  const exclusive = G.props.exclusiveTheme;
   let fails = 0;
-  let total = 0;
-  for (let seed = 1; seed <= 100; seed++) {
-    const maze = G.maze.generate(seed);
-    const props = G.props.generate(maze, seed);
-    total += props.length;
-    if (props.length < 60 || props.length > 90) fails++;
-    for (const prop of props) {
-      if (G.isWall(maze, prop.x, prop.y)) fails++;
-      if (prop.x === maze.start.x && prop.y === maze.start.y) fails++;
-      if (prop.family === 'wall' && !G.isWall(maze, prop.x + DIRS[prop.face][0], prop.y + DIRS[prop.face][1])) fails++;
+  const rows = [];
+  G.THEMES.forEach(function (theme) {
+    let themeFails = 0;
+    let total = 0;
+    let own = 0;
+    for (let seed = 1; seed <= 100; seed++) {
+      const maze = G.maze.generate(seed);
+      const props = G.props.generate(maze, seed, theme);
+      if (JSON.stringify(props) !== JSON.stringify(G.props.generate(maze, seed, theme))) themeFails++;
+      total += props.length;
+      if (props.length < 60 || props.length > 90) themeFails++;
+      const cells = new Set();
+      for (const prop of props) {
+        const key = prop.family + ':' + prop.x + ':' + prop.y;
+        if (cells.has(key)) themeFails++;
+        cells.add(key);
+        if (G.isWall(maze, prop.x, prop.y)) themeFails++;
+        if (prop.x === maze.start.x && prop.y === maze.start.y) themeFails++;
+        if (prop.family === 'wall' && !G.isWall(maze, prop.x + DIRS[prop.face][0], prop.y + DIRS[prop.face][1])) themeFails++;
+        if (exclusive[prop.kind]) {
+          if (exclusive[prop.kind] === theme.id) own++;
+          else themeFails++;
+        }
+      }
     }
-  }
+    fails += themeFails;
+    rows.push('<tr><td>' + theme.id + '</td><td>' + (themeFails ? 'FAIL ' + themeFails : 'PASS') + '</td><td>' +
+      (total / 100).toFixed(1) + '</td><td>' + own + '</td></tr>');
+  });
+  document.getElementById('themeTable').innerHTML =
+    '<tr><th>tema</th><th>invariantes</th><th>media props</th><th>exclusivos propios</th></tr>' + rows.join('');
   document.getElementById('status').textContent =
-    (fails ? 'FAIL ' + fails : 'PASS') + ' · 100 semillas · media ' + (total / 100).toFixed(1) + ' props · catálogo ' + G.props.catalog.length;
+    (fails ? 'FAIL ' + fails : 'PASS') + ' · 5 temas × 100 semillas · catálogo ' + G.props.catalog.length;
 
   G.props.preload();
   const cells = [];
@@ -47,25 +76,50 @@
   G.props.catalog.forEach(function (entry) {
     entry.variants.forEach(function (svg, variant) {
       const box = document.createElement('div');
-      box.className = 'cell';
+      box.className = 'cell' + (entry.theme ? ' themed' : '');
       const canvas = document.createElement('canvas');
       canvas.width = 104;
       canvas.height = 104;
       box.appendChild(canvas);
-      box.appendChild(document.createTextNode(entry.id + ' v' + variant + ' · ' + entry.family + (entry.light ? ' · luz' : '')));
+      box.appendChild(document.createTextNode(entry.id + ' v' + variant + ' · ' + entry.family + (entry.light ? ' · luz' : '') +
+        (entry.theme ? ' · ' + entry.theme : '')));
       catalogEl.appendChild(box);
       cells.push({ canvas: canvas, entry: entry, variant: variant });
     });
   });
 
+  setTimeout(function () {
+    const missing = cells.filter(function (cell) { return !G.props.image(cell.entry.id, cell.variant); })
+      .map(function (cell) { return cell.entry.id + ' v' + cell.variant; });
+    document.getElementById('images').textContent = missing.length
+      ? 'IMÁGENES FAIL ' + missing.length + ': ' + missing.join(', ')
+      : 'IMÁGENES PASS · ' + cells.length + ' variantes rasterizadas';
+  }, 1500);
+
   const seed = 7;
   const maze = G.maze.generate(seed);
-  const props = G.props.generate(maze, seed);
+  let props = [];
+  let activeTheme = G.THEMES[0];
   const tile = 26;
   const map = document.getElementById('map');
   map.width = maze.w * tile;
   map.height = maze.h * tile;
   const mapCtx = map.getContext('2d');
+  const themesEl = document.getElementById('themes');
+
+  function selectTheme(theme) {
+    activeTheme = theme;
+    props = G.props.generate(maze, seed, theme);
+    Array.from(themesEl.children).forEach(function (button) { button.classList.toggle('on', button.dataset.id === theme.id); });
+  }
+  G.THEMES.forEach(function (theme) {
+    const button = document.createElement('button');
+    button.textContent = theme.name;
+    button.dataset.id = theme.id;
+    button.onclick = function () { selectTheme(theme); };
+    themesEl.appendChild(button);
+  });
+  selectTheme(G.THEMES[0]);
 
   function frame(now) {
     cells.forEach(function (cell) {
@@ -78,15 +132,15 @@
       ctx.drawImage(img, (104 - width) / 2, 4, width, height);
     });
 
-    mapCtx.fillStyle = '#07060B';
+    mapCtx.fillStyle = activeTheme.fog;
     mapCtx.fillRect(0, 0, map.width, map.height);
     for (let y = 0; y < maze.h; y++) {
       for (let x = 0; x < maze.w; x++) {
-        mapCtx.fillStyle = G.isWall(maze, x, y) ? '#1E1B2E' : ((x + y) & 1 ? '#15121F' : '#191526');
+        mapCtx.fillStyle = G.isWall(maze, x, y) ? activeTheme.wall : ((x + y) & 1 ? activeTheme.floorDark : activeTheme.floorLight);
         mapCtx.fillRect(x * tile, y * tile, tile, tile);
       }
     }
-    mapCtx.strokeStyle = '#C9B37E';
+    mapCtx.strokeStyle = activeTheme.glow;
     mapCtx.strokeRect(maze.start.x * tile + 2, maze.start.y * tile + 2, tile - 4, tile - 4);
     ['floor', 'wall', 'room'].forEach(function (family) {
       props.forEach(function (prop) {
