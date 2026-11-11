@@ -10,7 +10,7 @@ G.CFG = {
   switchCooldownMs: 1000,
   intermissionMs: 3000,
   pieceOrder: ['pawn', 'knight', 'bishop', 'rook', 'queen', 'king'],
-  cooldowns: { pawn: 300, knight: 400, bishop: 450, rook: 450, queen: 550, king: 250 },
+  cooldowns: { pawn: 300, knight: 400, bishop: 330, rook: 330, queen: 330, king: 250 },
   colors: {
     void: '#07060B',
     wall: '#1E1B2E',
