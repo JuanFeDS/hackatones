@@ -121,7 +121,11 @@ G.sim = (function () {
       }
       return;
     }
-    if (command.type === 'attack' && state.now >= player.cooldownUntil) {
+    if (command.type === 'face') {
+      player.dir = { dx: command.dx, dy: command.dy };
+      return;
+    }
+    if (command.type === 'attack' &&state.now >= player.cooldownUntil) {
       applyAttack(state, player);
       return;
     }
