@@ -1,16 +1,21 @@
 G.sim = (function () {
   const WHIFF_COOLDOWN_MS = 250;
+  const LEVEL_CHANGE_MS = 4200;
 
   function create(seed) {
+    const theme = G.THEMES[0];
     const maze = G.maze.generate(seed);
     return {
       now: 0,
       phase: 'title',
       seed,
+      level: 1,
+      theme,
+      transition: null,
       nextId: 1,
       events: [],
       maze,
-      props: G.props.generate(maze, seed),
+      props: G.props.generate(maze, seed, theme),
       players: [{
         id: 0,
         x: maze.start.x,
@@ -144,16 +149,39 @@ G.sim = (function () {
     }
   }
 
+  function enterNextLevel(state) {
+    state.level++;
+    state.theme = G.THEMES[Math.min(state.level, G.THEMES.length) - 1];
+    const levelSeed = state.seed * 31 + state.level;
+    state.maze = G.maze.generate(levelSeed);
+    state.props = G.props.generate(state.maze, levelSeed, state.theme);
+    state.enemies = [];
+    for (const player of state.players) {
+      player.x = state.maze.start.x;
+      player.y = state.maze.start.y;
+      player.dir = { dx: 0, dy: -1 };
+    }
+    state.transition.swapped = true;
+    state.events.push({ type: 'level', n: state.level, name: state.theme.name, sub: state.theme.sub });
+  }
+
   function advanceWaves(state, now) {
     const wave = state.wave;
     if (wave.phase === 'fighting') {
       if (state.enemies.length === 0 && wave.toSpawn === 0) {
         wave.phase = 'intermission';
-        wave.nextWaveAt = now + G.CFG.intermissionMs;
+        if (wave.boss && wave.n < G.CFG.maxWaves) {
+          wave.nextWaveAt = now + LEVEL_CHANGE_MS;
+          state.transition = { start: now + LEVEL_CHANGE_MS - 1600, swapAt: wave.nextWaveAt, end: wave.nextWaveAt + 2600, swapped: false };
+        } else {
+          wave.nextWaveAt = now + G.CFG.intermissionMs;
+        }
       }
     } else if (wave.n > 0 && now >= wave.nextWaveAt && wave.n < G.CFG.maxWaves) {
+      if (state.transition && !state.transition.swapped) enterNextLevel(state);
       beginWave(state, wave.n + 1);
     }
+    if (state.transition && now > state.transition.end) state.transition = null;
   }
 
   function step(state, now, commands) {
