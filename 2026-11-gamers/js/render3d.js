@@ -1176,6 +1176,7 @@
 
     syncState(state);
     handleEvents(state, player, now);
+    G.slash.ingest(state.events, now);
     updateCamera(player, dt);
     flick = 0.93 + 0.045 * Math.sin(now * 0.011) + 0.03 * Math.sin(now * 0.027 + 1.7) + 0.02 * Math.sin(now * 0.071 + 4.2);
 
@@ -1200,6 +1201,7 @@
     drawVignette();
     drawGrain();
     drawDamageFx(player, now);
+    G.slash.drawFirstPerson(ctx, cssW, cssH, now);
     drawCrosshair();
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
