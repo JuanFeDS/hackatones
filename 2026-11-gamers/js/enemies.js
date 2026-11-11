@@ -90,6 +90,16 @@
   function pickKind(state) {
     const n = state.wave ? state.wave.n : 1;
     const pool = G.bestiary.normals.filter((entry) => entry.stats.from <= n);
+    const wave = state.wave;
+    if (wave) {
+      wave.kinds = wave.kinds || [];
+      const fresh = pool.filter((entry) => !wave.kinds.includes(entry.id));
+      if (fresh.length && wave.kinds.length < 3) {
+        const id = fresh[Math.floor(Math.random() * fresh.length)].id;
+        wave.kinds.push(id);
+        return id;
+      }
+    }
     let total = 0;
     for (const entry of pool) total += entry.stats.weight;
     let roll = Math.random() * total;
