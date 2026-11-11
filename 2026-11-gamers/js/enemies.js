@@ -10,7 +10,7 @@
   };
   const SPAWN_EVERY_MS = 500;
   const BFS_EVERY_MS = 500;
-  const MIN_SPAWN_DISTANCE = 10;
+  const MIN_SPAWN_DISTANCE = 7;
   const GHOST_MOVE_MS = 700;
   const GHOST_FAST_MOVE_MS = 400;
   const FAST_FROM_WAVE = 7;

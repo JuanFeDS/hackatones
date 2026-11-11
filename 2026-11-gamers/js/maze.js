@@ -2,8 +2,8 @@
   const G = (window.G = window.G || {});
   const DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
   const BOSS_ROOM = { x: 12, y: 12, w: 7, h: 7 };
-  const BRAID_RATE = 0.7;
-  const EXTRA_WALL_RATE = 0.08;
+  const BRAID_RATE = 1;
+  const EXTRA_WALL_RATE = 0.3;
 
   function floorNeighbors(grid, w, x, y) {
     let count = 0;
@@ -100,11 +100,11 @@
   }
 
   function placeRooms(w, h, rand) {
-    const wanted = 5 + Math.floor(rand() * 3);
+    const wanted = 9 + Math.floor(rand() * 4);
     const rooms = [];
-    for (let attempt = 0; attempt < 800 && rooms.length < wanted; attempt++) {
-      const roomW = 3 + Math.floor(rand() * 3);
-      const roomH = 3 + Math.floor(rand() * 3);
+    for (let attempt = 0; attempt < 1500 && rooms.length < wanted; attempt++) {
+      const roomW = 3 + Math.floor(rand() * 4);
+      const roomH = 3 + Math.floor(rand() * 4);
       const room = {
         x: 1 + Math.floor(rand() * (w - 2 - roomW)),
         y: 1 + Math.floor(rand() * (h - 2 - roomH)),
