@@ -410,6 +410,8 @@
     ctx.drawImage(floorCanvas, 0, 0, floorW * scale, floorH * scale);
   }
 
+  const WALL_SCALE = 2.2;
+
   function drawWalls(maze, horizon, f, now) {
     const wallRgb = rgbOf(colors().wall);
     const voidRgb = rgbOf(colors().void);
@@ -457,8 +459,9 @@
 
       const vis = Math.exp(-perp * 0.42) * flick;
       if (vis < 0.012) continue;
-      const height = f / perp;
-      const top = horizon - height / 2;
+      const baseHeight = f / perp;
+      const height = baseHeight * WALL_SCALE;
+      const top = horizon + baseHeight / 2 - height;
       const u0 = side === 0 ? camY + perp * rayY : camX + perp * rayX;
       const u = u0 - Math.floor(u0);
       const face = side === 1 ? 1 : 0.66;
@@ -470,9 +473,9 @@
       const x = i * colW;
       ctx.fillStyle = 'rgb(' + (red | 0) + ',' + (green | 0) + ',' + (blue | 0) + ')';
       ctx.fillRect(x, top, colW, height);
-      if (height < 18 || vis < 0.05) continue;
+      if (baseHeight < 18 || vis < 0.05) continue;
 
-      const rows = 4;
+      const rows = Math.round(4 * WALL_SCALE);
       const rowH = height / rows;
       const mortar = Math.max(1, height * 0.012);
       for (let row = 0; row < rows; row++) {
