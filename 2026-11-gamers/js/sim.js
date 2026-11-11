@@ -51,24 +51,39 @@ G.sim = (function () {
     state.events.push({ type: 'unlock', piece: next });
   }
 
+  function resolveHit(state, player, enemy) {
+    const result = G.enemies.hit(state, enemy, player, player.piece);
+    if (result.killed) {
+      state.enemies = state.enemies.filter((other) => other.id !== enemy.id);
+      if (enemy.kind === 'boss') {
+        unlockNext(state, player);
+        if (state.wave.n >= G.CFG.maxWaves) {
+          state.phase = 'won';
+          state.events.push({ type: 'win' });
+        }
+      }
+    }
+    return result;
+  }
+
+  function applyAttack(state, player) {
+    const captures = G.pieces.targets(state, player).filter((cell) => cell.capture);
+    if (!captures.length) return;
+    const distance = (cell) => Math.max(Math.abs(cell.x - player.x), Math.abs(cell.y - player.y));
+    captures.sort((first, second) => distance(first) - distance(second));
+    const enemy = G.enemyAt(state, captures[0].x, captures[0].y);
+    player.cooldownUntil = state.now + G.CFG.cooldowns[player.piece];
+    resolveHit(state, player, enemy);
+  }
+
   function applyMove(state, player, target) {
     const piece = player.piece;
     const from = { x: player.x, y: player.y };
     player.cooldownUntil = state.now + G.CFG.cooldowns[piece];
     const enemy = G.enemyAt(state, target.x, target.y);
     if (enemy) {
-      const result = G.enemies.hit(state, enemy, player, piece);
+      const result = resolveHit(state, player, enemy);
       if (result.blocked) return;
-      if (result.killed) {
-        state.enemies = state.enemies.filter((other) => other.id !== enemy.id);
-        if (enemy.kind === 'boss') {
-          unlockNext(state, player);
-          if (state.wave.n >= G.CFG.maxWaves) {
-            state.phase = 'won';
-            state.events.push({ type: 'win' });
-          }
-        }
-      }
     }
     const offsetX = target.x - from.x;
     const offsetY = target.y - from.y;
@@ -104,6 +119,10 @@ G.sim = (function () {
         player.switchUntil = state.now + G.CFG.switchCooldownMs;
         state.events.push({ type: 'switch', pid: player.id, piece: command.piece });
       }
+      return;
+    }
+    if (command.type === 'attack' && state.now >= player.cooldownUntil) {
+      applyAttack(state, player);
       return;
     }
     if (command.type === 'moveTo' && state.now >= player.cooldownUntil) {
