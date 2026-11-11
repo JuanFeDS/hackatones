@@ -882,18 +882,18 @@
     { id: 'altar', family: 'room', variants: [svgAltar()], size: 1.1, w: 64, h: 96, light: { color: '#B3123A', radius: 3 }, bossOnly: true },
     { id: 'giant_board', family: 'room', variants: [svgGiantBoard()], size: 1.0, w: 64, h: 64, flat: true, light: null },
 
-    { id: 'drip_puddle', family: 'floor', variants: [svgDripPuddle(0), svgDripPuddle(1)], size: 0.9, w: 64, h: 64, rotate: true, light: null, where: 'any' },
-    { id: 'bone_heap', family: 'floor', variants: [svgBoneHeap(0), svgBoneHeap(1)], size: 0.95, w: 64, h: 64, rotate: true, light: null, where: 'any' },
-    { id: 'bleeding_book', family: 'floor', variants: [svgBleedingBook(0), svgBleedingBook(1)], size: 0.75, w: 64, h: 64, rotate: true, light: null, where: 'any' },
-    { id: 'cracked_tile', family: 'floor', variants: [svgCrackedTile(0), svgCrackedTile(1)], size: 0.95, w: 64, h: 64, rotate: true, light: { color: '#FF4060', radius: 0.7 }, where: 'any' },
-    { id: 'roots_wall', family: 'wall', variants: [svgRootsWall()], size: 0.85, w: 64, h: 64, light: null, height3D: 0.95, lift3D: 0.45 },
-    { id: 'skull_niche', family: 'wall', variants: [svgSkullNiche()], size: 0.8, w: 64, h: 64, light: null, height3D: 0.65, lift3D: 0.3 },
-    { id: 'bookshelf', family: 'wall', variants: [svgBookshelf(0), svgBookshelf(1)], size: 0.95, w: 64, h: 64, light: null, height3D: 0.98, lift3D: 0.49 },
-    { id: 'chess_banner', family: 'wall', variants: [svgChessBanner(0), svgChessBanner(1)], size: 0.85, w: 64, h: 64, light: null, height3D: 0.85, lift3D: 0.6 },
-    { id: 'leaning_tomb', family: 'room', variants: [svgLeaningTomb()], size: 0.95, w: 64, h: 96, light: null },
-    { id: 'bone_pillar', family: 'room', variants: [svgBonePillar()], size: 1.15, w: 64, h: 96, light: null },
-    { id: 'reading_desk', family: 'room', variants: [svgReadingDesk()], size: 1.0, w: 64, h: 96, light: { color: LIGHT_CANDLE, radius: 1.6 } },
-    { id: 'obsidian_piece', family: 'room', variants: [svgObsidianPiece()], size: 1.2, w: 64, h: 96, light: { color: '#FF4060', radius: 0.9 } }
+    { id: 'drip_puddle', theme: 'criptas', family: 'floor', variants: [svgDripPuddle(0), svgDripPuddle(1)], size: 0.9, w: 64, h: 64, rotate: true, light: null, where: 'any' },
+    { id: 'bone_heap', theme: 'osario', family: 'floor', variants: [svgBoneHeap(0), svgBoneHeap(1)], size: 0.95, w: 64, h: 64, rotate: true, light: null, where: 'any' },
+    { id: 'bleeding_book', theme: 'biblioteca', family: 'floor', variants: [svgBleedingBook(0), svgBleedingBook(1)], size: 0.75, w: 64, h: 64, rotate: true, light: null, where: 'any' },
+    { id: 'cracked_tile', theme: 'salon', family: 'floor', variants: [svgCrackedTile(0), svgCrackedTile(1)], size: 0.95, w: 64, h: 64, rotate: true, light: { color: '#FF4060', radius: 0.7 }, where: 'any' },
+    { id: 'roots_wall', theme: 'criptas', family: 'wall', variants: [svgRootsWall()], size: 0.85, w: 64, h: 64, light: null, height3D: 0.95, lift3D: 0.45 },
+    { id: 'skull_niche', theme: 'osario', family: 'wall', variants: [svgSkullNiche()], size: 0.8, w: 64, h: 64, light: null, height3D: 0.65, lift3D: 0.3 },
+    { id: 'bookshelf', theme: 'biblioteca', family: 'wall', variants: [svgBookshelf(0), svgBookshelf(1)], size: 0.95, w: 64, h: 64, light: null, height3D: 0.98, lift3D: 0.49 },
+    { id: 'chess_banner', theme: 'salon', family: 'wall', variants: [svgChessBanner(0), svgChessBanner(1)], size: 0.85, w: 64, h: 64, light: null, height3D: 0.85, lift3D: 0.6 },
+    { id: 'leaning_tomb', theme: 'criptas', family: 'room', variants: [svgLeaningTomb()], size: 0.95, w: 64, h: 96, light: null },
+    { id: 'bone_pillar', theme: 'osario', family: 'room', variants: [svgBonePillar()], size: 1.15, w: 64, h: 96, light: null },
+    { id: 'reading_desk', theme: 'biblioteca', family: 'room', variants: [svgReadingDesk()], size: 1.0, w: 64, h: 96, light: { color: LIGHT_CANDLE, radius: 1.6 } },
+    { id: 'obsidian_piece', theme: 'salon', family: 'room', variants: [svgObsidianPiece()], size: 1.2, w: 64, h: 96, light: { color: '#FF4060', radius: 0.9 } }
   ];
 
   const BY_KIND = {};
@@ -918,17 +918,16 @@
   const BOSS_KINDS = ['altar', 'candelabra', 'rune_circle', 'blood_pool', 'bones', 'blood_runes', 'painted_eye'];
   const LIGHT_WALL_SPACING = 4;
 
-  // Multiplicadores extra por tema; los kinds que aparecen aquí son exclusivos (peso 0 en los demás temas).
+  // Se multiplica con theme.propWeights. Los kinds con `theme` en el catálogo pesan 0 fuera de su tema.
+  // En el salón, los exclusivos y statue x3 diluyen broken_column y rune_circle: se compensan aquí.
   const THEME_BOOST = {
     criptas: { roots_wall: 2, drip_puddle: 2, leaning_tomb: 2 },
     osario: { skull_niche: 2, bone_heap: 2, bone_pillar: 2 },
     biblioteca: { bookshelf: 2, bleeding_book: 2, reading_desk: 2 },
-    salon: { obsidian_piece: 2, cracked_tile: 2, chess_banner: 2 }
+    salon: { obsidian_piece: 2, cracked_tile: 2, chess_banner: 2, broken_column: 1.5, rune_circle: 1.5 }
   };
   const EXCLUSIVE_THEME = {};
-  Object.keys(THEME_BOOST).forEach(function (themeId) {
-    Object.keys(THEME_BOOST[themeId]).forEach(function (kind) { EXCLUSIVE_THEME[kind] = themeId; });
-  });
+  CATALOG.forEach(function (entry) { if (entry.theme) EXCLUSIVE_THEME[entry.id] = entry.theme; });
 
   // ---------- Generación ----------
 
