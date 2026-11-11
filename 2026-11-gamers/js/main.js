@@ -3,8 +3,16 @@
   const state = G.sim.create((Math.random() * 1e9) | 0);
   let audioStarted = false;
 
+  G.activeRender = G.render;
   G.render.init(canvas);
+  if (G.render3d) G.render3d.init(canvas);
   G.input.init(canvas);
+
+  window.addEventListener('keydown', (event) => {
+    if (event.code === 'KeyV' && G.render3d) {
+      G.activeRender = G.activeRender === G.render ? G.render3d : G.render;
+    }
+  });
 
   function startAudio() {
     if (audioStarted) return;
@@ -22,7 +30,7 @@
       targets: state.phase === 'playing' && player.alive ? G.pieces.targets(state, player) : [],
       hover: G.input.hover()
     };
-    G.render.draw(state, now, ui);
+    G.activeRender.draw(state, now, ui);
     G.audio.update(state, now);
     state.events.length = 0;
     requestAnimationFrame(frame);
