@@ -1,4 +1,6 @@
 G.sim = (function () {
+  const WHIFF_COOLDOWN_MS = 250;
+
   function create(seed) {
     const maze = G.maze.generate(seed);
     return {
@@ -68,11 +70,17 @@ G.sim = (function () {
 
   function applyAttack(state, player) {
     const captures = G.pieces.targets(state, player).filter((cell) => cell.capture);
-    if (!captures.length) return;
+    const origin = { x: player.x, y: player.y };
+    if (!captures.length) {
+      player.cooldownUntil = state.now + WHIFF_COOLDOWN_MS;
+      state.events.push({ type: 'attack', pid: player.id, from: origin, to: null, dir: { dx: player.dir.dx, dy: player.dir.dy }, piece: player.piece });
+      return;
+    }
     const distance = (cell) => Math.max(Math.abs(cell.x - player.x), Math.abs(cell.y - player.y));
     captures.sort((first, second) => distance(first) - distance(second));
     const enemy = G.enemyAt(state, captures[0].x, captures[0].y);
     player.cooldownUntil = state.now + G.CFG.cooldowns[player.piece];
+    state.events.push({ type: 'attack', pid: player.id, from: origin, to: { x: enemy.x, y: enemy.y }, dir: { dx: player.dir.dx, dy: player.dir.dy }, piece: player.piece });
     resolveHit(state, player, enemy);
   }
 
