@@ -22,6 +22,8 @@ G.CFG = {
 
 G.PIECE_GLYPH = { pawn: '♟', knight: '♞', bishop: '♝', rook: '♜', queen: '♛', king: '♚' };
 
+G.view = { free: false, yaw: -Math.PI / 2, sensitivity: 0.0045, turnRate: 3.2 };
+
 G.rng = function (seed) {
   let s = seed >>> 0;
   return function () {

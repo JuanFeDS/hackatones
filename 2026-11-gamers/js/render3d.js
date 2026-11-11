@@ -177,9 +177,13 @@
       camReady = true;
       return;
     }
-    const kPos = 1 - Math.exp(-dt / 55);
+    const kPos = 1 - Math.exp(-dt / 45);
     camX += (targetX - camX) * kPos;
     camY += (targetY - camY) * kPos;
+    if (G.view.free) {
+      yaw = G.view.yaw;
+      return;
+    }
     let diff = targetYaw - yaw;
     diff = ((((diff + Math.PI) % TAU) + TAU) % TAU) - Math.PI;
     yaw += diff * (1 - Math.exp(-dt / 75));

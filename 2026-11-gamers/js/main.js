@@ -11,6 +11,13 @@
   window.addEventListener('keydown', (event) => {
     if (event.code === 'KeyV' && G.render3d) {
       G.activeRender = G.activeRender === G.render ? G.render3d : G.render;
+      G.view.free = G.activeRender === G.render3d;
+      if (G.view.free) {
+        const dir = state.players[0].dir;
+        G.view.yaw = Math.atan2(dir.dy, dir.dx);
+      } else {
+        G.input.releasePointer();
+      }
     }
   });
 
