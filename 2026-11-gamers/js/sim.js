@@ -42,7 +42,6 @@ G.sim = (function () {
 
   function beginWave(state, n) {
     G.enemies.startWave(state, n);
-    state.events.push({ type: 'wave', n, boss: !!state.wave.boss });
   }
 
   function unlockNext(state, player) {
@@ -62,7 +61,6 @@ G.sim = (function () {
       if (result.blocked) return;
       if (result.killed) {
         state.enemies = state.enemies.filter((other) => other.id !== enemy.id);
-        player.kills++;
         if (enemy.kind === 'boss') {
           unlockNext(state, player);
           if (state.wave.n >= G.CFG.maxWaves) {
