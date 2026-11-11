@@ -24,6 +24,7 @@ G.input = (function () {
   let clickedCell = null;
   let hoverPixel = null;
   let attackAt = -Infinity;
+  let shiftDown = false;
   let pendingTurn = 0;
   let lastTurnAt = -Infinity;
 
@@ -110,8 +111,17 @@ G.input = (function () {
         }
       }
     });
-    window.addEventListener('keyup', (event) => held.delete(event.code));
-    window.addEventListener('blur', () => held.clear());
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Shift') shiftDown = true;
+    });
+    window.addEventListener('keyup', (event) => {
+      held.delete(event.code);
+      if (event.key === 'Shift') shiftDown = false;
+    });
+    window.addEventListener('blur', () => {
+      held.clear();
+      shiftDown = false;
+    });
     canvas.addEventListener('mousemove', (event) => {
       hoverPixel = { x: event.clientX, y: event.clientY };
     });
@@ -183,7 +193,7 @@ G.input = (function () {
     let vector = heldVector();
     if (!vector && pendingDir && now - pendingAt < PENDING_MS) vector = pendingDir;
     if (vector && !acted) {
-      const target = G.pieces.slide(state, player, vector.dx, vector.dy);
+      const target = G.pieces.slide(state, player, vector.dx, vector.dy, shiftDown);
       if (target) {
         commands.push({ playerId: player.id, type: 'moveTo', x: target.x, y: target.y });
         if (now >= player.cooldownUntil) pendingDir = null;
